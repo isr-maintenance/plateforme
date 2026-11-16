@@ -6,6 +6,6 @@
 const CONFIG = {
   LOGIN_URL: 'https://script.google.com/a/macros/elmarche.be/s/AKfycbyRQqqe47ifM319FcixJKdrAVo1vE3VFJNUKsTQiv8hX_rjYpAliY5714VXtxkOgzHuNQ/exec',   // URL « /exec » du déploiement Connexion
   API_URL:   'https://script.google.com/macros/s/AKfycbxPDMqJni1QwgLjrAV3RBmTDXeAX1MWN47cAis_I3V0VckDQEx4eq8oDxK-upmSAWX1Pw/exec',   // déploiement Données
-  PDF_ELEC4: '',   // lien Google Drive du PDF du cours d'Électricité 4e (partagé avec elmarche.be)
+  PDF_ELEC4: 'https://drive.google.com/file/d/1V9WnHxwNh3s3ZjSIhthrRC1mkZIClASv/view',   // lien Google Drive du PDF du cours d'Électricité 4e (partagé avec elmarche.be)
   ECOLE:     'Institut Saint-Roch · Marche'
 };
