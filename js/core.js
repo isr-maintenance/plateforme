@@ -1,0 +1,239 @@
+/* =========================================================
+   CŒUR — état, données, navigation, connexion
+   ========================================================= */
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (sel,root=document)=>root.querySelector(sel);
+const ck=(...a)=>a.join('|');
+
+const DEF_PROG = ()=>({ quiz:{}, ex:{}, steps:[], ohm:{}, visited:[], banc:false, test:{submitted:false, ans:{}, pts:{}, open:{}, texts:{}}, sec:0 });
+function normProg(p){ const d=DEF_PROG(); p=p||{}; const o=Object.assign(d,p); o.test=Object.assign(DEF_PROG().test, p.test||{}); ['quiz','ex','ohm'].forEach(k=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; }); ['steps','visited'].forEach(k=>{ if(!Array.isArray(o[k])) o[k]=[]; }); return o; }
+
+const S = {
+  me:null, booted:false, error:null,
+  role:'eleve', tab:'presentation', eleveClass:null, dashKey:'', view:{ page:'home' }, lib:{ sel:'4|eqmm' },
+  prog: DEF_PROG(), progs:{}, eleves:{}, modes:{}, signal:[], pdfs:{},
+  carnet:{ key:'', per:'', som:{}, evals:{}, periodes:[], echelle:'%', arrondi:'1' }, notes:{},
+  stage:{ cl:'4eqmm', per:'', periodes:[], lieux:[], aff:{}, tel:{}, journal:{}, mine:{}, colors:{}, onlyMine:false },
+  access:{ blocked:[], profs:[], open:true },
+};
+let ME='';
+const isProf = () => S.me && S.me.role==='prof';
+const isCoord = () => S.me && S.me.coord;
+
+/* ---------- préférences d'affichage (propres à ce navigateur) ---------- */
+const PREF_KEY='plateforme-prefs';
+function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify({ dashKey:S.dashKey, ckey:S.carnet.key, cper:S.carnet.per, ech:S.carnet.echelle, arr:S.carnet.arrondi, scl:S.stage.cl, sper:S.stage.per, colors:S.stage.colors, onlyMine:S.stage.onlyMine, lib:S.lib.sel })); }catch(e){} }
+function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); if(p.dashKey) S.dashKey=p.dashKey; if(p.ckey) S.carnet.key=p.ckey; if(p.cper) S.carnet.per=p.cper; if(p.ech) S.carnet.echelle=p.ech; if(p.arr) S.carnet.arrondi=p.arr; if(p.scl) S.stage.cl=p.scl; if(p.sper) S.stage.per=p.sper; if(p.colors) S.stage.colors=p.colors; S.stage.onlyMine=!!p.onlyMine; if(p.lib) S.lib.sel=p.lib; }catch(e){} }
+
+/* ---------- envoi au serveur ---------- */
+async function act(a, p, okMsg){
+  const r = await API.call(a, p);
+  if(!r.ok){ toast(r.msg || 'Erreur : non enregistré'); return null; }
+  if(okMsg) toast(okMsg);
+  return r;
+}
+/* la progression de l'élève part au serveur 1,5 s après le dernier changement */
+let saveTimer=null, previewProg=null;
+function save(){
+  savePrefs();
+  if(!S.me) return;
+  if(isProf()){ previewProg=S.prog; return; }          // aperçu élève d'un prof : rien n'est envoyé
+  clearTimeout(saveTimer); saveTimer=setTimeout(pushProg, 1500);
+}
+async function pushProg(){
+  clearTimeout(saveTimer); saveTimer=null;
+  const r = await API.call('saveProg', { prog: S.prog });
+  if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; setSync('ok'); } else setSync('err', r.msg);
+}
+window.addEventListener('beforeunload', ()=>{ if(saveTimer && !LOCAL){ navigator.sendBeacon && navigator.sendBeacon(CONFIG.API_URL, JSON.stringify({ t: (()=>{try{return localStorage.getItem('plateforme-jeton')}catch(e){return null}})(), a:'saveProg', p:{ prog:S.prog } })); } });
+function setSync(st,msg){ const el=$('#sync'); if(!el) return; el.className='sync '+st; el.title= st==='ok'?'Enregistré':(msg||'Non enregistré'); el.textContent= st==='ok'?'✓ enregistré':'⚠ non enregistré'; }
+
+/* ---------- élèves (vue prof) ---------- */
+function elevesOf(cl){ return Object.keys(S.eleves).map(m=>Object.assign({mail:m},S.eleves[m])).filter(e=>e.classe===cl).sort((a,b)=>a.nom.localeCompare(b.nom,'fr')); }
+function nomEl(mail){ return (S.eleves[mail]||{}).nom || (S.me && S.me.mail===mail ? S.me.nom : String(mail).split('@')[0]); }
+function progOf(mail){ return normProg(S.progs[mail]); }
+function withProg(prog, fn){ const k=S.prog; S.prog=prog; try { return fn(); } finally { S.prog=k; } }
+
+/* ---------- démarrage ---------- */
+async function boot(){
+  const r = await API.call('boot');
+  if(!r.ok){ S.error=r.msg; S.booted=false; render(); return; }
+  const d=r.data; S.me=d.me; ME=d.me.nom; S.booted=true; S.error=null;
+  S.modes=Object.assign({}, ...CLASSES.map(c=>({[c.id]:c.mode})), d.modes||{});
+  AFFECT=d.affect||[]; S.pdfs=d.pdfs||{};
+  S.stage.periodes = d.stage.periodes || JSON.parse(JSON.stringify(STAGE_PER_DEF));
+  S.stage.lieux = d.stage.lieux || [];
+  if(S.me.role==='eleve'){
+    S.role='eleve'; S.eleveClass=S.me.classe; S.prog=normProg(d.prog);
+    S.stage.mine=d.stage.mine||{}; S.stage.tel={ [S.me.mail]: d.stage.tel||'' };
+    S.stage.journal={}; Object.keys(d.stage.journal||{}).forEach(per=>S.stage.journal[ck(per,S.me.mail)]=d.stage.journal[per]);
+    S.stage.aff={}; Object.keys(S.stage.mine).forEach(per=>S.stage.aff[per]={ [S.me.mail]: S.stage.mine[per] });
+  } else {
+    S.role='prof'; S.eleves=d.eleves||{}; S.progs=d.progs||{};
+    S.access={ profs:d.profs||[], open:d.access.open, blocked:d.access.blocked||[] };
+    S.carnet.periodes = d.periodes || JSON.parse(JSON.stringify(PERIODES_DEF));
+    S.carnet.evals = d.evals||{}; S.notes=d.notes||{}; S.carnet.som=d.som||{}; S.signal=d.signal||[];
+    S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{};
+    S.eleveClass = S.eleveClass || '4eqmm';
+    if(S.tab==='cours') S.tab='dash';
+  }
+  render();
+}
+async function refresh(){ await boot(); toast('Données mises à jour'); }
+
+/* ---------- petits outils d'interface ---------- */
+const fil = id => FILIERES.find(f=>f.id===id);
+const cls = id => CLASSES.find(c=>c.id===id) || { id, nom:id, annee:0, fil:'' };
+const coursFor = (filId, annee) => COURS.filter(c=>c.pour.some(([f,a])=>f===filId && a===annee));
+const TYPE = { elec:{l:'Électricité',c:'var(--elec)',chip:'elec'}, meca:{l:'Mécanique',c:'var(--meca)',chip:'meca'}, tp:{l:'Pratique',c:'var(--tp)',chip:'tp'} };
+function statutChip(c){
+  if(c.statut==='demo') return `<span class="chip ok"><span class="dot"></span>Chapitre 2.3 en ligne + PDF</span>`;
+  if(c.statut==='demo-tp') return `<span class="chip ok"><span class="dot"></span>Feu vert TP É03</span>`;
+  if(S.pdfs[c.id]) return `<span class="chip elec"><span class="dot"></span>PDF disponible</span>`;
+  return `<span class="chip"><span class="dot"></span>Contenu en préparation</span>`;
+}
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast fade-in'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+function modal(title, body, opts={}){
+  closeModal();
+  const bg=document.createElement('div'); bg.className='modal-bg'; bg.id='modal';
+  bg.innerHTML=`<div class="modal ${opts.wide?'wide':''}" role="dialog" aria-label="${esc(title)}"><div class="modal-h"><h3>${title}</h3><div class="row">${opts.actions||''}<button class="btn sm ghost" data-close aria-label="Fermer">✕</button></div></div><div class="modal-b">${body}</div></div>`;
+  bg.addEventListener('click',e=>{ if(e.target===bg || e.target.closest('[data-close]')) closeModal(); });
+  document.body.appendChild(bg);
+  return bg;
+}
+function closeModal(){ const m=$('#modal'); if(m) m.remove(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ---------- PDF ---------- */
+let PDF_URL=null;
+function pdfUrl(key){
+  if(key && S.pdfs[key]) return S.pdfs[key].url;
+  if(S.pdfs['4-elec']) return S.pdfs['4-elec'].url;
+  if(CONFIG.PDF_ELEC4) return CONFIG.PDF_ELEC4;
+  if(!PDF_URL && typeof PDF_B64!=='undefined' && PDF_B64){
+    const bin=atob(PDF_B64); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+    PDF_URL=URL.createObjectURL(new Blob([u],{type:'application/pdf'}));
+  }
+  return PDF_URL;
+}
+function openPdf(page, key, title){
+  const url=pdfUrl(key); if(!url){ toast('PDF pas encore lié : un prof peut l’ajouter dans la Bibliothèque'); return; }
+  if(!url.startsWith('blob:')){ window.open(url,'_blank','noopener'); if(page) toast(`Va à la page ${page} du PDF`); return; }
+  const full = url + (page?'#page='+page:'');
+  modal(title||'Cours d’Électricité — 4e année' + (page?` · page ${page}`:''), `<iframe src="${full}" title="PDF"></iframe>`,
+    {wide:true, actions:`<a class="btn sm" href="${full}" target="_blank" rel="noopener">Nouvel onglet</a>`});
+}
+
+/* ---------- navigation ---------- */
+function go(tab, view){ S.tab=tab; S.view = view || {page:'home'}; render(); window.scrollTo(0,0); }
+function openCourse(id){
+  const c=COURS.find(x=>x.id===id);
+  const viewTab = S.role==='prof'?'contenus':'cours';
+  if(c.statut==='demo'){ S.tab=viewTab; S.view={page:'course',course:id}; render(); window.scrollTo(0,0); return; }
+  if(c.statut==='demo-tp'){ S.tab=viewTab; S.view={page:'tp',course:id}; render(); window.scrollTo(0,0); return; }
+  const filtxt = c.pour.map(([f,a])=>`${a}${fil(f).code}`).join(' · ');
+  modal(esc(c.titre), `<p class="muted small">${filtxt}${c.per?` · ${c.per} périodes/semaine`:''}</p>
+    <p>Ce cours fait partie de la plateforme : son contenu arrivera chapitre par chapitre.${S.pdfs[c.id]?' Le PDF est déjà disponible dans la Bibliothèque.':''}</p>`);
+}
+function openCap(cap){ S.view={page:'player',course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && cap.startsWith('c')){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
+
+/* =========================================================
+   RENDU
+   ========================================================= */
+function render(){
+  if(!S.booted){ renderLogin(); return; }
+  if(S.me.role==='eleve' && !S.me.classe){ renderChooseClass(); return; }
+  const tabs = S.role==='eleve'
+    ? [['presentation','Accueil'],['cours','Mes cours'],['monstage','Mon stage'],['biblio','Bibliothèque'],['outils','Outils']]
+    : [['presentation','Accueil'],['dash','Suivi'],['carnet','Cotes'],['stages','Stages'],['contenus','Contenus'],['biblio','Bibliothèque'],['outils','Outils']].concat(isCoord()?[['acces','Accès'],['admin','Admin']]:[]);
+  if(S.view.page==='journal') S.tab = S.role==='prof'?'stages':'monstage';
+  if(!tabs.some(t=>t[0]===S.tab)) S.tab='presentation';
+  const ini = S.me.nom.split(/[\s.]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const sub = S.me.role==='eleve' ? cls(S.me.classe).nom : (isCoord()?'coordinateur':'professeur');
+  $('#top').innerHTML = `<div class="topbar-in">
+    <div class="brand"><div class="brand-mark"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#fff"/></svg></div><div>Plateforme technique<small>${esc(CONFIG.ECOLE)}</small></div></div>
+    ${LOCAL?'<span class="demo-badge" title="Les données restent dans ce navigateur">test local</span>':''}
+    <nav class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</nav>
+    <div class="spacer"></div>
+    ${S.me.role==='eleve'?'<span class="sync ok tiny" id="sync">✓ enregistré</span>':''}
+    ${isProf()?`<div class="role-switch" role="group" aria-label="Changer de vue"><button class="${S.role==='prof'?'on':''}" data-role="prof">Prof</button><button class="${S.role==='eleve'?'on':''}" data-role="eleve" title="Voir la plateforme comme un élève (rien n’est enregistré)">Aperçu élève</button></div>`:''}
+    <button class="who" data-menu title="Mon compte" style="border:0;background:none;cursor:pointer"><div class="avatar">${ini}</div><div style="text-align:left"><b>${esc(S.me.nom)}</b><div class="tiny muted">${esc(sub)}</div></div></button>
+  </div>`;
+  $('#top').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+  $('#top').querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{
+    S.role=b.dataset.role;
+    if(S.role==='eleve'){ S.prog=previewProg||DEF_PROG(); S.tab='cours'; } else { S.tab='dash'; }
+    S.view={page:'home'}; render(); });
+  $('#top').querySelector('[data-menu]').onclick=()=>{ const md=modal('Mon compte', `<p><b>${esc(S.me.nom)}</b><br><span class="small muted">${esc(S.me.mail)}</span></p>
+      <div class="row wrap"><button class="btn" data-refresh>↻ Recharger les données</button><button class="btn" data-logout>Se déconnecter</button>${LOCAL?'<button class="btn ghost" data-reset>Effacer les données de test</button>':''}</div>`);
+    md.querySelector('[data-logout]').onclick=()=>API.logout();
+    md.querySelector('[data-refresh]').onclick=()=>{ closeModal(); refresh(); };
+    const rs=md.querySelector('[data-reset]'); if(rs) rs.onclick=()=>{ if(confirm('Effacer toutes les données de test de ce navigateur ?')){ API.resetLocal(); API.logout(); } };
+  };
+  const m=$('#main');
+  const pages = { presentation:pagePresentation, cours:pageCours, monstage:pageMonStage, biblio:pageBiblio, outils:pageOutils, dash:pageDash, contenus:pageContenus, admin:pageAdmin, carnet:pageCarnet, acces:pageAcces, stages:pageStages };
+  if(S.view.page==='journal'){ m.innerHTML=pageJournal(); bindCommon(m); bindJournal(m); return; }
+  if((S.tab==='cours'||S.tab==='contenus') && S.view.page!=='home'){
+    if(S.view.page==='course') m.innerHTML=pageCourse();
+    else if(S.view.page==='player') { m.innerHTML=pagePlayer(); afterPlayer(); return; }
+    else if(S.view.page==='tp') m.innerHTML=pageTP();
+  } else m.innerHTML = pages[S.tab]();
+  bindCommon(m);
+}
+function bindCommon(m){
+  m.querySelectorAll('[data-open-course]').forEach(b=>b.onclick=()=>openCourse(b.dataset.openCourse));
+  m.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>openPdf(+b.dataset.pdf||null, b.dataset.pdfkey||null, b.dataset.pdftitle||null));
+  m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap));
+  m.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ const v=b.dataset.back; S.view = v==='home'?{page:'home'}:{page:v,course:'4-elec'}; render(); });
+  m.querySelectorAll('[data-module]').forEach(b=>b.onclick=()=>moduleInfo(b.dataset.module));
+  m.querySelectorAll('[data-journal]').forEach(b=>b.onclick=()=>{ const [per,...st]=b.dataset.journal.split('|'); openJournal(per, st.join('|')||S.me.mail); });
+  const pageHooks = { cours:bindCours, biblio:bindBiblio, dash:bindDash, contenus:bindContenus, admin:bindAdmin, carnet:bindCarnet, acces:bindAcces, stages:bindStages, monstage:bindMonStage };
+  if(S.view.page==='home' && pageHooks[S.tab]) pageHooks[S.tab](m);
+  if(S.view.page==='tp') bindTP(m);
+}
+
+/* ---------------- Connexion ---------------- */
+function renderLogin(){
+  $('#top').innerHTML='';
+  $('#main').innerHTML=`<div style="max-width:440px;margin:7vh auto 0">
+    <div class="brand" style="justify-content:center;margin-bottom:22px"><div class="brand-mark" style="width:44px;height:44px"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#fff"/></svg></div><div style="font-size:20px">Plateforme technique<small style="display:block">${esc(CONFIG.ECOLE)}</small></div></div>
+    <div class="card pad" style="padding:26px">
+      <h2 style="margin-bottom:6px">Connexion</h2><p class="small muted">Avec ton compte Google de l'école (@${PLAT.DOMAIN}).</p>
+      ${S.error?`<div class="note bad" style="margin:12px 0"><b>Accès refusé</b>${esc(S.error)}</div>`:''}
+      ${LOCAL?`<div class="note warn" style="margin:12px 0"><b>Mode test local</b>Le serveur n'est pas encore configuré : tu peux essayer avec n'importe quelle adresse @${PLAT.DOMAIN}. Tout reste dans ce navigateur.</div>
+        <label class="small" style="display:block;margin:14px 0 6px;font-weight:650">Adresse de l'école</label>
+        <input type="text" id="lmail" placeholder="prenom.nom.student@${PLAT.DOMAIN}" style="width:100%">
+        <button class="btn primary" id="lgo" style="width:100%;justify-content:center;margin-top:12px">Entrer</button>
+        <div class="small muted" style="margin-top:10px">Comptes d'essai : <button class="btn sm ghost" data-try-mail="${PROFS_DEF[0].mail}">coordinateur</button> <button class="btn sm ghost" data-try-mail="eleve.essai.student@${PLAT.DOMAIN}">élève</button></div>`
+      :`<button class="btn primary" id="lgo" style="width:100%;justify-content:center;margin-top:12px">Se connecter avec Google</button>
+        ${S.error?`<p class="small muted" style="margin-top:10px">Mauvais compte ? Déconnecte-toi de Google dans ce navigateur, puis réessaie.</p>`:''}`}
+    </div></div>`;
+  const go=()=>{ if(LOCAL){ const v=$('#lmail').value; if(!v.trim()) return; API.loginLocal(v); boot(); } else API.loginGoogle(); };
+  $('#lgo').onclick=go; const lm=$('#lmail'); if(lm) lm.onkeydown=e=>{ if(e.key==='Enter') go(); };
+  document.querySelectorAll('[data-try-mail]').forEach(b=>b.onclick=()=>{ API.loginLocal(b.dataset.tryMail); boot(); });
+}
+function renderChooseClass(){
+  $('#top').innerHTML='';
+  $('#main').innerHTML=`<div style="max-width:460px;margin:8vh auto 0" class="card pad">
+    <div class="kicker">Première connexion</div><h2 style="margin:4px 0 8px">Bienvenue, ${esc(S.me.nom)}</h2>
+    <p class="small">Choisis ta classe. Tu verras ensuite les cours de cette classe. Si tu te trompes, demande à ton professeur de la changer.</p>
+    <select id="lclass" style="width:100%;margin:8px 0 14px"><option value="">— ta classe —</option>${CLASSES.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('')}</select>
+    <button class="btn primary" id="lok" style="width:100%;justify-content:center">Valider</button></div>`;
+  $('#lok').onclick=async()=>{ const v=$('#lclass').value; if(!v){ toast('Choisis ta classe'); return; }
+    const r=await act('setClasse',{classe:v}); if(r){ S.me.classe=v; boot(); } };
+}
+
+/* ---------------- démarrage ---------------- */
+function init(){
+  document.body.innerHTML = `<header class="topbar" id="top"></header><main id="main"></main>`;
+  loadPrefs(); API.readHash();
+  document.body.addEventListener('click',e=>{ const t=e.target.closest('[data-try]'); if(!t) return;
+    const k=t.dataset.try;
+    if(k==='relais'){ if(isProf()){ S.role='eleve'; S.prog=previewProg||DEF_PROG(); } S.tab='cours'; openCap('c1'); }
+    if(k==='tp'){ S.tab='cours'; S.view={page:'tp',course:'4eqem-tpe'}; render(); window.scrollTo(0,0); }
+    if(k==='dash'||k==='carnet'||k==='stages'){ S.role='prof'; go(k); }
+  });
+  if(API.hasToken()) { $('#main').innerHTML='<p class="muted" style="text-align:center;margin-top:20vh">Chargement…</p>'; boot(); } else render();
+  if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
