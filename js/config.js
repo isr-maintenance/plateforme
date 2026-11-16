@@ -5,7 +5,7 @@
    ========================================================= */
 const CONFIG = {
   LOGIN_URL: '',   // URL « /exec » du déploiement Connexion
-  API_URL:   '',   // URL « /exec » du déploiement Données
+  API_URL:   'https://script.google.com/macros/s/AKfycbxPDMqJni1QwgLjrAV3RBmTDXeAX1MWN47cAis_I3V0VckDQEx4eq8oDxK-upmSAWX1Pw/exec',   // déploiement Données
   PDF_ELEC4: '',   // lien Google Drive du PDF du cours d'Électricité 4e (partagé avec elmarche.be)
   ECOLE:     'Institut Saint-Roch · Marche'
 };
