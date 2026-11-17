@@ -89,72 +89,142 @@ function mountVat(root){
   draw();
 }
 
-/* ---------- 2.1.5 : le multimètre ---------- */
-const MM_TASKS=[
-  {k:'u1',t:'Mesurer la tension de la prise de l’établi',kind:'U',ac:true,val:'230,4',unit:'V~'},
-  {k:'u2',t:'Mesurer la tension de l’alimentation 24 V des circuits de commande',kind:'U',ac:false,val:'24,1',unit:'V⎓'},
-  {k:'i1',t:'Mesurer le courant absorbé par une lampe de 60 W',kind:'I',val:'0,26',unit:'A'},
-  {k:'r1',t:'Mesurer la résistance de la bobine d’un relais, hors tension',kind:'R',val:'480',unit:'Ω'},
+/* ---------- 2.1.5 : le multimètre — on le règle soi-même, puis on justifie ---------- */
+/* Multimètre à calibres manuels. Positions du sélecteur, dans le sens des aiguilles d'une montre. */
+const MM_POS=[
+  {k:'off', g:'',   l:'OFF'},
+  {k:'vdc1000',g:'V⎓',l:'1000',fn:'vdc',cal:1000,u:'V',d:0},
+  {k:'vdc200', g:'V⎓',l:'200', fn:'vdc',cal:200, u:'V',d:1},
+  {k:'vdc20',  g:'V⎓',l:'20',  fn:'vdc',cal:20,  u:'V',d:2},
+  {k:'vdc2',   g:'V⎓',l:'2',   fn:'vdc',cal:2,   u:'V',d:3},
+  {k:'vac750', g:'V~',l:'750', fn:'vac',cal:750, u:'V',d:0},
+  {k:'vac200', g:'V~',l:'200', fn:'vac',cal:200, u:'V',d:1},
+  {k:'aac10',  g:'A~',l:'10A', fn:'aac',cal:10,  u:'A',d:2},
+  {k:'adc10',  g:'A⎓',l:'10A', fn:'adc',cal:10,  u:'A',d:2},
+  {k:'madc200',g:'A⎓',l:'200m',fn:'madc',cal:0.2,u:'mA',d:1,m:1000},
+  {k:'ohm200', g:'Ω', l:'200', fn:'ohm',cal:200, u:'Ω',d:1},
+  {k:'ohm2k',  g:'Ω', l:'2k',  fn:'ohm',cal:2000,u:'kΩ',d:3,m:0.001},
+  {k:'ohm20k', g:'Ω', l:'20k', fn:'ohm',cal:20000,u:'kΩ',d:2,m:0.001},
+  {k:'ohm200k',g:'Ω', l:'200k',fn:'ohm',cal:200000,u:'kΩ',d:1,m:0.001},
 ];
-function mmSVG(o){
-  const pos={vac:['V~',-60],vdc:['V⎓',-20],ohm:['Ω',20],amp:['A',60]}, a=pos[o.fn]?pos[o.fn][1]:0;
-  const disp=o.disp||'– – –';
-  return `<svg viewBox="0 0 220 300" role="img" aria-label="Multimètre : fonction ${o.fn?pos[o.fn][0]:'non choisie'}, cordon rouge ${o.red==='a10'?'dans 10 A':'dans VΩ'}, affichage ${disp}">
-    <rect x="20" y="8" width="180" height="250" rx="18" fill="var(--amber)" />
-    <rect x="30" y="18" width="160" height="230" rx="12" fill="#2b3340"/>
-    <rect x="44" y="30" width="132" height="50" rx="6" fill="#cfe3c4"/>
-    <text x="168" y="66" text-anchor="end" font-family="ui-monospace,Menlo,monospace" font-size="${disp.length>6?18:26}" font-weight="700" fill="#14210f">${disp}</text>
-    <circle cx="110" cy="148" r="38" fill="#3b4452" stroke="#596273" stroke-width="3"/>
-    <g transform="rotate(${a} 110 148)"><rect x="106" y="112" width="8" height="34" rx="4" fill="#fff"/></g>
-    ${Object.entries(pos).map(([k,[l,ang]])=>{ const r=ang*Math.PI/180, x=110+Math.sin(r)*54, y=148-Math.cos(r)*54; return `<text x="${x}" y="${y+4}" text-anchor="middle" font-size="13" font-weight="800" fill="${o.fn===k?'#ffd34d':'#e9edf3'}">${l}</text>`; }).join('')}
-    ${[['a10','10 A',58],['com','COM',110],['vo','VΩ',162]].map(([k,l,x])=>`<circle cx="${x}" cy="222" r="11" fill="#141922" stroke="${k==='com'?'#888':'var(--live)'}" stroke-width="3"/><text x="${x}" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#e9edf3">${l}</text>`).join('')}
-    <path d="M110 222 C 110 270 90 285 70 296" stroke="#141922" stroke-width="5" fill="none"/>
-    <path d="M${o.red==='a10'?58:162} 222 C ${o.red==='a10'?58:162} 270 ${o.red==='a10'?60:180} 285 ${o.red==='a10'?40:200} 296" stroke="var(--live)" stroke-width="5" fill="none"/>
+const MM_A0=-150, MM_STEP=300/(MM_POS.length-1), MM_C={x:130,y:194};
+const mmAng = i => MM_A0+i*MM_STEP;
+const MM_TASKS=[
+  {k:'u1',t:'Mesurer la tension de la prise de l’établi',kind:'U',ac:true,v:231.4,best:'vac750',
+   jq:[{q:'Pourquoi la fonction V~ ?',o:['Une prise fournit du continu, il faut V⎓','La prise du réseau fournit une tension alternative','Parce qu’on mesure le courant de la prise'],g:1},
+       {q:'Pourquoi le calibre 750 ?',o:['C’est le plus petit calibre supérieur aux 230 V attendus : 200 afficherait OL','C’est toujours le calibre le plus grand qui est le bon','200 suffit, on arrondit'],g:0}]},
+  {k:'u2',t:'Mesurer la tension de l’alimentation 24 V des circuits de commande',kind:'U',ac:false,v:24.13,best:'vdc200',
+   jq:[{q:'Pourquoi la fonction V⎓ ?',o:['L’alimentation des circuits de commande fournit une tension continue','Le 24 V est toujours alternatif','Pour mesurer une résistance'],g:0},
+       {q:'Pourquoi le calibre 200 ?',o:['Le calibre 1000 est plus précis','Le calibre 20 afficherait OL, mais c’est sans importance','24 V dépasse 20 : on prend le calibre juste au-dessus, qui donne la lecture la plus précise'],g:2}]},
+  {k:'i1',t:'Mesurer le courant absorbé par une lampe de 60 W, sur le 230 V',kind:'I',ac:true,v:0.262,best:'aac10',
+   jq:[{q:'Pourquoi l’entrée 10 A et pas l’entrée mA ?',o:['L’entrée 10 A est plus précise','0,26 A dépasse les 200 mA de l’entrée mA : son fusible fondrait','Par habitude'],g:1},
+       {q:'Pourquoi brancher dans la coupure ?',o:['Le courant doit traverser l’appareil : on l’insère dans le circuit, en série','À cheval, la mesure serait plus précise','Pour ne pas couper la lampe'],g:0},
+       {q:'Et juste après la mesure ?',o:['On laisse le cordon rouge où il est pour la prochaine fois','On remet immédiatement le cordon rouge dans la borne VΩ mA','On éteint la lampe'],g:1}]},
+  {k:'r1',t:'Mesurer la résistance de la bobine d’un relais, hors tension',kind:'R',v:480,best:'ohm2k',
+   jq:[{q:'L’écran affiche 0.480 sur le calibre 2k. Que vaut la résistance ?',o:['0,48 Ω','4 800 Ω','480 Ω : l’affichage est en kΩ'],g:2},
+       {q:'Pourquoi le calibre 2k ?',o:['480 Ω dépasse le calibre 200 : on prend le plus petit calibre au-dessus','Le calibre 200k est plus sûr','On choisit toujours 2k pour une bobine'],g:0},
+       {q:'Pourquoi hors tension ?',o:['Pour économiser la pile','L’ohmmètre envoie son propre courant : sous tension, la mesure est fausse et l’appareil peut être endommagé','Ce n’est pas obligatoire'],g:1}]},
+];
+function mmLCD(o){
+  if(!o) return {txt:'',u:''};
+  return o;
+}
+function mmSVG(st){
+  const i=MM_POS.findIndex(p=>p.k===st.pos), a=mmAng(i), lcd=st.lcd||{txt:st.pos==='off'?'':'– – –',u:''};
+  const groups=[...new Set(MM_POS.map(p=>p.g).filter(Boolean))].map(g=>{ const idx=MM_POS.map((p,j)=>p.g===g?j:-1).filter(j=>j>=0); return {g, a:(mmAng(idx[0])+mmAng(idx[idx.length-1]))/2, a0:mmAng(idx[0])-MM_STEP/2.4, a1:mmAng(idx[idx.length-1])+MM_STEP/2.4}; });
+  const P=(ang,r)=>{ const t=ang*Math.PI/180; return [MM_C.x+Math.sin(t)*r, MM_C.y-Math.cos(t)*r]; };
+  const arc=(a0,a1,r)=>{ const [x0,y0]=P(a0,r),[x1,y1]=P(a1,r); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+  const plug=st.red==='a10'?70:190;
+  return `<svg viewBox="0 0 260 400" class="mmsvg" role="group" aria-label="Multimètre">
+    <rect x="12" y="6" width="236" height="356" rx="22" fill="var(--amber)"/><rect x="22" y="16" width="216" height="336" rx="16" fill="#2b3340"/>
+    <rect x="44" y="26" width="172" height="52" rx="6" fill="#cfe3c4"/>
+    <text x="178" y="64" text-anchor="end" font-family="ui-monospace,Menlo,monospace" font-size="28" font-weight="700" fill="#14210f">${lcd.txt}</text>
+    <text x="206" y="64" text-anchor="end" font-size="11" font-weight="800" fill="#14210f">${lcd.u}</text>
+    ${groups.map(g=>{ const [x,y]=P(g.a,100); return `<path d="${arc(g.a0,g.a1,90)}" stroke="#596273" stroke-width="3" fill="none"/><text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="#ffd34d">${g.g}</text>`; }).join('')}
+    ${MM_POS.map((p,j)=>{ const [x,y]=P(mmAng(j),72); return `<g class="mmpos" data-mmpos="${p.k}" style="cursor:pointer"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="12" fill="${p.k===st.pos?'#ffd34d':'transparent'}"/><text x="${x.toFixed(1)}" y="${(y+3.5).toFixed(1)}" text-anchor="middle" font-size="${p.l.length>3?8.5:10}" font-weight="800" fill="${p.k===st.pos?'#141922':'#e9edf3'}">${p.l}</text></g>`; }).join('')}
+    <g class="mmknob" data-mmknob tabindex="0" role="slider" aria-label="Sélecteur de fonction et de calibre" aria-valuemin="0" aria-valuemax="${MM_POS.length-1}" aria-valuenow="${i}" aria-valuetext="${MM_POS[i].g} ${MM_POS[i].l}" style="cursor:grab">
+      <circle cx="${MM_C.x}" cy="${MM_C.y}" r="46" fill="#3b4452" stroke="#596273" stroke-width="3"/>
+      <g class="mmarm" transform="rotate(${a} ${MM_C.x} ${MM_C.y})"><rect x="${MM_C.x-9}" y="${MM_C.y-44}" width="18" height="88" rx="9" fill="#1c222d"/><path d="M${MM_C.x} ${MM_C.y-44} l-7 14 h14 z" fill="#fff"/></g>
+    </g>
+    ${[['a10','10 A',70],['com','COM',130],['vo','VΩ mA',190]].map(([k,l,x])=>`<g ${k==='com'?'':`data-mmjack="${k}" style="cursor:pointer"`}><text x="${x}" y="306" text-anchor="middle" font-size="10" font-weight="800" fill="#e9edf3">${l}</text><circle cx="${x}" cy="326" r="13" fill="#141922" stroke="${k==='com'?'#888':'var(--live)'}" stroke-width="3"/>${k!=='com'&&st.red!==k?`<circle cx="${x}" cy="326" r="20" fill="transparent"/>`:''}</g>`).join('')}
+    <circle cx="130" cy="326" r="7" fill="#141922"/><path d="M130 326 C 130 370 110 385 90 400" stroke="#141922" stroke-width="6" fill="none"/>
+    <circle cx="${plug}" cy="326" r="8" fill="var(--live)"/><path d="M${plug} 326 C ${plug} 370 ${plug+20} 385 ${plug+40} 400" stroke="var(--live)" stroke-width="6" fill="none"/>
   </svg>`;
 }
-function mmEval(t, o){
-  const live=t.kind!=='R';
-  if(!o.fn||!o.mode) return {ok:false,msg:'Choisis la fonction et le branchement.'};
-  if(o.red==='a10' && o.mode==='cheval' && live) return {ok:false,disp:'FUSE',bad:true,msg:'<b>Court-circuit franc !</b> Entre COM et l’entrée courant, la résistance interne est quasi nulle. Au mieux le fusible fond, au pire l’appareil explose. Réflexe : après une mesure de courant, remettre aussitôt le cordon rouge en VΩ.'};
+function mmEval(t, st){
+  const p=MM_POS.find(x=>x.k===st.pos), live=t.kind!=='R', red=st.red, mode=st.mode;
+  const lcd=(v)=>{ const vv=v*(p.m||1); return {txt:vv.toFixed(p.d).replace(/^0(?=\.)/,p.d>=3?'0':'0'),u:p.u}; };
+  const OL={txt:'OL',u:p&&p.u||''};
+  if(p.k==='off') return {ok:false,lcd:{txt:'',u:''},msg:'Le multimètre est éteint : tourne le sélecteur.'};
+  if(!mode) return {ok:false,msg:'Choisis comment tu poses les pointes.'};
+  const shortV = live && mode==='cheval' && (red==='a10' || p.fn==='madc');
+  if(shortV && t.kind==='U') return {ok:false,lcd:{txt:'FUSE',u:''},bad:true,msg:'<b>Court-circuit franc !</b> Entre COM et une entrée courant, la résistance interne est quasi nulle : posée à cheval sur une tension, c’est un court-circuit. Au mieux le fusible fond, au pire l’appareil explose.'};
   if(t.kind==='U'){
-    if(o.fn==='amp') return {ok:false,msg:'Fonction courant pour une tension : choisis V~ ou V⎓.'};
-    if(o.fn==='ohm') return {ok:false,bad:true,msg:'Jamais l’ohmmètre sur un circuit sous tension : la lecture est fausse et l’appareil peut être endommagé.'};
-    if(o.mode==='coupure') return {ok:false,msg:'Une tension se mesure ENTRE deux points : on pose les pointes à cheval sur le composant, sans rien démonter.'};
-    if(o.red!=='vo') return {ok:false,msg:'Pour une tension, le cordon rouge va dans la borne VΩ.'};
-    if(t.ac && o.fn==='vdc') return {ok:false,disp:'0.3',bad:true,msg:'<b>Attention :</b> en position continue sur une tension alternative, l’affichage est proche de zéro. On croirait l’installation hors tension !'};
-    if(!t.ac && o.fn==='vac') return {ok:false,disp:'0.0',msg:'Position alternative sur une alimentation continue : la lecture est fausse. Choisis V⎓.'};
-    return {ok:true,disp:t.val,msg:`Mesure correcte : ${t.val} ${t.unit}. Pointes à cheval, circuit entier, une main dans la poche.`};
+    if(p.fn==='ohm') return {ok:false,bad:true,lcd:OL,msg:'Jamais l’ohmmètre sur un circuit sous tension : la lecture est fausse et l’appareil peut être endommagé.'};
+    if(p.fn!=='vac'&&p.fn!=='vdc') return {ok:false,msg:'Le sélecteur est sur une fonction courant : pour une tension, choisis V~ ou V⎓.'};
+    if(red!=='vo') return {ok:false,msg:'Pour une tension, le cordon rouge va dans la borne VΩ mA.'};
+    if(mode==='coupure') return {ok:false,msg:'Une tension se mesure ENTRE deux points : on pose les pointes à cheval sur le composant, sans rien démonter.'};
+    if(t.ac && p.fn==='vdc') return {ok:false,bad:true,lcd:{txt:'0.3',u:'V'},msg:'<b>Attention :</b> en V⎓ sur une tension alternative, l’affichage est proche de zéro. On croirait l’installation hors tension !'};
+    if(!t.ac && p.fn==='vac') return {ok:false,lcd:{txt:'0.0',u:'V'},msg:'Position alternative sur une alimentation continue : la lecture est fausse. Choisis V⎓.'};
+    if(t.v>p.cal) return {ok:false,lcd:OL,msg:'<b>OL</b> : la valeur dépasse le calibre. Remonte d’un calibre.'};
+    if(p.k!==t.best) return {ok:false,lcd:lcd(t.v),msg:'La lecture est possible, mais peu précise : descends au calibre juste au-dessus de la valeur.'};
+    return {ok:true,lcd:lcd(t.v),msg:'Mesure correcte. Justifie maintenant ton réglage.'};
   }
   if(t.kind==='I'){
-    if(o.fn!=='amp') return {ok:false,msg:'Pour un courant, choisis la fonction A.'};
-    if(o.red!=='a10') return {ok:false,msg:'En fonction courant, le cordon rouge passe dans l’entrée courant (10 A).'};
-    if(o.mode==='cheval') return {ok:false,disp:'FUSE',bad:true,msg:'<b>Court-circuit !</b> Un ampèremètre posé à cheval est une résistance presque nulle entre deux points de tension différente. On ouvre le circuit et on insère l’appareil dans la coupure.'};
-    return {ok:true,disp:t.val,msg:`Mesure correcte : ${t.val} A. Tout le courant traverse l’appareil. <b>Et maintenant : cordon rouge en VΩ, tout de suite.</b>`};
+    if(p.fn==='vac'||p.fn==='vdc'||p.fn==='ohm') return {ok:false,msg:'Pour un courant, le sélecteur doit être sur une fonction A.'};
+    if(mode==='cheval') return {ok:false,lcd:{txt:'FUSE',u:''},bad:true,msg:'<b>Court-circuit !</b> Un ampèremètre posé à cheval est une résistance presque nulle entre deux points de tension différente. On ouvre le circuit et on insère l’appareil dans la coupure.'};
+    if(p.fn==='madc') return {ok:false,lcd:{txt:'FUSE',u:''},bad:true,msg:'0,26 A traverse l’entrée mA, prévue pour 200 mA au maximum : son fusible fond. Il fallait l’entrée 10 A.'};
+    if(red!=='a10') return {ok:false,msg:'Sur le calibre 10 A, le cordon rouge doit être dans la borne 10 A.'};
+    if(p.fn==='adc') return {ok:false,lcd:{txt:'0.00',u:'A'},msg:'A⎓ sur un courant alternatif : la lecture est fausse. Le réseau est alternatif, choisis A~.'};
+    return {ok:true,lcd:lcd(t.v),msg:'Mesure correcte. Justifie maintenant ton réglage.'};
   }
-  if(o.red==='a10') return {ok:false,msg:'Le cordon rouge est resté dans l’entrée 10 A : remets-le en VΩ.'};
-  if(o.fn!=='ohm') return {ok:false,disp:'0.0',msg:'Le circuit est hors tension : une fonction tension n’affiche rien d’utile. Choisis Ω.'};
-  if(o.mode==='coupure') return {ok:false,msg:'Pour une résistance, on pose les deux pointes aux bornes du composant, circuit hors tension.'};
-  return {ok:true,disp:t.val,msg:`Mesure correcte : ${t.val} Ω — valeur normale pour une bobine 24 V.`};
+  if(red==='a10') return {ok:false,msg:'Le cordon rouge est resté dans la borne 10 A : remets-le dans VΩ mA.'};
+  if(p.fn!=='ohm') return {ok:false,lcd:{txt:'0.0',u:p.u},msg:'Le circuit est hors tension : une fonction tension ou courant n’affiche rien d’utile. Choisis Ω.'};
+  if(mode==='coupure') return {ok:false,msg:'Pour une résistance, on pose les deux pointes aux bornes du composant.'};
+  if(t.v>p.cal) return {ok:false,lcd:OL,msg:'<b>OL</b> : la valeur dépasse le calibre. Remonte d’un calibre.'};
+  if(p.k!==t.best) return {ok:false,lcd:lcd(t.v),msg:'La lecture est possible, mais peu précise : descends au calibre juste au-dessus de la valeur.'};
+  return {ok:true,lcd:lcd(t.v),msg:'Mesure correcte. Justifie maintenant ton réglage.'};
 }
 function mountMM(root){
-  const box=root.querySelector('#mmsim'), st=WS.mm||(WS.mm={t:0,red:'vo',fn:null,mode:null,res:null}), dr=DR(), mem=dr.mm||(dr.mm={});
+  const box=root.querySelector('#mmsim'), st=WS.mm||(WS.mm={t:0,red:'vo',pos:'off',mode:null,res:null,lcd:null,ans:{},jfb:''}), dr=DR(), mem=dr.mm||(dr.mm={});
+  const setPos=(k)=>{ if(st.pos===k) return; st.pos=k; st.res=null; st.lcd=null; st.ans={}; st.jfb=''; };
   const draw=()=>{
-    const t=MM_TASKS[st.t], allOk=MM_TASKS.every(x=>mem[x.k]);
-    box.innerHTML=`<div class="mm-ui"><div>${mmSVG({fn:st.fn,red:st.red,disp:st.res&&st.res.disp})}</div><div>
+    const t=MM_TASKS[st.t], allOk=MM_TASKS.every(x=>mem[x.k]), done=mem[t.k], p=MM_POS.find(x=>x.k===st.pos);
+    box.innerHTML=`<div class="mm-ui"><div><div class="mmwrap">${mmSVG(st)}</div><p class="tiny muted" style="text-align:center;margin:4px 0 0">Tourne le sélecteur (glisse, clique sur une position ou utilise les flèches du clavier). Clique sur une borne pour y brancher le cordon rouge.</p></div><div>
       <div class="kicker" style="margin-bottom:6px">Mesures à réaliser</div>
       <div class="tasklist">${MM_TASKS.map((x,i)=>`<button class="${mem[x.k]?'ok':''} ${i===st.t?'on':''}" data-mt="${i}">${mem[x.k]?'✓ ':''}${x.t}</button>`).join('')}</div>
-      <div class="kicker" style="margin:12px 0 6px">Cordon rouge dans…</div><div class="seg">${[['vo','VΩ'],['a10','10 A']].map(([k,l])=>`<button class="${st.red===k?'on':''}" data-mr="${k}">${l}</button>`).join('')}</div>
-      <div class="kicker" style="margin:12px 0 6px">Fonction</div><div class="seg">${[['vac','V~ alternatif'],['vdc','V⎓ continu'],['ohm','Ω'],['amp','A']].map(([k,l])=>`<button class="${st.fn===k?'on':''}" data-mf="${k}">${l}</button>`).join('')}</div>
-      <div class="kicker" style="margin:12px 0 6px">Branchement</div><div class="seg">${[['cheval','À cheval sur le composant'],['coupure','Dans la coupure du circuit']].map(([k,l])=>`<button class="${st.mode===k?'on':''}" data-mo="${k}">${l}</button>`).join('')}</div>
-      <div class="row" style="margin-top:12px"><button class="btn primary sm" data-mgo>Mesurer</button></div>
-      ${st.res?`<div class="fb ${st.res.ok?'good':'wrong'}" style="margin-top:10px">${st.res.msg}</div>`:''}
-      ${allOk?`<div class="fb good" style="margin-top:10px"><b>Les quatre mesures sont réussies.</b></div>`:''}
+      <div class="small" style="margin:12px 0 6px"><b>Ton réglage :</b> ${p.k==='off'?'appareil éteint':`${p.g} · calibre ${p.l}`} · cordon rouge en ${st.red==='a10'?'10 A':'VΩ mA'}</div>
+      <div class="kicker" style="margin:10px 0 6px">Je pose les pointes…</div><div class="seg">${[['cheval','à cheval sur le composant'],['coupure','dans la coupure du circuit']].map(([k,l])=>`<button class="${st.mode===k?'on':''}" data-mo="${k}">${l}</button>`).join('')}</div>
+      <div class="row" style="margin-top:12px"><button class="btn primary sm" data-mgo ${done?'disabled':''}>Mesurer</button></div>
+      ${done?`<div class="fb good" style="margin-top:10px"><b>✓ Mesure réussie et justifiée.</b> Passe à la suivante.</div>`:st.res?`<div class="fb ${st.res.ok?'good':'wrong'}" style="margin-top:10px">${st.res.msg}</div>`:''}
+      ${!done&&st.res&&st.res.ok?`<div style="margin-top:8px">${t.jq.map((q,qi)=>`<div class="q"><div class="qt">${q.q}</div><div class="opts">${q.o.map((o,oi)=>`<button class="opt ${st.ans[qi]===oi?(oi===q.g?'good':'wrong'):''}" data-mj="${qi}" data-oi="${oi}"><span class="l">${'ABC'[oi]}</span><span>${o}</span></button>`).join('')}</div></div>`).join('')}${st.jfb}</div>`:''}
+      ${allOk?`<div class="fb good" style="margin-top:10px"><b>Les quatre mesures sont réussies et justifiées.</b></div>`:''}
     </div></div>`;
-    box.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{ st.t=+b.dataset.mt; st.res=null; draw(); });
-    box.querySelectorAll('[data-mr]').forEach(b=>b.onclick=()=>{ st.red=b.dataset.mr; st.res=null; draw(); });
-    box.querySelectorAll('[data-mf]').forEach(b=>b.onclick=()=>{ st.fn=b.dataset.mf; st.res=null; draw(); });
-    box.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{ st.mode=b.dataset.mo; st.res=null; draw(); });
-    box.querySelector('[data-mgo]').onclick=()=>{ st.res=mmEval(t,st); if(st.res.ok){ mem[t.k]=true; save(); if(MM_TASKS.every(x=>mem[x.k])) exSet('a7mm'); } draw(); };
+    const svg=box.querySelector('svg');
+    box.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{ st.t=+b.dataset.mt; st.res=null; st.lcd=null; st.ans={}; st.jfb=''; draw(); });
+    box.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{ st.mode=b.dataset.mo; st.res=null; st.lcd=null; st.ans={}; draw(); });
+    box.querySelectorAll('[data-mmjack]').forEach(g=>g.onclick=()=>{ st.red=g.dataset.mmjack; st.res=null; st.lcd=null; st.ans={}; draw(); });
+    box.querySelectorAll('[data-mmpos]').forEach(g=>g.onclick=()=>{ setPos(g.dataset.mmpos); draw(); });
+    const knob=box.querySelector('[data-mmknob]');
+    knob.onkeydown=e=>{ const i=MM_POS.findIndex(x=>x.k===st.pos); let j=i;
+      if(e.key==='ArrowRight'||e.key==='ArrowUp') j=Math.min(MM_POS.length-1,i+1); else if(e.key==='ArrowLeft'||e.key==='ArrowDown') j=Math.max(0,i-1); else return;
+      e.preventDefault(); setPos(MM_POS[j].k); draw(); box.querySelector('[data-mmknob]').focus(); };
+    knob.onpointerdown=e=>{ e.preventDefault(); knob.setPointerCapture(e.pointerId); knob.style.cursor='grabbing';
+      const pt=svg.createSVGPoint();
+      const move=ev=>{ pt.x=ev.clientX; pt.y=ev.clientY; const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+        let ang=Math.atan2(q.x-MM_C.x, MM_C.y-q.y)*180/Math.PI; ang=Math.max(MM_A0,Math.min(-MM_A0,ang));
+        const j=Math.round((ang-MM_A0)/MM_STEP); if(MM_POS[j].k!==st.pos){ setPos(MM_POS[j].k);
+          knob.querySelector('.mmarm').setAttribute('transform',`rotate(${mmAng(j)} ${MM_C.x} ${MM_C.y})`);
+          svg.querySelectorAll('[data-mmpos]').forEach(g=>{ const on=g.dataset.mmpos===st.pos; g.querySelector('circle').setAttribute('fill',on?'#ffd34d':'transparent'); g.querySelector('text').setAttribute('fill',on?'#141922':'#e9edf3'); }); } };
+      knob.onpointermove=move; move(e);
+      knob.onpointerup=knob.onpointercancel=()=>{ knob.onpointermove=null; knob.onpointerup=null; draw(); };
+    };
+    const go=box.querySelector('[data-mgo]'); if(go) go.onclick=()=>{ st.res=mmEval(t,st); st.lcd=st.res.lcd||null; st.ans={}; st.jfb=''; draw(); };
+    box.querySelectorAll('[data-mj]').forEach(b=>b.onclick=()=>{ st.ans[+b.dataset.mj]=+b.dataset.oi;
+      const allRight=t.jq.every((q,qi)=>st.ans[qi]===q.g), answered=t.jq.every((q,qi)=>st.ans[qi]!=null);
+      if(allRight){ mem[t.k]=true; save(); if(MM_TASKS.every(x=>mem[x.k])) exSet('a7mm'); const nx=MM_TASKS.findIndex(x=>!mem[x.k]); if(nx>=0){ st.t=nx; st.res=null; st.lcd=null; st.ans={}; } }
+      else st.jfb=answered?'<div class="fb wrong"><b>Pas encore.</b> Une justification est fausse : relis le tableau des gestes et la règle du calibre.</div>':'';
+      draw(); });
   };
   draw();
 }
@@ -284,12 +354,12 @@ defChapter({
       <p>Au plus près de l'endroit où l'on va travailler, et non à l'armoire : un conducteur peut être alimenté par un autre chemin. En triphasé, on mesure <b>toutes les combinaisons</b> : entre phases (L1-L2, L2-L3, L1-L3), entre chaque phase et le neutre, entre chaque phase et la terre, et entre le neutre et la terre.</p>
       <p class="small muted">Contrôles avant usage : état des cordons et des pointes, présence des garde-doigts, date de vérification, catégorie de mesure adaptée.</p>`,
      mount:mountVat},
-    {id:'a7', sec:'2.1.5', t:'Le multimètre', pdf:16, quiz:['a7q1','a7q2','a7q3'], ex:{keys:['a7mm'], lbl:'Les quatre mesures'},
+    {id:'a7', sec:'2.1.5', t:'Le multimètre', pdf:16, quiz:['a7q1','a7q2','a7q3'], ex:{keys:['a7mm'], lbl:'Les quatre mesures, justifiées'},
      body:()=>`<p class="lead">Trois bornes, trois gestes — et une erreur à ne jamais commettre.</p>
       ${tbl(['Borne','Usage'],[['COM','Commun. Le cordon noir y reste en permanence.'],['VΩ','Tension, résistance, continuité, test de diode. Cordon rouge.'],['mA et 10 A','Entrées de mesure du courant, protégées par un fusible.']])}
       <div class="note bad" style="margin-top:14px"><b>L'erreur classique</b>Laisser le cordon rouge dans l'entrée 10 A et mesurer une tension : la résistance interne est quasi nulle, c'est un court-circuit franc. Au mieux le fusible fond, au pire l'appareil explose. <b>Après chaque mesure de courant, remettre immédiatement le cordon rouge en VΩ.</b></div>
       ${tbl(['Grandeur','Le geste','La règle de sécurité'],[['Tension','Les deux pointes à cheval sur le composant, sans rien démonter. Le circuit reste entier.','Circuit sous tension : gants, garde-doigts, une main dans la poche.'],['Courant','On ouvre le circuit et on insère l’appareil dans la coupure : tout le courant le traverse.','Jamais à cheval en mode courant : c’est un court-circuit.'],['Résistance et continuité','Les deux pointes aux bornes du composant.','Circuit obligatoirement hors tension, composant si possible déconnecté.']])}
-      ${exbox('mmsim','Au multimètre','Choisis la mesure, place le cordon rouge, la fonction et le branchement, puis mesure. Les erreurs sont permises ici — pas à l’atelier.')}
+      ${exbox('mmsim','Au multimètre','Pour chaque mesure : règle toi-même le sélecteur et le cordon rouge, pose les pointes, mesure — puis justifie ton réglage. Les erreurs sont permises ici, pas à l’atelier.')}
       <h3>Le calibre et la lecture</h3>
       <ul class="ctrlq"><li>À sélection manuelle : partir du calibre le plus élevé et descendre progressivement.</li><li>À sélection automatique : vérifier l'unité affichée — un 230 lu en millivolts n'est pas 230 V.</li><li>« OL » ou « 1. » seul : la valeur dépasse le calibre.</li><li>Une pile faible fausse silencieusement la lecture : contrôler l'indicateur de pile.</li></ul>
       <h3>La catégorie de mesure</h3>

@@ -382,3 +382,7 @@ table.t tr.mine td:first-child{box-shadow:inset 5px 0 0 var(--hl)}
 .wire-hot{animation:hot 0.6s infinite alternate}
 @keyframes hot{from{stroke:#ff7a00}to{stroke:#ff2a00}}
 @media (prefers-reduced-motion: reduce){.wire-hot{animation:none}}
+.mmwrap{max-width:300px;margin:0 auto}
+.mmsvg{touch-action:none;user-select:none;-webkit-user-select:none}
+.mmsvg [data-mmknob]:focus{outline:none}
+.mmsvg [data-mmknob]:focus-visible circle{stroke:#ffd34d}
