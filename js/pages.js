@@ -97,10 +97,10 @@ function pageBiblio(){
       ${list.map(c=>{
         const has = S.pdfs[c.id] || (c.pdf && (CONFIG.PDF_ELEC4 || typeof PDF_B64!=='undefined'));
         return `<div class="doc"><div class="ic ${has?'':'empty'}">PDF</div><div class="meta"><b>${esc(c.titre)}</b>${c.sous?` <span class="small muted">— ${esc(c.sous)}</span>`:''}
-          <div class="small muted">${S.pdfs[c.id]?esc(S.pdfs[c.id].name||'PDF sur Google Drive'):c.pdf?'Cours d’Électricité — 4e année · version révisée · annexes, corrigés et évaluations formatives inclus':'Pas encore de PDF'}</div></div>
+          <div class="small muted">${S.pdfs[c.id]?esc(S.pdfs[c.id].name||'PDF sur Google Drive'):c.pdf?(S.role==='prof'?'Cours d’Électricité — 4e année · version prof, avec les corrigés (annexes E et I) · les élèves ont la version sans corrigés':'Cours d’Électricité — 4e année · version révisée · annexes et évaluations formatives'):'Pas encore de PDF'}</div></div>
           ${has?`<button class="btn sm" data-pdf="1" ${S.pdfs[c.id]?`data-pdfkey="${c.id}" data-pdftitle="${esc(c.titre)}"`:''}>Ouvrir</button>`:''}
           ${S.role==='prof'?`<button class="btn sm" data-pdflink="${c.id}">${S.pdfs[c.id]?'Changer le lien':'Lier un PDF'}</button>`:''}</div>`; }).join('')}
-      ${an==='4'?`<div class="pad" style="border-top:1px solid var(--line)"><div class="kicker" style="margin-bottom:8px">Accès direct — Électricité 4e</div><div class="row wrap">${ELEC4.flatMap(u=>u.chaps).map(([n,t,p])=>`<button class="btn sm" data-pdf="${p}" title="${esc(t)}">${n}</button>`).join('')}${ELEC4_ANNEXES.map(([t,p])=>`<button class="btn sm" data-pdf="${p}">${t.split(' — ')[0]}</button>`).join('')}</div></div>`:''}
+      ${an==='4'?`<div class="pad" style="border-top:1px solid var(--line)"><div class="kicker" style="margin-bottom:8px">Accès direct — Électricité 4e</div><div class="row wrap">${ELEC4.flatMap(u=>u.chaps).map(([n,t,p])=>`<button class="btn sm" data-pdf="${p}" title="${esc(t)}">${n}</button>`).join('')}${elec4Annexes().map(([t,p,pr])=>`<button class="btn sm" data-pdf="${p}"${pr?' title="Réservée aux profs"':''}>${pr?'🔒 ':''}${t.split(' — ')[0]}</button>`).join('')}</div></div>`:''}
     </section>
   </div>`;
 }
@@ -156,7 +156,7 @@ function pageCourse(){
     else st = `<span class="chip">En préparation</span>`;
     return `<div class="chap ${avail?'avail':''} ${num==='2.4'&&!passed&&mode==='strict'?'locked':''}"><span class="num">${num}</span><div class="ti"><b>${t}</b><span class="tiny muted">${tp?`TP alimenté : ${tp} · `:''}PDF p. ${pg}</span></div>
       ${st}<button class="btn sm" data-pdf="${pg}" title="Ouvrir le PDF à la page ${pg}">PDF</button>${avail?`<button class="btn sm primary" data-cap="c1">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}
-  <div class="uaa"><h3>Annexes</h3><div class="chapters">${ELEC4_ANNEXES.map(([t,p])=>`<div class="chap"><span class="num">—</span><div class="ti"><b>${t}</b></div><button class="btn sm" data-pdf="${p}">PDF p. ${p}</button></div>`).join('')}</div></div>`;
+  <div class="uaa"><h3>Annexes</h3><div class="chapters">${elec4Annexes().map(([t,p,pr])=>`<div class="chap"><span class="num">${pr?'🔒':'—'}</span><div class="ti"><b>${t}</b>${pr?'<span class="tiny muted">Réservée aux profs : les élèves ne la voient pas</span>':''}</div><button class="btn sm" data-pdf="${p}">PDF p. ${p}</button></div>`).join('')}</div></div>`;
 }
 
 /* ---------------- Lecteur de chapitre ---------------- */

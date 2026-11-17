@@ -90,17 +90,24 @@ const ELEC4 = [
     ['4.5','Remise en service pluritechnologique et synthèse',158,null],
   ]},
 ];
-const ELEC4_ANNEXES = [
-  ['Annexe A — Couverture des acquis de l’UAA1',161],
-  ['Annexe B — Formulaire et valeurs à retenir',162],
-  ['Annexe C — Glossaire',165],
-  ['Annexe D — Problèmes de métier',167],
-  ['Annexe E — Corrigés',184],
-  ['Annexe F — Fiche de suivi de l’élève',214],
-  ['Annexe G — Fiche méthode : tracer un schéma',218],
-  ['Annexe H — Évaluations formatives',218],
-  ['Annexe I — Corrigés des évaluations formatives',259],
+/* Annexes : [titre, page dans la version prof (complète), page dans la version élèves ou null si réservée aux profs]
+   La version élèves est la version complète sans les annexes E et I (corrigés). */
+const ELEC4_ANNEXES_ALL = [
+  ['Annexe A — Couverture des acquis de l’UAA1',161,161],
+  ['Annexe B — Formulaire et valeurs à retenir',162,162],
+  ['Annexe C — Glossaire',165,165],
+  ['Annexe D — Problèmes de métier',167,167],
+  ['Annexe E — Corrigés',184,null],
+  ['Annexe F — Fiche de suivi de l’élève',214,184],
+  ['Annexe G — Fiche méthode : tracer un schéma',218,188],
+  ['Annexe H — Évaluations formatives',218,188],
+  ['Annexe I — Corrigés des évaluations formatives',259,null],
 ];
+/* Annexes visibles selon la vue (prof ou élève / aperçu élève) : [titre, page, réservée aux profs] */
+function elec4Annexes(){
+  const prof = typeof S!=='undefined' && S.role==='prof';
+  return ELEC4_ANNEXES_ALL.filter(a=>prof || a[2]!=null).map(([t,pp,pe])=>[t, prof?pp:pe, pe==null]);
+}
 
 /* Évaluations formatives de l'annexe H : [chapitre, total, seuil] */
 const FORMATIVES = [

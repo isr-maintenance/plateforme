@@ -109,6 +109,7 @@ let PDF_URL=null;
 function pdfUrl(key){
   if(key && S.pdfs[key]) return S.pdfs[key].url;
   if(S.pdfs['4-elec']) return S.pdfs['4-elec'].url;
+  if(S.role==='prof' && CONFIG.PDF_ELEC4_PROF) return CONFIG.PDF_ELEC4_PROF;   // version avec corrigés (pas en aperçu élève)
   if(CONFIG.PDF_ELEC4) return CONFIG.PDF_ELEC4;
   if(!PDF_URL && typeof PDF_B64!=='undefined' && PDF_B64){
     const bin=atob(PDF_B64); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
