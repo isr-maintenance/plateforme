@@ -60,7 +60,7 @@ async function boot(){
   if(!r.ok){ S.error=r.msg; S.booted=false; render(); return; }
   const d=r.data; S.me=d.me; ME=d.me.nom; S.booted=true; S.error=null;
   S.modes=Object.assign({}, ...CLASSES.map(c=>({[c.id]:c.mode})), d.modes||{});
-  AFFECT=d.affect||[]; S.pdfs=d.pdfs||{};
+  AFFECT=d.affect||[]; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[];
   S.stage.periodes = d.stage.periodes || JSON.parse(JSON.stringify(STAGE_PER_DEF));
   S.stage.lieux = d.stage.lieux || [];
   if(S.me.role==='eleve'){
@@ -125,6 +125,32 @@ function openPdf(page, key, title){
     {wide:true, actions:`<a class="btn sm" href="${full}" target="_blank" rel="noopener">Nouvel onglet</a>`});
 }
 
+/* ---------- évaluations formatives + corrigés (contenu servi par le serveur, jamais dans le code public) ---------- */
+function fcorOpen(ch){
+  const x=(S.fcor||[]).find(f=>f.ch===ch); if(!x) return false;
+  if(S.role==='prof') return true;
+  if(isProf()) return ch==='2.3' && !!(S.prog&&S.prog.test&&S.prog.test.submitted);   // aperçu élève : comme un élève qui débute
+  return x.ok;
+}
+function fcorBlock(){
+  const L=S.fcor||[]; if(!L.length) return '';
+  const prof=S.role==='prof', nOk=L.filter(f=>fcorOpen(f.ch)).length;
+  return `<div class="uaa"><h3>Évaluations formatives et corrigés <span class="tiny" style="font-weight:600">· ${prof?'les élèves voient chaque corrigé quand leur évaluation est terminée':`${nOk}/${L.length} disponible${nOk>1?'s':''}`}</span></h3>
+    ${prof?'':`<p class="small muted" style="margin:0 0 8px">Quand ton évaluation d'un chapitre est terminée (corrigée par ton prof, ou passée ici dans la plateforme), tu peux relire les questions et le corrigé, avec les points du cours à revoir.</p>`}
+    <div class="chapters">${L.map(f=>{ const o=fcorOpen(f.ch);
+      return `<div class="chap ${o?'avail':''}"><span class="num">${f.ch}</span><div class="ti"><b>${esc(f.titre||'')}</b>${o?'':'<span class="tiny muted">🔒 s’ouvre quand ton évaluation est terminée</span>'}</div>
+        ${o?`<button class="btn sm${prof?'':' primary'}" data-fcor="${f.ch}">Évaluation et corrigé</button>`:'<span class="chip">🔒</span>'}</div>`; }).join('')}</div></div>`;
+}
+async function openFcor(ch){
+  if(!fcorOpen(ch)){ toast('Le corrigé s’ouvrira quand ton évaluation '+ch+' sera terminée'); return; }
+  const r=await act('fcor',{ch}); if(!r) return;
+  const f=r.fcor, fmt=t=>esc(t||'').replace(/^(\d+\. \([^)]*\) — revoir [^\n]*)$/gm,'<b>$1</b>').replace(/^(\d+\. )/gm,'<b>$1</b>');
+  modal(`Évaluation formative ${esc(f.ch)} — ${esc(f.titre||'')}`,
+    `<div class="note" style="margin-top:0">${S.role==='prof'?'<b>Vue prof.</b>Un élève voit cette page quand son évaluation '+esc(f.ch)+' est terminée.':'<b>Ton évaluation est terminée.</b>Compare tes réponses au corrigé. Une réponse équivalente sur le fond est acceptée, pas seulement la formulation exacte.'}</div>
+     <h3 style="margin:14px 0 6px">Les questions</h3><div class="small" style="white-space:pre-wrap;line-height:1.55">${fmt(f.ev)}</div>
+     <h3 style="margin:18px 0 6px">Le corrigé</h3><div class="small" style="white-space:pre-wrap;line-height:1.55">${fmt(f.cor)}</div>`);
+}
+
 /* ---------- navigation ---------- */
 function go(tab, view){ S.tab=tab; S.view = view || {page:'home'}; render(); window.scrollTo(0,0); }
 function openCourse(id){
@@ -184,6 +210,8 @@ function render(){
 function bindCommon(m){
   m.querySelectorAll('[data-open-course]').forEach(b=>b.onclick=()=>openCourse(b.dataset.openCourse));
   m.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>openPdf(+b.dataset.pdf||null, b.dataset.pdfkey||null, b.dataset.pdftitle||null));
+  m.querySelectorAll('[data-pdfurl]').forEach(b=>b.onclick=()=>window.open(b.dataset.pdfurl,'_blank','noopener'));
+  m.querySelectorAll('[data-fcor]').forEach(b=>b.onclick=()=>openFcor(b.dataset.fcor));
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
   m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap));
   m.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ const v=b.dataset.back; S.view = v==='home'?{page:'home'}:{page:v,course:'4-elec'}; render(); });

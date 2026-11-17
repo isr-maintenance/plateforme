@@ -91,7 +91,8 @@ const ELEC4 = [
   ]},
 ];
 /* Annexes : [titre, page dans la version prof (complète), page dans la version élèves ou null si réservée aux profs]
-   La version élèves est la version complète sans les annexes E et I (corrigés). */
+   La version élèves est la version complète sans les annexes E (corrigés), H (évaluations formatives) et I (leurs corrigés).
+   Les élèves retrouvent chaque évaluation et son corrigé dans la plateforme, quand leur évaluation est terminée. */
 const ELEC4_ANNEXES_ALL = [
   ['Annexe A — Couverture des acquis de l’UAA1',161,161],
   ['Annexe B — Formulaire et valeurs à retenir',162,162],
@@ -100,7 +101,7 @@ const ELEC4_ANNEXES_ALL = [
   ['Annexe E — Corrigés',184,null],
   ['Annexe F — Fiche de suivi de l’élève',214,184],
   ['Annexe G — Fiche méthode : tracer un schéma',218,188],
-  ['Annexe H — Évaluations formatives',218,188],
+  ['Annexe H — Évaluations formatives',218,null],
   ['Annexe I — Corrigés des évaluations formatives',259,null],
 ];
 /* Annexes visibles selon la vue (prof ou élève / aperçu élève) : [titre, page, réservée aux profs] */

@@ -104,3 +104,23 @@ console.log(`✓ ${n} vérifications réussies`);
   const d=a2.handle({t:a2.makeToken(e2),a:'boot'}).data;
   ok(d.stage.mine.s4.lieu==='l1' && d.stage.lieux.length===1 && d.stage.journal.s4['2027-03-01'].act==='x', 'stage et journal retrouvés sans périodes enregistrées');
   console.log(`✓ ${n} vérifications réussies (avec régression)`); }
+
+// évaluations formatives + corrigés : visibles par l'élève quand son évaluation est terminée
+{ const st3 = memStore(), a3 = ctx.makeApi(st3, deps); a3.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const C = m => a3.makeToken(m), co = 'olivier.lesenfants@elmarche.be', e3 = 'lea.x.student@elmarche.be';
+  const H = (m, a, p) => a3.handle({ t: C(m), a, p });
+  H(e3, 'setClasse', { classe: '4eqmm' });
+  ok(H(co, 'setFcor', { list: [{ ch:'2.1', titre:'Sécu', ev:'Q1', cor:'R1' }, { ch:'2.3', titre:'Relais', ev:'Q3', cor:'R3' }, { ch:'2.10', titre:'Cadre', ev:'Q10', cor:'R10' }] }).ok, 'coordinateur charge les corrigés');
+  ok(H(e3, 'setFcor', { ch:'2.1', ev:'x', cor:'y' }).ok === false, 'élève ne peut pas charger de corrigé');
+  let d = H(e3, 'boot').data; ok(d.fcor.length === 3 && d.fcor.every(x => !x.ok) && !('cor' in d.fcor[0]), 'élève : liste sans contenu, tout verrouillé');
+  ok(d.fcor.map(x=>x.ch).join() === '2.1,2.3,2.10', 'ordre des chapitres');
+  ok(H(e3, 'fcor', { ch:'2.1' }).ok === false, 'corrigé refusé avant évaluation');
+  H(co, 'setNote', { key:'4eqmm|4-elec', kind:'over', ev:'F2.1', mail:e3, v:'20' });
+  d = H(e3, 'boot').data; ok(d.fcor.find(x=>x.ch==='2.1').ok && !d.fcor.find(x=>x.ch==='2.3').ok, '2.1 ouvert après la note, pas 2.3');
+  ok(H(e3, 'fcor', { ch:'2.1' }).fcor.cor === 'R1', 'élève lit le corrigé 2.1');
+  ok(H(e3, 'fcor', { ch:'2.10' }).ok === false, '2.10 toujours fermé (pas confondu avec 2.1)');
+  H(e3, 'saveProg', { prog: { test: { submitted: true, sid: 'z' } } });
+  ok(H(e3, 'fcor', { ch:'2.3' }).fcor.cor === 'R3', '2.3 ouvert après l’évaluation passée dans la plateforme');
+  ok(H('autre.y.student@elmarche.be', 'fcor', { ch:'2.1' }).ok === false, 'un autre élève reste verrouillé');
+  ok(H(co, 'fcor', { ch:'2.10' }).fcor.cor === 'R10' && H(co, 'boot').data.fcor.every(x=>x.ok), 'prof : tout ouvert');
+  console.log(`✓ ${n} vérifications réussies (avec corrigés formatifs)`); }

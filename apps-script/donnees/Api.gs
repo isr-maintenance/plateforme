@@ -62,6 +62,29 @@ function makeApi(store, deps) {
   function need(cond, msg){ if (!cond) throw err('bad', msg || 'Requête invalide.'); }
   function str(v, max){ v = v == null ? '' : String(v); return v.slice(0, max || 2000); }
   function listDocs(prefix){ var o = {}; store.list(prefix).forEach(function(r){ o[r.key.slice(prefix.length)] = r.value; }); return o; }
+  /* ---------- évaluations formatives et corrigés (annexes H et I) ----------
+     Stockés dans le classeur sous « fcor:<chapitre> » = {ch, titre, ev, cor}. Ils ne sont PAS dans le code public.
+     Un élève voit l'évaluation et le corrigé d'un chapitre quand son évaluation est terminée :
+     note encodée par un prof (carnet, évaluation « F<chapitre> »), ou évaluation passée dans la plateforme (2.3). */
+  function fcorDone(mail){
+    var done = {}, suf = '|' + mail;
+    store.list('notes:').forEach(function(r){
+      var o = (r.value && r.value.over) || {};
+      Object.keys(o).forEach(function(k){ if (k.slice(-suf.length) === suf && k.charAt(0) === 'F' && o[k] !== '') done[k.slice(1, -suf.length)] = true; });
+    });
+    var pr = doc('prog:' + mail, null); if (pr && pr.test && pr.test.submitted) done['2.3'] = true;
+    return done;
+  }
+  function fcorList(me){
+    var done = me.role === 'eleve' ? fcorDone(me.mail) : null;
+    return store.list('fcor:').map(function(r){ var v = r.value || {}; return { ch: v.ch, titre: v.titre, ok: !done || !!done[v.ch] }; })
+      .sort(function(a, b){ var x = String(a.ch).split('.'), y = String(b.ch).split('.'); return (x[0] - y[0]) || (x[1] - y[1]); });
+  }
+  function fcorGet(me, p){
+    var ch = str(p.ch, 10), v = doc('fcor:' + ch, null); need(v, 'Évaluation inconnue.');
+    if (me.role === 'eleve') need(fcorDone(me.mail)[ch], 'Le corrigé s’ouvrira quand ton évaluation ' + ch + ' sera terminée.');
+    return { ok: true, fcor: v };
+  }
   function isProfOf(me, cl){ return me.coord || doc('affect', []).some(function(a){ return a.cl === cl && a.profs.indexOf(me.nom) >= 0; }); }
 
   /* ---------- démarrage : tout ce qu'il faut à l'écran ---------- */
@@ -77,6 +100,7 @@ function makeApi(store, deps) {
       store.list('journal:').forEach(function(r){ var k = r.key.slice(8), i = k.lastIndexOf('|'); if (k.slice(i + 1) === me.mail) out.stage.journal[k.slice(0, i)] = r.value; });
       out.stage.lieux = out.stage.lieux.filter(function(l){ return Object.keys(out.stage.mine).some(function(k){ return out.stage.mine[k].lieu === l.id; }); });
       out.stage.tel = (doc('stage:tel', {}))[me.mail] || '';
+      out.fcor = fcorList(me);
       return out;
     }
     out.profs = profs(); out.access = { open: cfg().open !== false, blocked: cfg().blocked || [] };
@@ -90,6 +114,7 @@ function makeApi(store, deps) {
     out.stage.aff = listDocs('stage:aff:');
     out.stage.tel = doc('stage:tel', {});
     out.stage.journal = listDocs('journal:');
+    out.fcor = fcorList(me);
     return out;
   }
 
@@ -120,7 +145,8 @@ function makeApi(store, deps) {
       e.vu = false; e.maj = deps.now(); J[date] = e; put(k, J, me.mail);
       return { ok: true, entry: e };
     },
-    setTel: function(me, p){ var t = doc('stage:tel', {}); t[me.mail] = str(p.tel, 30); put('stage:tel', t, me.mail); return { ok: true }; }
+    setTel: function(me, p){ var t = doc('stage:tel', {}); t[me.mail] = str(p.tel, 30); put('stage:tel', t, me.mail); return { ok: true }; },
+    fcor: fcorGet
   };
 
   /* ---------- actions prof ---------- */
@@ -160,6 +186,7 @@ function makeApi(store, deps) {
       if ('com' in p) e.com = str(p.com, 2000); if ('vu' in p) e.vu = !!p.vu; J[d] = e; put(k, J, me.mail); return { ok: true };
     },
     signal: function(me, p){ var L = doc('signal', []); L.unshift({ cap: str(p.cap, 20), txt: str(p.txt, 1000), who: me.nom, at: deps.now() }); put('signal', L.slice(0, 200), me.mail); return { ok: true }; },
+    fcor: fcorGet,
     setPdf: function(me, p){ var P = doc('pdfs', {}); var c = str(p.course, 40); if (!p.url) delete P[c]; else P[c] = { url: str(p.url, 500), name: str(p.name, 120) }; put('pdfs', P, me.mail); return { ok: true }; }
   };
 
@@ -174,6 +201,15 @@ function makeApi(store, deps) {
     },
     setAffect: function(me, p){ need(Array.isArray(p.affect), 'Liste invalide.'); put('affect', p.affect.filter(function(a){ return a && a.cl && a.c && a.profs && a.profs.length; }), me.mail); return { ok: true }; },
     setModes: function(me, p){ put('modes', p.modes || {}, me.mail); return { ok: true }; },
+    setFcor: function(me, p){
+      var L = Array.isArray(p.list) ? p.list : [p];
+      L.forEach(function(x){
+        var ch = str(x.ch, 10); need(/^\d+\.\d+$/.test(ch), 'Chapitre invalide.');
+        if (x.del) { store.del('fcor:' + ch); return; }
+        put('fcor:' + ch, { ch: ch, titre: str(x.titre, 200), ev: str(x.ev, 20000), cor: str(x.cor, 20000) }, me.mail);
+      });
+      return { ok: true, n: L.length };
+    },
     setAccess: function(me, p){ var c = cfg(); if ('open' in p) c.open = !!p.open; if (Array.isArray(p.blocked)) c.blocked = p.blocked.map(function(x){ return String(x).toLowerCase(); }); put('cfg', c, me.mail); return { ok: true }; }
   };
 
