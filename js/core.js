@@ -162,7 +162,7 @@ function openCourse(id){
   modal(esc(c.titre), `<p class="muted small">${filtxt}${c.per?` · ${c.per} périodes/semaine`:''}</p>
     <p>Ce cours fait partie de la plateforme : son contenu arrivera chapitre par chapitre.${S.pdfs[c.id]?' Le PDF est déjà disponible dans la Bibliothèque.':''}</p>`);
 }
-function openCap(cap){ S.view={page:'player',course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && cap.startsWith('c')){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
+function openCap(cap){ S.view={page:'player',course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && capById(cap)){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
 
 /* =========================================================
    RENDU

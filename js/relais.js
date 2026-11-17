@@ -65,6 +65,7 @@ function P(){ return S.prog; }
 function quizOk(id){ const a=P().quiz[id]; return !!(a && a.ok); }
 function exOk(cap){
   const p=P();
+  if(cap.ex && typeof cap.ex==='object') return cap.ex.keys.every(k=>!!p.ex[k]);   // chapitres décrits par données
   switch(cap.ex){
     case 'parts': return !!p.ex.parts;
     case 'coil':  return !!p.ex.coil;
@@ -110,7 +111,7 @@ function quizHTML(id){
     </div>
     ${answered ? (a.ok
       ? `<div class="fb good"><b>Juste.</b> ${q.e}</div>`
-      : `<div class="fb wrong"><b>Pas encore.</b> Relis le passage puis réessaie. ${q.r!==S.view.cap?`<button class="revoir" data-goto="${q.r}">Revoir ${CAPS.find(c=>c.id===q.r).sec}</button>`:''}</div>`) : ''}
+      : `<div class="fb wrong"><b>Pas encore.</b> Relis le passage puis réessaie. ${q.r!==S.view.cap?`<button class="revoir" data-goto="${q.r}">Revoir ${capById(q.r).sec}</button>`:''}</div>`) : ''}
   </div>`;
 }
 function answerQuiz(id,i){
@@ -427,6 +428,7 @@ function ohmRead(){
 
 /* ---------------- rendu des capsules ---------------- */
 function capBody(id){
+  const dc=capById(id); if(dc && dc.body) return dc.body();
   switch(id){
   case 'c1': return `
     <p class="lead">Jusqu'ici, pour allumer une lampe, on fermait un interrupteur à la main. En industrie, trois besoins apparaissent.</p>
@@ -580,6 +582,7 @@ function ohmRelaySVG(){
 /* ---------------- montage (interactions) ---------------- */
 function mountCap(id){
   const root=document.getElementById('capbody'); if(!root) return;
+  const dc=capById(id); if(dc && dc.mount){ dc.mount(root); return; }
   if(id==='c1'){
     const b=root.querySelector('[data-c1press]'), fig=root.querySelector('#c1fig');
     const set=(on)=>{ fig.querySelector('svg').outerHTML=introSVG(on); b.classList.toggle('pressed',on); };

@@ -128,7 +128,7 @@ function pageCours(){
 }
 function courseCard(c){
   const t=TYPE[c.type]; let prog='';
-  if(c.statut==='demo'){ const n=capsDoneCount(); prog=`<div class="small muted">Chapitre 2.3 · ${n}/${CAPS.length} capsules</div><div class="bar ${n===CAPS.length?'ok':''}"><i style="width:${n/CAPS.length*100}%"></i></div>`; }
+  if(c.statut==='demo'){ const ALL=Object.values(CHAPTERS).flatMap(h=>h.caps), n=ALL.filter(capDone).length; prog=`<div class="small muted">Chapitres ${Object.keys(CHAPTERS).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).join(', ')} · ${n}/${ALL.length} capsules</div><div class="bar ${n===ALL.length?'ok':''}"><i style="width:${n/ALL.length*100}%"></i></div>`; }
   if(c.statut==='demo-tp'){ const n=FEUVERT.filter(x=>feuVert(x.k)).length; prog=`<div class="small muted">Feu vert É03 · ${n}/${FEUVERT.length} prérequis</div><div class="bar ${n===6?'ok':''}"><i style="width:${n/6*100}%"></i></div>`; }
   return `<button class="ccard ${c.type}" data-open-course="${c.id}"><div class="row between"><span class="chip ${t.chip}">${t.l}</span>${c.per?`<span class="tiny muted">${c.per} p./sem.</span>`:''}</div>
     <span class="t1">${esc(c.titre)}</span>${c.sous?`<span class="small muted">${esc(c.sous)}</span>`:''}
@@ -148,23 +148,25 @@ function pageCourse(){
   return `<div class="crumbs"><button data-back="home">${S.role==='prof'?'Contenus':'Mes cours'}</button> › Électricité 4e</div>
   <div class="page-head"><div><div class="kicker">4EQEM + 4EQMM · socle commun · 3 p./sem. · version révisée</div><h1>Cours d'Électricité — 4e année</h1>
     <p class="muted small" style="margin-top:4px">Référentiel SeGEC — Électricien de maintenance industrielle · UAA1 entière, début UAA2 et UAA3</p></div>
-    <div class="row wrap"><button class="btn" data-pdf="1">📄 Cours complet (PDF)</button><button class="btn primary" data-cap="c1">Continuer le chapitre 2.3 →</button></div></div>
+    <div class="row wrap"><button class="btn" data-pdf="1">📄 Cours complet (PDF)</button>${(()=>{ const nx=Object.keys(CHAPTERS).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).find(k=>chapCapsDone(k)<CHAPTERS[k].caps.length)||'2.3'; return `<button class="btn primary" data-cap="${chapResume(nx)}">Continuer le chapitre ${nx} →</button>`; })()}</div></div>
   <div class="note"><b>Chaque chapitre prépare un TP précis.</b>La théorie est vue avant la séance de TP correspondante : c'est le principe de verrouillage théorie / TP du cours. Mode de déblocage de ta classe : <b>${mode==='strict'?'strict — le chapitre suivant s’ouvre quand le test est réussi':'souple — le prof ouvre les chapitres'}</b>.</div>
   ${ELEC4.map(u=>`<div class="uaa"><h3>${u.uaa} <span class="tiny" style="font-weight:600">· ${u.vol}</span></h3><div class="chapters">${u.chaps.map(([num,t,pg,tp])=>{
-    const avail = num==='2.3';
+    const CH=CHAPTERS[num], avail = !!CH;
     let st;
-    if(avail) st = passed?`<span class="chip ok">Réussi ${sc.total}/${TOTAL}</span>`:`<span class="chip elec">${n}/${CAPS.length} capsules</span>`;
+    if(num==='2.3') st = passed?`<span class="chip ok">Réussi ${sc.total}/${TOTAL}</span>`:`<span class="chip elec">${n}/${CAPS.length} capsules</span>`;
+    else if(avail){ const d=chapCapsDone(num); st = `<span class="chip ${d===CH.caps.length?'ok':'elec'}">${d===CH.caps.length?'✓ ':''}${d}/${CH.caps.length} capsules</span>`; }
     else if(num==='2.4') st = passed||mode==='souple' ? `<span class="chip">En préparation</span>` : `<span class="chip warn">🔒 après réussite du 2.3</span>`;
     else st = `<span class="chip">En préparation</span>`;
     return `<div class="chap ${avail?'avail':''} ${num==='2.4'&&!passed&&mode==='strict'?'locked':''}"><span class="num">${num}</span><div class="ti"><b>${t}</b><span class="tiny muted">${tp?`TP alimenté : ${tp} · `:''}PDF p. ${pg}</span></div>
-      ${st}<button class="btn sm" data-pdf="${pg}" title="Ouvrir le PDF à la page ${pg}">PDF</button>${avail?`<button class="btn sm primary" data-cap="c1">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}
+      ${st}<button class="btn sm" data-pdf="${pg}" title="Ouvrir le PDF à la page ${pg}">PDF</button>${avail?`<button class="btn sm primary" data-cap="${chapResume(num)}">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}
   <div class="uaa"><h3>Annexes</h3><div class="chapters">${elec4Annexes().map(([t,p,pr])=>`<div class="chap"><span class="num">${pr?'🔒':'—'}</span><div class="ti"><b>${t}</b>${pr?'<span class="tiny muted">Réservée aux profs : les élèves ne la voient pas</span>':''}</div><button class="btn sm" data-pdf="${p}">PDF p. ${p}</button></div>`).join('')}</div></div>
   ${fcorBlock()}`;
 }
 
 /* ---------------- Lecteur de chapitre ---------------- */
 function pagePlayer(){
-  const capId=S.view.cap;
+  const capId=S.view.cap, ch=chapOf(capId)||CHAPTERS['2.3'];
+  if(!ch.legacy) return pagePlayerD(ch, capId);
   const tocItems = CAPS.map((c,i)=>`<button class="item ${capId===c.id?'on':''}" data-cap="${c.id}"><span class="ck ${capDone(c)?'done':capPart(c)?'part':''}" data-ck="${c.id}">${capDone(c)?'✓':''}</span><span><span class="tiny muted">${c.sec}</span><br>${c.t}</span></button>`).join('');
   const sc=testScore();
   const fvN=FEUVERT.filter(x=>feuVert(x.k)).length;
@@ -183,12 +185,14 @@ function pagePlayer(){
   </div>`;
 }
 function capHTML(id){
-  const i=CAPS.findIndex(c=>c.id===id), cap=CAPS[i];
-  const prev=CAPS[i-1], next=CAPS[i+1];
-  const exLbl = {parts:'Défi des pièces',coil:'Faire coller puis retomber le relais',pins:'Les deux exercices de brochage',steps:'Les six étapes de la simulation',ohm:'Les quatre diagnostics',calc:'Le calcul de la bobine'}[cap.ex];
+  const ch=chapOf(id)||CHAPTERS['2.3'], L=ch.caps;
+  const i=L.findIndex(c=>c.id===id), cap=L[i];
+  const prev=L[i-1], next=L[i+1];
+  const exLbl = cap.ex && typeof cap.ex==='object' ? cap.ex.lbl : {parts:'Défi des pièces',coil:'Faire coller puis retomber le relais',pins:'Les deux exercices de brochage',steps:'Les six étapes de la simulation',ohm:'Les quatre diagnostics',calc:'Le calcul de la bobine'}[cap.ex];
+  const pdfPg = ch.legacy ? ch.pdf[i] : cap.pdf;
   return `<div class="cap-body">
-    <div class="row between wrap"><div class="kicker">${cap.sec} · capsule ${i+1}/${CAPS.length}</div>
-      <div class="row">${S.role==='prof'?`<button class="btn sm" data-signal="${cap.id}">⚑ Signaler une erreur</button>`:''}<button class="btn sm ghost" data-pdf="${[53,53,54,54,55,57,59,61][i]}">Voir dans le PDF</button></div></div>
+    <div class="row between wrap"><div class="kicker">${cap.sec} · capsule ${i+1}/${L.length}</div>
+      <div class="row">${S.role==='prof'?`<button class="btn sm" data-signal="${cap.id}">⚑ Signaler une erreur</button>`:''}<button class="btn sm ghost" data-pdf="${pdfPg}">Voir dans le PDF</button></div></div>
     <h2>${cap.t}</h2>
     <div id="capbody">${capBody(id)}</div>
     <div class="hr"></div>
@@ -198,7 +202,7 @@ function capHTML(id){
   <div class="cap-foot">
     ${prev?`<button class="btn" data-cap="${prev.id}">← ${prev.t}</button>`:'<span></span>'}
     <span class="small" id="capstatus">${capDone(cap)?'<b style="color:var(--ok)">✓ Capsule validée</b>':'<span class="muted">Réponds juste à toutes les questions'+(exLbl?' et termine l’exercice':'')+'</span>'}</span>
-    ${next?`<button class="btn primary" data-cap="${next.id}">${next.t} →</button>`:`<button class="btn primary" data-cap="test">Passer au test →</button>`}
+    ${next?`<button class="btn primary" data-cap="${next.id}">${next.t} →</button>`:ch.legacy?`<button class="btn primary" data-cap="test">Passer au test →</button>`:`<button class="btn primary" data-cap="syn:${ch.num}">Synthèse et évaluation →</button>`}
   </div>`;
 }
 function afterPlayer(){
@@ -207,13 +211,14 @@ function afterPlayer(){
   m.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto));
   m.querySelectorAll('[data-signal]').forEach(b=>b.onclick=()=>signalForm(b.dataset.signal));
   const cap=S.view.cap;
-  if(cap==='test') bindTest(m); else if(cap==='fv') bindFV(m); else mountCap(cap);
+  if(cap==='test') bindTest(m); else if(cap==='fv') bindFV(m); else if(cap.startsWith('syn:')) m.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto)); else mountCap(cap);
   startClock();
 }
 function renderPlayer(keepScroll){
   const y=window.scrollY;
   const card=$('#capcard'); if(!card){ render(); return; }
-  if(S.view.cap.startsWith('c')){ $('#quizzes').innerHTML = CAPS.find(c=>c.id===S.view.cap).quiz.map(quizHTML).join('');
+  const vc=capById(S.view.cap);
+  if(vc && $('#quizzes')){ $('#quizzes').innerHTML = vc.quiz.map(quizHTML).join('');
     $('#quizzes').querySelectorAll('[data-qopt]').forEach(b=>b.onclick=()=>answerQuiz(b.dataset.qopt,+b.dataset.i));
     $('#quizzes').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto));
     updateTocChecks();
@@ -221,6 +226,7 @@ function renderPlayer(keepScroll){
   if(keepScroll) window.scrollTo(0,y);
 }
 function updateTocChecks(){
+  const CH=chapOf(S.view.cap)||CHAPTERS['2.3'], CAPS=CH.caps, capsDoneCount=()=>CAPS.filter(capDone).length;
   CAPS.forEach(c=>{ const el=document.querySelector(`[data-ck="${c.id}"]`); if(el){ el.className='ck '+(capDone(c)?'done':capPart(c)?'part':''); el.textContent=capDone(c)?'✓':''; } });
   const b=$('#tocbar'); if(b) b.style.width=capsDoneCount()/CAPS.length*100+'%';
   const t=$('#toccount'); if(t) t.textContent=`${capsDoneCount()}/${CAPS.length} capsules validées`;
@@ -594,3 +600,21 @@ function pageContenus(){
 }
 function bindContenus(){}
 
+
+/* ---------- lecteur des chapitres décrits par données (2.1, 2.2…) ---------- */
+function pagePlayerD(ch, capId){
+  const L=ch.caps, n=L.filter(capDone).length, syn='syn:'+ch.num, open=typeof fcorOpen==='function'&&fcorOpen(ch.num);
+  const toc=L.map(c=>`<button class="item ${capId===c.id?'on':''}" data-cap="${c.id}"><span class="ck ${capDone(c)?'done':capPart(c)?'part':''}" data-ck="${c.id}">${capDone(c)?'✓':''}</span><span><span class="tiny muted">${c.sec}</span><br>${c.t}</span></button>`).join('');
+  return `<div class="crumbs"><button data-back="home">${S.role==='prof'?'Contenus':'Mes cours'}</button> › <button data-back="course">Électricité 4e</button> › ${ch.num} ${ch.titre}</div>
+  <div class="player">
+    <aside class="card toc" style="padding:10px">
+      <div style="padding:6px 10px 10px"><div class="kicker">Chapitre ${ch.num}</div><b>${ch.titre}</b>
+        <div class="bar ${n===L.length?'ok':''}" style="margin-top:8px"><i id="tocbar" style="width:${n/L.length*100}%"></i></div>
+        <div class="tiny muted" id="toccount" style="margin-top:4px">${n}/${L.length} capsules validées</div></div>
+      ${toc}
+      <div class="sep">Terminer</div>
+      <button class="item ${capId===syn?'on':''}" data-cap="${syn}"><span class="ck ${open?'done':''}">${open?'✓':''}</span><span>Synthèse et évaluation<br><span class="tiny muted">prérequis du TP ${ch.tp} · formative ${ch.num}</span></span></button>
+    </aside>
+    <section class="card cap fade-in" id="capcard">${capId===syn?synHTML(ch.num):capHTML(capId)}</section>
+  </div>`;
+}
