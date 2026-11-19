@@ -60,7 +60,7 @@ async function boot(){
   if(!r.ok){ S.error=r.msg; S.booted=false; render(); return; }
   const d=r.data; S.me=d.me; ME=d.me.nom; S.booted=true; S.error=null;
   S.modes=Object.assign({}, ...CLASSES.map(c=>({[c.id]:c.mode})), d.modes||{});
-  AFFECT=d.affect||[]; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[];
+  AFFECT=d.affect||[]; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[]; S.ouv=d.ouv||{};
   S.stage.periodes = d.stage.periodes || JSON.parse(JSON.stringify(STAGE_PER_DEF));
   S.stage.lieux = d.stage.lieux || [];
   if(S.me.role==='eleve'){
@@ -162,7 +162,8 @@ function openCourse(id){
   modal(esc(c.titre), `<p class="muted small">${filtxt}${c.per?` · ${c.per} périodes/semaine`:''}</p>
     <p>Ce cours fait partie de la plateforme : son contenu arrivera chapitre par chapitre.${S.pdfs[c.id]?' Le PDF est déjà disponible dans la Bibliothèque.':''}</p>`);
 }
-function openCap(cap){ S.view={page:'player',course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && capById(cap)){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
+function openCap(cap){ const och=chapOf(cap); if(S.role==='eleve' && och && !chapOpen(och.num)){ toast('Ce chapitre n’est pas encore ouvert : ton prof l’ouvrira au moment du TP.'); return; }
+  S.view={page:'player',course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && capById(cap)){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
 
 /* =========================================================
    RENDU

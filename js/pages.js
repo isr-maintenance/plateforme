@@ -128,7 +128,7 @@ function pageCours(){
 }
 function courseCard(c){
   const t=TYPE[c.type]; let prog='';
-  if(c.statut==='demo'){ const ALL=Object.values(CHAPTERS).flatMap(h=>h.caps), n=ALL.filter(capDone).length; prog=`<div class="small muted">Chapitres ${Object.keys(CHAPTERS).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).join(', ')} · ${n}/${ALL.length} capsules</div><div class="bar ${n===ALL.length?'ok':''}"><i style="width:${n/ALL.length*100}%"></i></div>`; }
+  if(c.statut==='demo'){ const ON=chapNums().filter(chapOpen), ALL=ON.flatMap(k=>CHAPTERS[k].caps), n=ALL.filter(capDone).length; prog=`<div class="small muted">${ON.length>1?`Chapitres ${ON[0]} à ${ON[ON.length-1]}`:`Chapitre ${ON[0]||'—'}`} · ${n}/${ALL.length} capsules</div><div class="bar ${n===ALL.length?'ok':''}"><i style="width:${n/ALL.length*100}%"></i></div>`; }
   if(c.statut==='demo-tp'){ const n=FEUVERT.filter(x=>feuVert(x.k)).length; prog=`<div class="small muted">Feu vert É03 · ${n}/${FEUVERT.length} prérequis</div><div class="bar ${n===6?'ok':''}"><i style="width:${n/6*100}%"></i></div>`; }
   return `<button class="ccard ${c.type}" data-open-course="${c.id}"><div class="row between"><span class="chip ${t.chip}">${t.l}</span>${c.per?`<span class="tiny muted">${c.per} p./sem.</span>`:''}</div>
     <span class="t1">${esc(c.titre)}</span>${c.sous?`<span class="small muted">${esc(c.sous)}</span>`:''}
@@ -148,16 +148,16 @@ function pageCourse(){
   return `<div class="crumbs"><button data-back="home">${S.role==='prof'?'Contenus':'Mes cours'}</button> › Électricité 4e</div>
   <div class="page-head"><div><div class="kicker">4EQEM + 4EQMM · socle commun · 3 p./sem. · version révisée</div><h1>Cours d'Électricité — 4e année</h1>
     <p class="muted small" style="margin-top:4px">Référentiel SeGEC — Électricien de maintenance industrielle · UAA1 entière, début UAA2 et UAA3</p></div>
-    <div class="row wrap"><button class="btn" data-pdf="1">📄 Cours complet (PDF)</button>${(()=>{ const nx=Object.keys(CHAPTERS).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).find(k=>chapCapsDone(k)<CHAPTERS[k].caps.length)||'2.3'; return `<button class="btn primary" data-cap="${chapResume(nx)}">Continuer le chapitre ${nx} →</button>`; })()}</div></div>
-  <div class="note"><b>Chaque chapitre prépare un TP précis.</b>La théorie est vue avant la séance de TP correspondante : c'est le principe de verrouillage théorie / TP du cours. Mode de déblocage de ta classe : <b>${mode==='strict'?'strict — le chapitre suivant s’ouvre quand le test est réussi':'souple — le prof ouvre les chapitres'}</b>.</div>
+    <div class="row wrap"><button class="btn" data-pdf="1">📄 Cours complet (PDF)</button>${(()=>{ const ON=chapNums().filter(chapOpen), nx=ON.find(k=>chapCapsDone(k)<CHAPTERS[k].caps.length)||ON[ON.length-1]||'2.1'; return `<button class="btn primary" data-cap="${chapResume(nx)}">Continuer le chapitre ${nx} →</button>`; })()}</div></div>
+  <div class="note"><b>Chaque chapitre prépare un TP précis.</b>La théorie est vue avant la séance de TP correspondante : c'est le principe de verrouillage théorie / TP du cours. ${S.role==='prof'?'Tu ouvres les chapitres pour ta classe dans <b>Suivi</b>.':'Ton prof ouvre chaque chapitre au moment du TP correspondant.'}</div>
   ${ELEC4.map(u=>`<div class="uaa"><h3>${u.uaa} <span class="tiny" style="font-weight:600">· ${u.vol}</span></h3><div class="chapters">${u.chaps.map(([num,t,pg,tp])=>{
-    const CH=CHAPTERS[num], avail = !!CH;
+    const CH=CHAPTERS[num], open = !!CH && chapOpen(num), avail = open;
     let st;
-    if(num==='2.3') st = passed?`<span class="chip ok">Réussi ${sc.total}/${TOTAL}</span>`:`<span class="chip elec">${n}/${CAPS.length} capsules</span>`;
-    else if(avail){ const d=chapCapsDone(num); st = `<span class="chip ${d===CH.caps.length?'ok':'elec'}">${d===CH.caps.length?'✓ ':''}${d}/${CH.caps.length} capsules</span>`; }
-    else if(num==='2.4') st = passed||mode==='souple' ? `<span class="chip">En préparation</span>` : `<span class="chip warn">🔒 après réussite du 2.3</span>`;
+    if(CH && !open) st = `<span class="chip warn">🔒 pas encore ouvert</span>`;
+    else if(num==='2.3' && passed) st = `<span class="chip ok">Réussi ${sc.total}/${TOTAL}</span>`;
+    else if(CH){ const d=chapCapsDone(num); st = `<span class="chip ${d===CH.caps.length?'ok':'elec'}">${d===CH.caps.length?'✓ ':''}${d}/${CH.caps.length} capsules</span>`; }
     else st = `<span class="chip">En préparation</span>`;
-    return `<div class="chap ${avail?'avail':''} ${num==='2.4'&&!passed&&mode==='strict'?'locked':''}"><span class="num">${num}</span><div class="ti"><b>${t}</b><span class="tiny muted">${tp?`TP alimenté : ${tp} · `:''}PDF p. ${pg}</span></div>
+    return `<div class="chap ${avail?'avail':''} ${CH&&!open?'locked':''}"><span class="num">${num}</span><div class="ti"><b>${t}</b><span class="tiny muted">${tp?`TP alimenté : ${tp} · `:''}PDF p. ${pg}</span></div>
       ${st}<button class="btn sm" data-pdf="${pg}" title="Ouvrir le PDF à la page ${pg}">PDF</button>${avail?`<button class="btn sm primary" data-cap="${chapResume(num)}">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}
   <div class="uaa"><h3>Annexes</h3><div class="chapters">${elec4Annexes().map(([t,p,pr])=>`<div class="chap"><span class="num">${pr?'🔒':'—'}</span><div class="ti"><b>${t}</b>${pr?'<span class="tiny muted">Réservée aux profs : les élèves ne la voient pas</span>':''}</div><button class="btn sm" data-pdf="${p}">PDF p. ${p}</button></div>`).join('')}</div></div>
   ${fcorBlock()}`;

@@ -68,26 +68,34 @@ function pageDash(){
     <div class="row wrap">${sel}<button class="btn" data-go="carnet">Carnet de cotes →</button></div></div>${body}`;
 }
 function rowOf(mail){ const pr=progOf(mail); return withProg(pr, ()=>({ mail, caps:capsDoneCount(), test:liveTest(), min:Math.round((pr.sec||0)/60), fv:FEUVERT.map(x=>feuVert(x.k)?1:0) })); }
+function chapRow(mail){ const pr=progOf(mail); return withProg(pr, ()=>{ const o={}; chapNums().forEach(k=>o[k]=chapCapsDone(k)); return { chaps:o, test:liveTest(), min:Math.round((pr.sec||0)/60) }; }); }
 function dashChap(cl, studs){
-  const rows=studs.map(s=>Object.assign(rowOf(s.mail),{nom:s.nom,last:s.last}));
-  const done=rows.filter(r=>r.caps===CAPS.length).length;
+  const ON=chapsOuverts(cl), NUMS=chapNums(), OPEN=NUMS.filter(k=>ON.includes(k));
+  const rows=studs.map(s=>Object.assign(chapRow(s.mail),{nom:s.nom,last:s.last,mail:s.mail}));
+  const totCaps=OPEN.reduce((a,k)=>a+CHAPTERS[k].caps.length,0);
+  const pct=r=>totCaps?Math.round(OPEN.reduce((a,k)=>a+r.chaps[k],0)/totCaps*100):0;
+  const avgPct=rows.length?Math.round(rows.reduce((a,r)=>a+pct(r),0)/rows.length):0;
   const scores=rows.map(r=>r.test).filter(v=>typeof v==='number');
   const avg=scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1).replace('.',','):'—';
-  const errs=Object.keys(Q).map(id=>{ const ans=studs.map(s=>(progOf(s.mail).quiz||{})[id]).filter(Boolean); return [id, ans.length? Math.round(ans.filter(a=>!a.first).length/ans.length*100):null, ans.length]; })
-    .filter(x=>x[1]!=null && x[2]>=1).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const errs=Object.keys(Q).filter(id=>{ const c=capById(Q[id].r); return c && ON.includes(c.chap); }).map(id=>{ const ans=studs.map(s=>(progOf(s.mail).quiz||{})[id]).filter(Boolean); return [id, ans.length? Math.round(ans.filter(a=>!a.first).length/ans.length*100):null, ans.length]; })
+    .filter(x=>x[1]!=null && x[2]>=1).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const toGrade=studs.filter(s=>{ const t=progOf(s.mail).test; return t.submitted && TEST.some(q=>q.type==='open' && (t.open||{})[q.id]==null); });
-  return `<div class="grid g4" style="margin-bottom:16px">
-    <div class="card kpi"><div class="v">${done}/${rows.length}</div><div class="l">ont fini les capsules du 2.3</div></div>
-    <div class="card kpi"><div class="v">${avg}<span class="muted" style="font-size:16px">/${TOTAL}</span></div><div class="l">moyenne de la formative 2.3</div></div>
-    <div class="card kpi"><div class="v" style="color:var(--ok)">${scores.filter(v=>v>=SEUIL).length}</div><div class="l">au-dessus du seuil (${SEUIL}/${TOTAL})</div></div>
+  const cell=(d,n)=> !d?`<span class="cell none" style="min-width:0">·</span>`:d>=n?`<span class="cell ok" style="min-width:0">✓</span>`:`<span class="cell run" style="min-width:0">${d}/${n}</span>`;
+  return `<div class="card pad" style="margin-bottom:16px"><h3 style="margin:0">Chapitres ouverts pour ${cls(cl).nom}</h3>
+    <p class="small muted" style="margin:4px 0 10px">Ouvre chaque chapitre au moment du TP correspondant : tes élèves ne voient pas les chapitres fermés. Clique pour ouvrir ou fermer.</p>
+    <div class="chipset">${NUMS.map(k=>`<button class="chtog ${ON.includes(k)?'on':''}" data-ouv="${k}" title="${esc(CHAPTERS[k].titre)}"><b>${k}</b><span>${ON.includes(k)?'ouvert':'fermé'}</span></button>`).join('')}</div></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="v">${avgPct}%</div><div class="l">des capsules ouvertes validées, en moyenne</div></div>
+    <div class="card kpi"><div class="v">${rows.filter(r=>totCaps&&pct(r)===100).length}/${rows.length}</div><div class="l">élèves à jour</div></div>
+    <div class="card kpi"><div class="v">${avg}<span class="muted" style="font-size:16px">/${TOTAL}</span></div><div class="l">moyenne de la formative 2.3 (en ligne)</div></div>
     <div class="card kpi"><div class="v" style="color:var(--warn)">${toGrade.length}</div><div class="l">évaluation(s) à corriger</div></div></div>
-  <div class="card" style="margin-bottom:16px"><div class="pad row between wrap" style="border-bottom:1px solid var(--line)"><h3>Électricité 4e — chapitre 2.3</h3><span class="small muted">Déblocage : <b>${S.modes[cl]||'strict'}</b></span></div>
-  <div class="scroll-x"><table class="t"><tr><th>Élève</th><th>Capsules 2.3</th><th>Formative 2.3</th><th>Temps</th><th>Dernière connexion</th></tr>
-    ${rows.map(r=>`<tr><td>${esc(r.nom)}</td><td>${capsCell(r.caps)}</td><td>${scoreCell(r.test,TOTAL,SEUIL)}</td><td class="small muted">${r.min} min</td><td class="small muted">${fmtAgo(r.last)}</td></tr>`).join('')}
-  </table></div></div>
+  <div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Électricité 4e — capsules validées par chapitre</h3></div>
+  <div class="scroll-x"><table class="t"><tr><th>Élève</th>${OPEN.map(k=>`<th title="${esc(CHAPTERS[k].titre)}">${k}</th>`).join('')}<th>Formative 2.3</th><th>Temps</th><th>Dernière connexion</th></tr>
+    ${rows.map(r=>`<tr><td>${esc(r.nom)}</td>${OPEN.map(k=>`<td>${cell(r.chaps[k],CHAPTERS[k].caps.length)}</td>`).join('')}<td>${scoreCell(r.test,TOTAL,SEUIL)}</td><td class="small muted">${r.min} min</td><td class="small muted">${fmtAgo(r.last)}</td></tr>`).join('')}
+  </table></div><p class="tiny muted" style="padding:0 16px 12px;margin:0">✓ chapitre terminé · 3/8 capsules validées · « · » pas commencé. Les formatives sur papier s'encodent dans le carnet de cotes.</p></div>
   <div class="grid g2">
-    <div class="card pad"><h3>Les questions qui bloquent</h3><p class="small muted">% d'élèves qui se trompent au premier essai.</p>
-      ${errs.length?errs.map(([id,p,n])=>`<div class="hbar"><span class="lbl">${Q[id].q} <span class="tiny muted">· ${CAPS.find(c=>c.id===Q[id].r).sec} · ${n} rép.</span></span><span class="track"><i style="width:${p}%"></i></span><span class="pct">${p}%</span></div>`).join(''):'<p class="small muted">Pas encore assez de réponses.</p>'}</div>
+    <div class="card pad"><h3>Les questions qui bloquent</h3><p class="small muted">% d'élèves qui se trompent au premier essai, dans les chapitres ouverts.</p>
+      ${errs.length?errs.map(([id,p,n])=>`<div class="hbar"><span class="lbl">${Q[id].q} <span class="tiny muted">· ${capById(Q[id].r).sec} · ${n} rép.</span></span><span class="track"><i style="width:${p}%"></i></span><span class="pct">${p}%</span></div>`).join(''):'<p class="small muted">Pas encore assez de réponses.</p>'}</div>
     <div class="card pad"><h3>À corriger</h3>
       ${toGrade.length? toGrade.map(s=>{ const t=progOf(s.mail).test; return TEST.filter(q=>q.type==='open' && (t.open||{})[q.id]==null).map(q=>`<div class="q"><div class="tiny muted">${esc(s.nom)} · question ${TEST.indexOf(q)+1} (${q.pts} pts)</div><div class="qt">${q.q}</div>
         <div class="small" style="white-space:pre-wrap"><b>Réponse :</b> ${esc((t.texts||{})[q.id]||'')}</div><details class="small" style="margin:6px 0"><summary style="cursor:pointer">Corrigé</summary>${q.cor}</details>
@@ -110,6 +118,10 @@ function dashTP(cl, studs){
   </table></div></div>`;
 }
 function bindDash(m){
+  m.querySelectorAll('[data-ouv]').forEach(b=>b.onclick=async()=>{ const cl=S.dashKey.split('|')[0], k=b.dataset.ouv, cur=chapsOuverts(cl).slice();
+    const i=cur.indexOf(k); if(i>=0) cur.splice(i,1); else cur.push(k); cur.sort((x,y)=>x.localeCompare(y,'fr',{numeric:true}));
+    const r=await act('setOuv',{key:ouvKey(cl),chaps:cur}, `${k} ${i>=0?'fermé':'ouvert'} pour ${cls(cl).nom}`);
+    if(r){ S.ouv[ouvKey(cl)]=r.chaps||cur; const y=window.scrollY; render(); window.scrollTo(0,y); } });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };
   m.querySelectorAll('[data-grade]').forEach(b=>b.onclick=async()=>{ const [mail,q,v]=b.dataset.grade.split('|');
     const r=await act('grade',{mail,q,v:+v},'Note enregistrée — elle passe dans le carnet de cotes');
@@ -118,7 +130,7 @@ function bindDash(m){
     if(r){ (S.progs[mail]||(S.progs[mail]={})).banc=c.checked; const y=window.scrollY; render(); window.scrollTo(0,y); } });
 }
 function signalForm(capId){
-  const cap=CAPS.find(c=>c.id===capId);
+  const cap=capById(capId);
   const md=modal('Signaler une erreur', `<p class="small muted">Capsule ${cap.sec} — ${cap.t}</p><textarea data-sigtxt placeholder="Ce qui ne va pas, et la correction proposée"></textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn primary" data-sigok>Envoyer</button></div>`);
   md.querySelector('[data-sigok]').onclick=async()=>{ const v=md.querySelector('[data-sigtxt]').value.trim(); if(!v) return;
     const r=await act('signal',{cap:cap.sec,txt:v},'Signalement envoyé'); if(r){ S.signal.unshift({cap:cap.sec,txt:v,who:ME}); closeModal(); } };
@@ -183,9 +195,9 @@ function pageAdmin(){
   const noms=S.access.profs.map(p=>p.nom);
   return `<div class="page-head"><div><div class="kicker">Réservé au coordinateur</div><h1>Administration</h1></div><span class="chip elec">Année scolaire 2026-2027</span></div>
   <div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Classes</h3><p class="small muted" style="margin:4px 0 0">Chaque classe est liée à une année et une filière : l'élève choisit sa classe à la première connexion et voit automatiquement ses cours.</p></div>
-  <div class="scroll-x"><table class="t"><tr><th>Classe</th><th>Année</th><th>Filière</th><th>Élèves</th><th>Déblocage des chapitres</th><th>Profs</th></tr>
+  <div class="scroll-x"><table class="t"><tr><th>Classe</th><th>Année</th><th>Filière</th><th>Élèves</th><th>Chapitres ouverts (Électricité)</th><th>Profs</th></tr>
     ${CLASSES.map(c=>`<tr><td><b>${c.nom}</b>${c.fil==='3qem'?'<div class="tiny muted">dernière année : 2027-2028</div>':''}</td><td>${c.annee}e</td><td class="small">${fil(c.fil).nom}</td><td>${elevesOf(c.id).length}</td>
-      <td><select data-cmode="${c.id}"><option value="strict" ${S.modes[c.id]==='strict'?'selected':''}>Strict — après réussite de la formative</option><option value="souple" ${S.modes[c.id]==='souple'?'selected':''}>Souple — ouvert par le prof</option></select></td>
+      <td class="small">${c.annee===4?chapsOuverts(c.id).join(', ')+'<div class="tiny muted">ouverts par le prof dans Suivi</div>':'—'}</td>
       <td class="small muted">${[...new Set(AFFECT.filter(x=>x.cl===c.id).flatMap(x=>x.profs))].join(', ')||'—'}</td></tr>`).join('')}
   </table></div></div>
   <div class="card"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Qui donne quel cours</h3><p class="small muted" style="margin:4px 0 0">Un professeur par cours, ou deux pour les cours partagés. Chacun retrouve ses cours dans son suivi et son carnet de cotes ; à deux, ils voient et encodent les mêmes cotes.</p></div>

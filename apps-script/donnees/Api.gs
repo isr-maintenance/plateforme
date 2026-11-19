@@ -89,7 +89,7 @@ function makeApi(store, deps) {
 
   /* ---------- démarrage : tout ce qu'il faut à l'écran ---------- */
   function boot(me){
-    var out = { me: me, cfg: { open: cfg().open !== false }, modes: doc('modes', {}), affect: doc('affect', []), pdfs: doc('pdfs', {}) };
+    var out = { me: me, cfg: { open: cfg().open !== false }, modes: doc('modes', {}), affect: doc('affect', []), pdfs: doc('pdfs', {}), ouv: doc('ouv', {}) };
     out.stage = { periodes: doc('stage:periodes', null), lieux: doc('stage:lieux', []) };
     if (me.role === 'eleve') {
       var el = doc('eleve:' + me.mail, null);
@@ -186,6 +186,14 @@ function makeApi(store, deps) {
       if ('com' in p) e.com = str(p.com, 2000); if ('vu' in p) e.vu = !!p.vu; J[d] = e; put(k, J, me.mail); return { ok: true };
     },
     signal: function(me, p){ var L = doc('signal', []); L.unshift({ cap: str(p.cap, 20), txt: str(p.txt, 1000), who: me.nom, at: deps.now() }); put('signal', L.slice(0, 200), me.mail); return { ok: true }; },
+    /* chapitres ouverts pour une classe et un cours, par un prof de cette classe : {key:'4eqmm|4-elec', chaps:['2.1',…]} */
+    setOuv: function(me, p){
+      var key = str(p.key, 60), cl = key.split('|')[0];
+      need(PLAT.CLASSES.indexOf(cl) >= 0, 'Classe inconnue.'); need(isProfOf(me, cl), 'Tu ne donnes pas cours dans cette classe.');
+      need(Array.isArray(p.chaps), 'Liste invalide.');
+      var O = doc('ouv', {}); O[key] = p.chaps.map(function(c){ return str(c, 10); }).filter(function(c){ return /^\d+\.\d+$/.test(c); }).slice(0, 60);
+      put('ouv', O, me.mail); return { ok: true, chaps: O[key] };
+    },
     fcor: fcorGet,
     setPdf: function(me, p){ var P = doc('pdfs', {}); var c = str(p.course, 40); if (!p.url) delete P[c]; else P[c] = { url: str(p.url, 500), name: str(p.name, 120) }; put('pdfs', P, me.mail); return { ok: true }; }
   };

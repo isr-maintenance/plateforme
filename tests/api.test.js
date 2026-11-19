@@ -124,3 +124,15 @@ console.log(`✓ ${n} vérifications réussies`);
   ok(H('autre.y.student@elmarche.be', 'fcor', { ch:'2.1' }).ok === false, 'un autre élève reste verrouillé');
   ok(H(co, 'fcor', { ch:'2.10' }).fcor.cor === 'R10' && H(co, 'boot').data.fcor.every(x=>x.ok), 'prof : tout ouvert');
   console.log(`✓ ${n} vérifications réussies (avec corrigés formatifs)`); }
+
+// chapitres ouverts par le prof de la classe
+{ const st4 = memStore(), a4 = ctx.makeApi(st4, deps); a4.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a4.handle({ t: a4.makeToken(m), a, p });
+  H('olivier.lesenfants@elmarche.be','setProfs',{profs:[{nom:'O. Lesenfants',mail:'olivier.lesenfants@elmarche.be',role:'Coordinateur'},{nom:'P. Dachelet',mail:'philippe.dachelet@elmarche.be',role:'Professeur'}]});
+  H('olivier.lesenfants@elmarche.be','setAffect',{affect:[{cl:'4eqmm',c:'4-elec',profs:['P. Dachelet']}]});
+  ok(H('philippe.dachelet@elmarche.be','setOuv',{key:'4eqmm|4-elec',chaps:['2.1','2.2','x','2.4']}).chaps.join()==='2.1,2.2,2.4', 'prof de la classe ouvre des chapitres (valeurs invalides filtrées)');
+  ok(H('philippe.dachelet@elmarche.be','setOuv',{key:'4eqem|4-elec',chaps:['2.1']}).ok===false, 'pas dans une classe où il ne donne pas cours');
+  ok(H('zz.y.student@elmarche.be','setOuv',{key:'4eqmm|4-elec',chaps:['2.9']}).ok===false, 'élève ne peut pas ouvrir de chapitre');
+  H('zz.y.student@elmarche.be','setClasse',{classe:'4eqmm'});
+  ok(H('zz.y.student@elmarche.be','boot').data.ouv['4eqmm|4-elec'].length===3, 'élève reçoit les chapitres ouverts');
+  console.log(`✓ ${n} vérifications réussies (avec chapitres ouverts)`); }

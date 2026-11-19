@@ -18,6 +18,13 @@ function chapResume(num){ const ch=CHAPTERS[num]; const c=ch.caps.find(x=>!capDo
 function exSet(k){ const p=P(); if(!p.ex[k]){ p.ex[k]=true; save(); } updateTocChecks(); }
 function DR(){ const p=P(); if(!p.dr||typeof p.dr!=='object') p.dr={}; return p.dr; }
 
+/* chapitres ouverts : le prof les ouvre pour sa classe (Suivi). Par défaut : 2.1 à 2.3. */
+const OUV_DEF=['2.1','2.2','2.3'];
+const ouvKey = cl => (cl||S.eleveClass)+'|4-elec';
+function chapsOuverts(cl){ const o=(S.ouv||{})[ouvKey(cl)]; return Array.isArray(o)?o:OUV_DEF; }
+function chapOpen(num){ return S.role==='prof' || chapsOuverts().includes(num); }
+const chapNums = () => Object.keys(CHAPTERS).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
+
 /* le 2.3 dans le registre (ses capsules, ses pages PDF) */
 defChapter({ num:'2.3', titre:'Le relais électromécanique', tp:'É03', caps:CAPS, legacy:true, pdf:[53,53,54,54,55,57,59,61] });
 
@@ -29,6 +36,7 @@ function wDone(box, html){ box.innerHTML = `<div class="fb good">${html}</div>`;
 
 /* ---------- exercice : remettre dans l'ordre ---------- */
 function mountOrderW(box, key, cfg){
+  box._w={key,cfg};
   const st = WS[key] || (WS[key]={ slots:[], fb:'' });
   const order = cfg.shuffle || cfg.items.map((_,i)=>i).reverse();
   const draw = ()=>{
@@ -51,6 +59,7 @@ function mountOrderW(box, key, cfg){
 
 /* ---------- exercice : classer chaque élément dans une catégorie ---------- */
 function mountSortW(box, key, cfg){
+  box._w={key,cfg};
   const st = WS[key] || (WS[key]={ sel:{}, checked:false });
   const draw = ()=>{
     const done=!!P().ex[key];
@@ -72,6 +81,7 @@ function mountSortW(box, key, cfg){
 /* ---------- exercice : série de calculs corrigés ---------- */
 /* rows : [{q, unit, ans, tol (relative, défaut 2 %), hint}] — les réponses sont calculées dans le code, pas recopiées */
 function mountDrillW(box, key, cfg){
+  box._w={key,cfg};
   const dr=DR(), vals = dr[key] || (dr[key]={});
   const st = WS[key] || (WS[key]={ checked:false });
   const okRow=(r,i)=>{ const v=num(vals[i]); if(isNaN(v)) return false; const tol=r.tol!=null?r.tol:0.02; return Math.abs(v-r.ans) <= Math.max(Math.abs(r.ans)*tol, r.abs||1e-9); };
@@ -105,10 +115,10 @@ function synHTML(num){
   const ch=CHAPTERS[num], open=typeof fcorOpen==='function' && fcorOpen(num), f=(S.fcor||[]).find(x=>x.ch===num);
   const pre=ch.prereq||[], nOk=pre.filter(x=>x.cap&&capDone(capById(x.cap))).length;
   return `<div class="cap-body"><div class="kicker">Fin du chapitre ${num}</div><h2>Synthèse et évaluation</h2>
-    <div class="card pad" style="margin:12px 0"><div class="row between wrap"><div><div class="kicker">Évaluation formative ${num}</div>
+    ${ch.noEval?'':`<div class="card pad" style="margin:12px 0"><div class="row between wrap"><div><div class="kicker">Évaluation formative ${num}</div>
       <b>${f?esc(f.titre):esc(ch.titre)}</b><div class="small muted">${ch.evalInfo||'Elle se passe sur papier, en classe, avec ton prof.'} ${open?'Elle est terminée : tu peux relire les questions et le corrigé.':'Quand elle sera corrigée, tu pourras relire ici les questions et le corrigé.'}</div></div>
-      ${open?`<button class="btn primary" data-fcor="${num}">Évaluation et corrigé</button>`:'<span class="chip">🔒 après l’évaluation</span>'}</div></div>
-    <h3>Ce que tu dois maîtriser avant d'entrer au TP ${ch.tp}</h3>
+      ${open?`<button class="btn primary" data-fcor="${num}">Évaluation et corrigé</button>`:'<span class="chip">🔒 après l’évaluation</span>'}</div></div>`}
+    <h3>${ch.prereqTitle||`Ce que tu dois maîtriser avant d'entrer au TP ${ch.tp}`}</h3>
     <p class="small muted">Chaque point se coche quand la capsule correspondante est validée. Le geste lui-même se vérifie à l'atelier, avec ton prof.</p>
     <div class="fv">${pre.map(x=>{ const c=x.cap&&capById(x.cap), ok=c&&capDone(c); return `<div class="it ${ok?'ok':''}"><span class="lamp"></span><span>${x.t}</span><span class="src">${c?`${c.sec} · ${c.t}${ok?'':`<br><button class="revoir btn sm ghost" style="padding:2px 0" data-goto="${c.id}">y aller →</button>`}`:'à l’atelier'}</span></div>`; }).join('')}</div>
     <div class="small muted" style="margin-top:6px">${nOk}/${pre.filter(x=>x.cap).length} points de théorie validés</div>
