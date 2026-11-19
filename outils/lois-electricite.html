@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lois de base en électricité – Plateforme technique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --ink:#1d1d1f; --muted:#6b6b70; --line:#e3e1da;
+  --I:#2563eb; --U:#d97706; --R:#7c3aed; --P:#dc2626; --E:#059669;
+  --ok:#059669; --bad:#dc2626; --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#141416; --card:#1e1e22; --ink:#f2f2f3; --muted:#a0a0a8; --line:#2e2e34;
+    --I:#60a5fa; --U:#fbbf24; --R:#a78bfa; --P:#f87171; --E:#34d399; --ok:#34d399; --bad:#f87171; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 22px}
+.back{display:inline-block;margin:0 0 14px;color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500}
+.back:hover{color:var(--ink)}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;padding:10px 14px;font:inherit;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+nav button.on{color:var(--ink);border-color:var(--ink)}
+section{display:none} section.on{display:block}
+.mono{font-family:"JetBrains Mono",monospace}
+h2{font-size:1.15rem;margin:0 0 6px}
+.hint{color:var(--muted);font-size:.92rem;margin:0 0 18px}
+
+/* flip cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.flip{perspective:1200px;height:340px;cursor:pointer}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;overflow:auto}
+.back{transform:rotateY(180deg)}
+.front{align-items:center;justify-content:center;text-align:center}
+.sym{font-size:4.2rem;font-weight:700;line-height:1}
+.fname{font-size:1.25rem;font-weight:600;margin-top:10px}
+.funit{color:var(--muted);margin-top:4px}
+.tap{position:absolute;bottom:12px;font-size:.78rem;color:var(--muted)}
+.back h3{margin:0 0 8px;font-size:1rem}
+.back ul{margin:0;padding-left:18px;font-size:.9rem}
+.back li{margin:3px 0}
+.fx{font-family:"JetBrains Mono",monospace;font-size:1.05rem;background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);border-radius:8px;padding:8px 10px;margin:4px 0 10px;text-align:center}
+
+/* panels */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:4px}
+input,select{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);width:150px}
+input:focus,select:focus{outline:2px solid var(--I);outline-offset:1px}
+.btn{font:inherit;font-weight:600;padding:9px 16px;border-radius:9px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.result{margin-top:16px;padding:14px 16px;border-radius:10px;background:var(--bg);font-size:1rem;min-height:52px}
+.result b{font-size:1.25rem}
+.result ol b{font-size:inherit}
+.steps{color:var(--muted);font-size:.88rem;margin-top:4px;font-family:"JetBrains Mono",monospace}
+
+/* triangle */
+.tri-wrap{display:flex;gap:28px;flex-wrap:wrap;align-items:center}
+svg.tri{width:240px;height:210px;flex:none}
+svg.tri text{font-family:Inter,sans-serif;font-weight:700;cursor:pointer;user-select:none}
+svg.tri .zone{cursor:pointer;transition:opacity .2s}
+svg.tri .zone:hover{opacity:.85}
+.tri-side{flex:1;min-width:240px}
+
+/* resistors */
+.res-list{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.res-list .r{display:flex;align-items:center;gap:4px}
+.res-list input{width:90px}
+.res-list button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1.1rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;border:0;background:transparent;color:var(--muted);padding:8px 14px;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--bg)}
+svg.circ{width:100%;max-width:560px;height:auto;display:block;margin:10px 0}
+
+/* quiz */
+.qcard{font-size:1.08rem}
+.qopts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px}
+.qopts button{font:inherit;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:center}
+.qopts button:hover:not(:disabled){border-color:var(--ink)}
+.qopts button.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
+.qopts button.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,transparent)}
+.score{display:flex;gap:18px;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+.score b{color:var(--ink)}
+.fb{margin-top:14px;font-size:.95rem}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+@media (max-width:640px){ table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch} .wrap{padding:20px 16px 48px} .panel{padding:16px} }
+.tree{margin:16px 0 4px}
+.grp{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px 10px;margin:4px 0;display:flex;gap:8px;align-items:flex-start}
+.grp.S{flex-direction:row;flex-wrap:wrap;border-color:color-mix(in srgb,var(--I) 45%,transparent)}
+.grp.P{flex-direction:column;border-color:color-mix(in srgb,var(--R) 55%,transparent)}
+.grp > .gl{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;width:100%}
+.grp.S > .gl{color:var(--I)} .grp.P > .gl{color:var(--R)}
+.rnode{display:flex;flex-direction:column;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:6px 8px}
+.rnode .top{display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600}
+.rnode input{width:80px;padding:5px 7px}
+.rnode .acts{display:flex;gap:4px}
+.rnode .acts button{font:inherit;font-size:.75rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:2px 6px;cursor:pointer}
+.rnode .acts button:hover{border-color:var(--ink)}
+.rnode .acts .del{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← Plateforme technique</a>
+  <h1>Lois de base en électricité</h1>
+  <p class="sub">Courant, tension, résistance, puissance : fiches à retourner, calculateurs et quiz.</p>
+
+  <nav id="tabs">
+    <button data-t="fiches" class="on">Fiches</button>
+    <button data-t="analogie">Analogie hydraulique</button>
+    <button data-t="ohm">Loi d'Ohm</button>
+    <button data-t="puissance">Puissance &amp; énergie</button>
+    <button data-t="montages">Série / parallèle</button>
+    <button data-t="quiz">Quiz</button>
+    <button data-t="recap">Récap</button>
+  </nav>
+
+  <!-- FICHES -->
+  <section id="fiches" class="on">
+    <h2>Les fiches</h2>
+    <p class="hint">Clique sur une carte pour la retourner. Essaie de retrouver les formules avant de regarder.</p>
+    <div class="grid" id="cards"></div>
+  </section>
+
+  <!-- ANALOGIE -->
+  <section id="analogie">
+    <div class="panel">
+      <h2>L'électricité, c'est comme une centrale hydraulique</h2>
+      <p class="hint">L'eau qui tombe d'un barrage fait tourner une turbine, comme les électrons qui circulent dans un fil font briller une lampe. Bouge les curseurs et regarde l'eau couler.</p>
+      <svg id="hydro" viewBox="0 0 640 390" style="width:100%;height:auto;display:block"></svg>
+      <div class="row" style="margin-top:8px">
+        <label style="flex:1;min-width:220px"><span>Hauteur de chute = <b style="color:var(--U)">tension U</b> : <span id="hUv"></span></span>
+          <input type="range" id="hU" min="1" max="12" step="1" value="6" style="width:100%;padding:0"></label>
+        <label style="flex:1;min-width:220px"><span>Étroitesse du tuyau = <b style="color:var(--R)">résistance R</b> : <span id="hRv"></span></span>
+          <input type="range" id="hR" min="1" max="10" step="1" value="3" style="width:100%;padding:0"></label>
+      </div>
+      <div class="result" id="hRes"></div>
+    </div>
+    <div class="panel">
+      <h2>Ce qui correspond à quoi</h2>
+      <table>
+        <thead><tr><th>Centrale hydraulique</th><th>Circuit électrique</th><th>Pourquoi</th></tr></thead>
+        <tbody>
+          <tr><td>Différence de hauteur entre le lac et la rivière</td><td style="color:var(--U);font-weight:600">Tension U (V)</td><td>Plus l'eau tombe de haut, plus elle pousse fort.</td></tr>
+          <tr><td>Débit d'eau (litres par seconde)</td><td style="color:var(--I);font-weight:600">Courant I (A)</td><td>Quantité qui passe chaque seconde.</td></tr>
+          <tr><td>Tuyau étroit, turbine qui freine</td><td style="color:var(--R);font-weight:600">Résistance R (Ω)</td><td>Plus le passage est étroit, moins l'eau passe.</td></tr>
+          <tr><td>Force de la turbine (hauteur × débit)</td><td style="color:var(--P);font-weight:600">Puissance P (W)</td><td>Beaucoup d'eau qui tombe de haut = beaucoup de puissance.</td></tr>
+          <tr><td>Électricité produite pendant une journée</td><td style="color:var(--E);font-weight:600">Énergie E (kWh)</td><td>Puissance × durée.</td></tr>
+          <tr><td>Pompe qui remonte l'eau dans le lac</td><td style="color:var(--U);font-weight:600">Générateur (pile)</td><td>Il redonne de la « hauteur » aux charges pour que ça tourne en boucle.</td></tr>
+          <tr><td>Vanne fermée</td><td>Interrupteur ouvert</td><td>Plus rien ne passe : I = 0.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Trois expériences à faire avec les curseurs</h2>
+      <ol>
+        <li><b>Monte la hauteur</b> (tension) sans toucher au tuyau : l'eau coule plus vite. Si U double, I double → c'est la loi d'Ohm, I = U / R.</li>
+        <li><b>Rétrécis le tuyau</b> (résistance) : le débit baisse et la turbine ralentit. Si R double, I est divisé par 2.</li>
+        <li><b>Regarde la turbine</b> : elle dépend à la fois de la hauteur et du débit. P = U × I, comme la puissance d'une centrale = hauteur de chute × débit.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- OHM -->
+  <section id="ohm">
+    <div class="panel">
+      <h2>Le triangle de la loi d'Ohm</h2>
+      <p class="hint">Clique sur la lettre que tu cherches : le triangle te donne la formule, puis entre les deux autres valeurs.</p>
+      <div class="tri-wrap">
+        <svg class="tri" viewBox="0 0 240 210" id="tri"></svg>
+        <div class="tri-side">
+          <div id="triFormula" class="fx mono" style="--c:var(--U);font-size:1.4rem">U = R × I</div>
+          <div class="row" id="ohmInputs"></div>
+          <div class="result" id="ohmRes">Entre les valeurs pour calculer.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PUISSANCE -->
+  <section id="puissance">
+    <div class="panel">
+      <h2>Calculateur de puissance</h2>
+      <p class="hint">Entre deux grandeurs parmi U, I et R : la puissance et les autres valeurs sont calculées.</p>
+      <div class="row">
+        <label>Tension U (V)<input type="number" id="pU" step="any" placeholder="ex. 230"></label>
+        <label>Courant I (A)<input type="number" id="pI" step="any" placeholder="ex. 8,7"></label>
+        <label>Résistance R (Ω)<input type="number" id="pR" step="any" placeholder="ex. 26,45"></label>
+        <button class="btn ghost" id="pClear">Effacer</button>
+      </div>
+      <div class="result" id="pRes">Remplis exactement deux champs.</div>
+    </div>
+    <div class="panel">
+      <h2>Énergie consommée et coût</h2>
+      <p class="hint">E = P × t. Avec P en kW et t en heures, on obtient des kWh.</p>
+      <div class="row">
+        <label>Puissance (W)<input type="number" id="eP" value="2000" step="any"></label>
+        <label>Durée<input type="number" id="eT" value="6" step="any"></label>
+        <label>Unité<select id="eTu"><option value="60">minutes</option><option value="3600">heures</option><option value="1">secondes</option></select></label>
+        <label>Prix du kWh (€)<input type="number" id="ePrice" value="0.35" step="0.01"></label>
+      </div>
+      <div class="result" id="eRes"></div>
+    </div>
+  </section>
+
+  <!-- MONTAGES -->
+  <section id="montages">
+    <div class="panel">
+      <h2>Construis ton circuit : série, parallèle, mixte</h2>
+      <p class="hint">Pars d'un modèle, puis sur n'importe quelle résistance clique <b>+ série</b> pour en ajouter une à la suite, ou <b>+ parallèle</b> pour en mettre une à côté. Le schéma et tous les calculs se mettent à jour.</p>
+      <div class="row" style="align-items:center">
+        <div><div class="hint" style="margin:0 0 4px">Modèles</div>
+        <div class="seg" id="mode"><button data-m="s" class="on">Série</button><button data-m="p">Parallèle</button><button data-m="m">Mixte</button><button data-m="c">Complexe</button></div></div>
+        <label>Tension du générateur (V)<input type="number" id="mU" value="12" step="any"></label>
+      </div>
+      <div id="tree" class="tree"></div>
+      <svg class="circ" id="circ" viewBox="0 0 560 200"></svg>
+      <div id="mRes"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div class="panel">
+      <h2>Quiz — exercices à volonté</h2>
+      <p class="hint">Les questions sont générées au hasard : entraîne-toi autant que tu veux.</p>
+      <div class="score"><span>Bonnes réponses : <b id="qOk">0</b></span><span>Questions : <b id="qN">0</b></span><span>Série : <b id="qStreak">0</b></span></div>
+      <div class="qcard" id="qText"></div>
+      <div class="qopts" id="qOpts"></div>
+      <div class="fb" id="qFb"></div>
+      <div style="margin-top:16px"><button class="btn" id="qNext">Question suivante</button></div>
+    </div>
+  </section>
+
+  <!-- RECAP -->
+  <section id="recap">
+    <div class="panel">
+      <h2>Toutes les formules</h2>
+      <table>
+        <thead><tr><th>Grandeur</th><th>Symbole</th><th>Unité</th><th>Formules</th><th>Mesure</th></tr></thead>
+        <tbody>
+          <tr><td>Courant</td><td style="color:var(--I);font-weight:700">I</td><td>ampère (A)</td><td class="mono">I = Q/t · I = U/R · I = P/U</td><td>ampèremètre en série</td></tr>
+          <tr><td>Tension</td><td style="color:var(--U);font-weight:700">U</td><td>volt (V)</td><td class="mono">U = R×I · U = P/I</td><td>voltmètre en dérivation</td></tr>
+          <tr><td>Résistance</td><td style="color:var(--R);font-weight:700">R</td><td>ohm (Ω)</td><td class="mono">R = U/I · R = U²/P</td><td>ohmmètre hors circuit</td></tr>
+          <tr><td>Puissance</td><td style="color:var(--P);font-weight:700">P</td><td>watt (W)</td><td class="mono">P = U×I · P = R×I² · P = U²/R</td><td>wattmètre</td></tr>
+          <tr><td>Énergie</td><td style="color:var(--E);font-weight:700">E</td><td>joule (J) ou kWh</td><td class="mono">E = P×t</td><td>compteur électrique</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Série ou parallèle ?</h2>
+      <table>
+        <thead><tr><th>Montage</th><th>Courant</th><th>Tension</th><th>Résistance équivalente</th></tr></thead>
+        <tbody>
+          <tr><td>Série</td><td>identique partout</td><td class="mono">U = U₁ + U₂ + …</td><td class="mono">Réq = R₁ + R₂ + …</td></tr>
+          <tr><td>Parallèle</td><td class="mono">I = I₁ + I₂ + …</td><td>identique partout</td><td class="mono">1/Réq = 1/R₁ + 1/R₂ + …</td></tr>
+          <tr><td>Mixte (R₁ + R₂∥R₃)</td><td>I total dans R₁, puis I = I₂ + I₃</td><td class="mono">U = U₁ + Up</td><td class="mono">Rp = R₂R₃/(R₂+R₃) · Réq = R₁ + Rp</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Pièges fréquents</h2>
+      <ul>
+        <li>Convertir en unités de base avant de calculer : 250 mA = 0,25 A ; 2,2 kΩ = 2 200 Ω.</li>
+        <li>Ampèremètre en série, voltmètre en parallèle.</li>
+        <li>Pour E en kWh : P en kW et t en heures. 1 kWh = 3 600 000 J.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const fmt = (x, d=3) => {
+  if (!isFinite(x)) return "—";
+  const a = Math.abs(x);
+  let v = a !== 0 && (a < 0.001 || a >= 1e7) ? x.toExponential(2) : (+x.toPrecision(4)).toString();
+  return v.replace(".", ",");
+};
+const color = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const num = el => { const v = parseFloat(String(el.value).replace(",", ".")); return isFinite(v) ? v : null; };
+
+/* Tabs */
+function showTab(t){
+  if (!document.getElementById(t)) return;
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x.dataset.t === t));
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === t));
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => { showTab(b.dataset.t); history.replaceState(null, "", "#" + b.dataset.t); });
+showTab(location.hash.slice(1) || "fiches");
+window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+
+/* Flip cards */
+const cards = [
+  {s:"I", c:"--I", n:"Le courant", u:"ampère (A)", def:"Déplacement de charges électriques. Quantité de charges qui passe chaque seconde.",
+   f:["I = Q / t"], pts:["Mesure : ampèremètre <b>en série</b>","Série : I identique partout","Parallèle : I = I₁ + I₂ + … (loi des nœuds)","1 mA = 0,001 A"]},
+  {s:"U", c:"--U", n:"La tension", u:"volt (V)", def:"Différence de potentiel entre deux points. Elle « pousse » le courant.",
+   f:["U = W / Q"], pts:["Mesure : voltmètre <b>en dérivation</b>","Série : U = U₁ + U₂ + … (loi des mailles)","Parallèle : U identique partout","Pile 1,5 V · prise 230 V"]},
+  {s:"R", c:"--R", n:"La résistance", u:"ohm (Ω)", def:"Opposition d'un dipôle au passage du courant.",
+   f:["U = R × I","R = ρ × L / S"], pts:["Mesure : ohmmètre <b>hors circuit</b>","Série : Réq = R₁ + R₂ + …","Parallèle : 1/Réq = 1/R₁ + 1/R₂ + …","1 kΩ = 1 000 Ω"]},
+  {s:"P", c:"--P", n:"La puissance", u:"watt (W)", def:"Énergie consommée ou fournie chaque seconde.",
+   f:["P = U × I","P = R × I²  ·  P = U² / R"], pts:["Mesure : wattmètre","LED ≈ 5 W · bouilloire ≈ 2 000 W","1 kW = 1 000 W"]},
+  {s:"E", c:"--E", n:"L'énergie", u:"joule (J) ou kWh", def:"Quantité totale d'électricité consommée pendant une durée.",
+   f:["E = P × t"], pts:["W et s → joules","kW et h → kWh (facture)","1 kWh = 3 600 000 J"]},
+];
+$("#cards").innerHTML = cards.map(k => `
+  <div class="flip" style="--c:var(${k.c})">
+    <div class="in">
+      <div class="face front">
+        <div class="sym" style="color:var(${k.c})">${k.s}</div>
+        <div class="fname">${k.n}</div>
+        <div class="funit">${k.u}</div>
+        <div class="tap">Clique pour retourner</div>
+      </div>
+      <div class="face back">
+        <h3 style="color:var(${k.c})">${k.s} — ${k.n}</h3>
+        <p style="margin:0 0 8px;font-size:.9rem">${k.def}</p>
+        ${k.f.map(x => `<div class="fx">${x}</div>`).join("")}
+        <ul>${k.pts.map(p => `<li>${p}</li>`).join("")}</ul>
+      </div>
+    </div>
+  </div>`).join("");
+document.querySelectorAll(".flip").forEach(f => f.onclick = () => f.classList.toggle("on"));
+
+/* Hydraulic analogy */
+const P0=[222,160],P1=[310,170],P2=[380,300],P3=[456,312];
+const bez = t => { const m=1-t; return [0,1].map(k => m*m*m*P0[k]+3*m*m*t*P1[k]+3*m*t*t*P2[k]+t*t*t*P3[k]); };
+let hyd = {U:6,R:3,I:2,P:12,phase:0,ang:0,last:0};
+function renderHydro(){
+  const U = +$("#hU").value, R = +$("#hR").value, I = U/R, P = U*I;
+  Object.assign(hyd,{U,R,I,P});
+  $("#hUv").textContent = U+" V"; $("#hRv").textContent = R+" Ω";
+  const surf = 170 - (U/12)*120, w = 4 + (11-R)*2.4, water = "#4ea3e6";
+  const glow = Math.min(1, P/60);
+  const d = `M ${P0} C ${P1} ${P2} ${P3}`;
+  let g = `<g font-family="Inter,sans-serif" font-size="13">`;
+  // pump return loop
+  g += `<path d="M 622 352 L 622 22 L 44 22 L 44 ${surf-4}" fill="none" stroke="${color('--U')}" stroke-width="2" stroke-dasharray="6 6" opacity=".7"/>
+        <circle cx="622" cy="110" r="16" fill="var(--card)" stroke="${color('--U')}" stroke-width="2"/><path d="M 615 116 L 622 102 L 629 116 Z" fill="${color('--U')}"/>
+        <text x="604" y="146" text-anchor="end" fill="${color('--U')}" font-weight="600">Pompe = générateur</text>`;
+  // reference level + head arrow
+  g += `<line x1="16" y1="336" x2="440" y2="336" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="3 4"/>
+        <line x1="16" y1="${surf}" x2="200" y2="${surf}" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="3 4"/>
+        <line x1="16" y1="${surf+6}" x2="16" y2="330" stroke="${color('--U')}" stroke-width="2.5"/>
+        <path d="M 10 ${surf+10} L 16 ${surf} L 22 ${surf+10} M 10 326 L 16 336 L 22 326" fill="none" stroke="${color('--U')}" stroke-width="2.5"/>
+        <text x="26" y="${(surf+336)/2+30}" fill="${color('--U')}" font-weight="700" font-size="15">Hauteur = U</text>`;
+  // reservoir + dam
+  g += `<rect x="20" y="${surf}" width="180" height="${172-surf}" fill="${water}" opacity=".55"/>
+        <path d="M 20 40 L 20 172 L 200 172" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="2"/>
+        <polygon points="200,40 224,40 236,180 200,180" fill="currentColor" opacity=".25"/>
+        <text x="125" y="${Math.max(surf-8, 36)}" text-anchor="middle" font-weight="600">Lac du barrage</text>`;
+  // penstock
+  g += `<path d="${d}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="${w+6}" stroke-linecap="round"/>
+        <path d="${d}" fill="none" stroke="${water}" stroke-width="${w}" stroke-linecap="round"/>
+        <g id="drops"></g>
+        <text x="${bez(.45)[0]+26}" y="${bez(.45)[1]-8}" fill="${color('--R')}" font-weight="700">Tuyau = fil</text>
+        <text x="${bez(.45)[0]+26}" y="${bez(.45)[1]+9}" fill="${color('--R')}">plus étroit = plus de résistance</text>
+        <text x="${bez(.75)[0]-6}" y="${bez(.75)[1]+40}" text-anchor="end" fill="${color('--I')}" font-weight="700">Débit = courant I</text>`;
+  // lower river
+  g += `<rect x="440" y="336" width="196" height="40" fill="${water}" opacity=".55"/>
+        <text x="540" y="388" text-anchor="middle" fill="currentColor" opacity=".7">Rivière en bas</text>`;
+  // turbine
+  g += `<circle cx="482" cy="314" r="28" fill="var(--card)" stroke="${color('--P')}" stroke-width="2.5"/>
+        <g id="turb" transform="rotate(${hyd.ang} 482 314)">${[0,60,120,180,240,300].map(a => `<path d="M 482 314 L 482 292 Q 492 300 486 314 Z" fill="${color('--P')}" transform="rotate(${a} 482 314)"/>`).join("")}</g>
+        <circle cx="482" cy="314" r="4" fill="currentColor"/>
+        <text x="482" y="268" text-anchor="middle" fill="${color('--P')}" font-weight="700">Turbine</text>`;
+  // wire + bulb
+  g += `<path d="M 510 306 L 548 306 L 548 268" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="2"/>
+        <circle cx="548" cy="240" r="${22+glow*22}" fill="#fde047" opacity="${glow*.45}"/>
+        <circle cx="548" cy="246" r="16" fill="${glow>0.02?'#fde047':'var(--card)'}" fill-opacity="${.25+glow*.75}" stroke="currentColor" stroke-opacity=".6" stroke-width="2"/>
+        <rect x="541" y="260" width="14" height="8" fill="currentColor" opacity=".5"/>
+        <text x="548" y="${240-24-glow*22}" text-anchor="middle" fill="currentColor" font-weight="600">Lampe</text>`;
+  $("#hydro").innerHTML = g + "</g>";
+  hyd.dropsEl = $("#drops"); hyd.turbEl = $("#turb");
+  hyd.dropsEl.innerHTML = Array.from({length:14},() => `<circle r="${Math.max(2, w/5)}" fill="#fff" opacity=".85"/>`).join("");
+  const comment = I >= 4 ? "Gros débit : la lampe brille fort." : I >= 1.5 ? "Débit moyen." : "Petit débit : la lampe brille à peine.";
+  $("#hRes").innerHTML = `<b style="color:var(--I)">I = U / R = ${U} ÷ ${R} = ${fmt(I)} A</b> · <b style="color:var(--P)">P = U × I = ${U} × ${fmt(I)} = ${fmt(P)} W</b>
+    <div class="steps">${comment} Plus la chute est haute et le tuyau large, plus l'eau (le courant) passe, et plus la turbine (la puissance) tourne vite.</div>`;
+}
+function animHydro(ts){
+  const dt = hyd.last ? Math.min(.05,(ts-hyd.last)/1000) : 0; hyd.last = ts;
+  if ($("#analogie").classList.contains("on") && hyd.dropsEl){
+    hyd.phase = (hyd.phase + dt*hyd.I*0.12) % 1;
+    hyd.dropsEl.querySelectorAll("circle").forEach((c,i) => { const p = bez((hyd.phase + i/14) % 1); c.setAttribute("cx",p[0]); c.setAttribute("cy",p[1]); });
+    hyd.ang = (hyd.ang + dt*hyd.P*6) % 360;
+    hyd.turbEl.setAttribute("transform", `rotate(${hyd.ang} 482 314)`);
+  }
+  requestAnimationFrame(animHydro);
+}
+["hU","hR"].forEach(id => $("#"+id).oninput = renderHydro);
+renderHydro(); requestAnimationFrame(animHydro);
+
+/* Ohm triangle */
+let target = "U";
+function drawTri(){
+  const op = k => target === k ? 1 : .35;
+  $("#tri").innerHTML = `
+    <polygon points="120,8 232,200 8,200" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>
+    <line x1="64" y1="104" x2="176" y2="104" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>
+    <line x1="120" y1="104" x2="120" y2="200" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>
+    <g class="zone" data-k="U" opacity="${op('U')}"><polygon points="120,14 170,100 70,100" fill="transparent"/><text x="120" y="82" text-anchor="middle" font-size="40" fill="${color('--U')}">U</text></g>
+    <g class="zone" data-k="R" opacity="${op('R')}"><polygon points="62,108 118,108 118,196 14,196" fill="transparent"/><text x="84" y="168" text-anchor="middle" font-size="40" fill="${color('--R')}">R</text></g>
+    <g class="zone" data-k="I" opacity="${op('I')}"><polygon points="122,108 178,108 226,196 122,196" fill="transparent"/><text x="156" y="168" text-anchor="middle" font-size="40" fill="${color('--I')}">I</text></g>
+    <text x="120" y="150" text-anchor="middle" font-size="22" fill="currentColor" opacity=".5">×</text>`;
+  document.querySelectorAll("#tri .zone").forEach(z => z.onclick = () => { target = z.dataset.k; setupOhm(); });
+}
+const ohmDef = {
+  U:{f:"U = R × I", c:"--U", ins:[["R","Résistance R (Ω)"],["I","Courant I (A)"]], calc:v=>v.R*v.I, unit:"V", step:v=>`${fmt(v.R)} × ${fmt(v.I)}`},
+  R:{f:"R = U / I", c:"--R", ins:[["U","Tension U (V)"],["I","Courant I (A)"]], calc:v=>v.U/v.I, unit:"Ω", step:v=>`${fmt(v.U)} ÷ ${fmt(v.I)}`},
+  I:{f:"I = U / R", c:"--I", ins:[["U","Tension U (V)"],["R","Résistance R (Ω)"]], calc:v=>v.U/v.R, unit:"A", step:v=>`${fmt(v.U)} ÷ ${fmt(v.R)}`},
+};
+function setupOhm(){
+  drawTri();
+  const d = ohmDef[target];
+  const fx = $("#triFormula"); fx.textContent = d.f; fx.style.setProperty("--c", `var(${d.c})`);
+  $("#ohmInputs").innerHTML = d.ins.map(([k,l]) => `<label>${l}<input type="number" step="any" data-k="${k}"></label>`).join("");
+  $("#ohmInputs").querySelectorAll("input").forEach(i => i.oninput = calcOhm);
+  calcOhm();
+}
+function calcOhm(){
+  const d = ohmDef[target], v = {};
+  let ok = true;
+  $("#ohmInputs").querySelectorAll("input").forEach(i => { const x = num(i); if (x === null) ok = false; v[i.dataset.k] = x; });
+  if (!ok){ $("#ohmRes").innerHTML = "Entre les deux valeurs pour calculer."; return; }
+  const r = d.calc(v);
+  if (!isFinite(r)){ $("#ohmRes").innerHTML = "Division par zéro : la valeur du dénominateur ne peut pas être 0."; return; }
+  $("#ohmRes").innerHTML = `<b style="color:var(${d.c})">${target} = ${fmt(r)} ${d.unit}</b><div class="steps">${target} = ${d.step(v)} = ${fmt(r)} ${d.unit}</div>`;
+}
+setupOhm();
+
+/* Power */
+["pU","pI","pR"].forEach(id => $("#"+id).oninput = calcP);
+$("#pClear").onclick = () => { ["pU","pI","pR"].forEach(id => $("#"+id).value = ""); calcP(); };
+function calcP(){
+  let U = num($("#pU")), I = num($("#pI")), R = num($("#pR"));
+  const n = [U,I,R].filter(x => x !== null).length;
+  if (n !== 2){ $("#pRes").innerHTML = n < 2 ? "Remplis exactement deux champs." : "Trop de valeurs : laisse un champ vide."; return; }
+  let P, how;
+  if (R === null){ R = U/I; P = U*I; how = `P = U × I = ${fmt(U)} × ${fmt(I)}`; }
+  else if (I === null){ I = U/R; P = U*U/R; how = `P = U² / R = ${fmt(U)}² ÷ ${fmt(R)}`; }
+  else { U = R*I; P = R*I*I; how = `P = R × I² = ${fmt(R)} × ${fmt(I)}²`; }
+  $("#pRes").innerHTML = `<b style="color:var(--P)">P = ${fmt(P)} W</b>${P>=1000?` <span style="color:var(--muted)">(${fmt(P/1000)} kW)</span>`:""}
+    <div class="steps">${how} = ${fmt(P)} W</div>
+    <div class="steps">U = ${fmt(U)} V · I = ${fmt(I)} A · R = ${fmt(R)} Ω</div>`;
+}
+["eP","eT","eTu","ePrice"].forEach(id => $("#"+id).oninput = calcE);
+function calcE(){
+  const P = num($("#eP")), t = num($("#eT")), mult = +$("#eTu").value, price = num($("#ePrice"));
+  if (P === null || t === null){ $("#eRes").innerHTML = "Entre une puissance et une durée."; return; }
+  const sec = t*mult, h = sec/3600, J = P*sec, kWh = (P/1000)*h;
+  $("#eRes").innerHTML = `<b style="color:var(--E)">E = ${fmt(kWh)} kWh</b> <span style="color:var(--muted)">= ${fmt(J)} J</span>
+    <div class="steps">E = ${fmt(P/1000)} kW × ${fmt(h)} h = ${fmt(kWh)} kWh</div>
+    ${price!==null?`<div class="steps">Coût ≈ ${fmt(kWh*price)} €</div>`:""}`;
+}
+calcE();
+
+/* Circuit builder (series / parallel / any mix) */
+let uid = 0;
+const R_ = v => ({t:"R", v, id:++uid});
+const S_ = (...c) => ({t:"S", c, id:++uid});
+const P_ = (...c) => ({t:"P", c, id:++uid});
+const presets = {
+  s: () => S_(R_(100), R_(220), R_(330)),
+  p: () => S_(P_(R_(100), R_(220), R_(330))),
+  m: () => S_(R_(10), P_(R_(20), R_(20))),
+  c: () => S_(R_(10), P_(R_(30), S_(R_(10), R_(20))), R_(5)),
+};
+let root = presets.s();
+document.querySelectorAll("#mode button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#mode button").forEach(x => x.classList.toggle("on", x === b));
+  root = presets[b.dataset.m](); renderTree();
+});
+$("#mU").oninput = calcM;
+
+function normalize(n){
+  if (n.t === "R") return n;
+  let c = [];
+  n.c.map(normalize).filter(Boolean).forEach(k => { if (k.t === n.t) c.push(...k.c); else c.push(k); });
+  if (!c.length) return null;
+  if (c.length === 1) return c[0];
+  n.c = c; return n;
+}
+function fixRoot(){ let r = normalize(root); if (!r) r = R_(100); if (r.t !== "S") r = S_(r); root = r; }
+function findParent(n, id){ if (n.t === "R") return null; for (const k of n.c){ if (k.id === id) return n; const p = findParent(k, id); if (p) return p; } return null; }
+function findNode(n, id){ if (n.id === id) return n; if (n.t === "R") return null; for (const k of n.c){ const f = findNode(k, id); if (f) return f; } return null; }
+function addNext(id, type){
+  const par = findParent(root, id), i = par.c.findIndex(k => k.id === id), me = par.c[i];
+  const nr = R_(me.v ?? 100);
+  if (par.t === type) par.c.splice(i+1, 0, nr);
+  else par.c[i] = type === "S" ? S_(me, nr) : P_(me, nr);
+  renderTree();
+}
+function delNode(id){ const par = findParent(root, id); par.c = par.c.filter(k => k.id !== id); renderTree(); }
+
+let names = new Map();
+function nameAll(){ names = new Map(); let k = 0; (function w(n){ if (n.t === "R") names.set(n.id, "R"+(++k)); else n.c.forEach(w); })(root); }
+const label = (n, top) => n.t === "R" ? names.get(n.id) : (top ? "" : "(") + n.c.map(k => label(k)).join(n.t === "S" ? " + " : " ∥ ") + (top ? "" : ")");
+const sub = s => s.replace(/R(\d+)/g, (_, d) => "R" + d.split("").map(x => "₀₁₂₃₄₅₆₇₈₉"[x]).join(""));
+
+function treeHTML(n, isRoot){
+  if (n.t === "R") return `<div class="rnode"><div class="top">${names.get(n.id)}<input type="number" step="any" value="${n.v ?? ""}" data-id="${n.id}"> Ω</div>
+    <div class="acts"><button data-act="S" data-id="${n.id}">+ série</button><button data-act="P" data-id="${n.id}">+ parallèle</button>${isRoot ? "" : `<button class="del" data-act="X" data-id="${n.id}" title="Supprimer">×</button>`}</div></div>`;
+  const total = countR(root);
+  return `<div class="grp ${n.t}"><div class="gl">${isRoot ? "Circuit principal — en série" : n.t === "S" ? "Branche en série" : "Groupe en parallèle"}</div>${n.c.map(k => treeHTML(k, false).replace('class="del"', total > 1 ? 'class="del"' : 'class="del" hidden')).join("")}</div>`;
+}
+const countR = n => n.t === "R" ? 1 : n.c.reduce((a,k) => a + countR(k), 0);
+function renderTree(){
+  fixRoot(); nameAll();
+  $("#tree").innerHTML = treeHTML(root, true);
+  $("#tree").querySelectorAll("input").forEach(inp => inp.oninput = () => { findNode(root, +inp.dataset.id).v = num(inp); calcM(); });
+  $("#tree").querySelectorAll("button[data-act]").forEach(b => b.onclick = () => {
+    const id = +b.dataset.id; if (b.dataset.act === "X") delNode(id); else if (countR(root) < 12) addNext(id, b.dataset.act);
+  });
+  calcM();
+}
+
+/* layout + drawing */
+const RW = 76, RH = 50, GAP = 0, PAD = 18;
+function size(n){
+  if (n.t === "R") return n.sz = {w:RW, h:RH};
+  const s = n.c.map(size);
+  return n.sz = n.t === "S"
+    ? {w: s.reduce((a,k) => a + k.w, 0) + GAP*(s.length-1), h: Math.max(...s.map(k => k.h))}
+    : {w: Math.max(...s.map(k => k.w)) + 2*PAD, h: s.reduce((a,k) => a + k.h, 0)};
+}
+function draw(n, x, y, out){
+  const W = 'stroke="currentColor" stroke-opacity=".55" stroke-width="2" fill="none"';
+  const mid = y + n.sz.h/2;
+  if (n.t === "R"){
+    out.push(`<line x1="${x}" y1="${mid}" x2="${x+13}" y2="${mid}" ${W}/><line x1="${x+RW-13}" y1="${mid}" x2="${x+RW}" y2="${mid}" ${W}/>
+      <rect x="${x+13}" y="${mid-9}" width="${RW-26}" height="18" rx="3" fill="var(--card)" stroke="${color('--R')}" stroke-width="2"/>
+      <text x="${x+RW/2}" y="${mid-15}" text-anchor="middle" font-size="12" fill="currentColor">${names.get(n.id)}</text>`);
+    return;
+  }
+  if (n.t === "S"){
+    let cx = x;
+    n.c.forEach(k => { const ky = y + (n.sz.h - k.sz.h)/2; draw(k, cx, ky, out); cx += k.sz.w + GAP; });
+    return;
+  }
+  let cy = y; const mids = [];
+  n.c.forEach(k => {
+    const kx = x + PAD, km = cy + k.sz.h/2; mids.push(km);
+    draw(k, kx, cy, out);
+    out.push(`<line x1="${x+PAD/2}" y1="${km}" x2="${kx}" y2="${km}" ${W}/><line x1="${kx+k.sz.w}" y1="${km}" x2="${x+n.sz.w-PAD/2}" y2="${km}" ${W}/>`);
+    cy += k.sz.h;
+  });
+  const t = mids[0], b = mids[mids.length-1];
+  out.push(`<line x1="${x+PAD/2}" y1="${t}" x2="${x+PAD/2}" y2="${b}" ${W}/><line x1="${x+n.sz.w-PAD/2}" y1="${t}" x2="${x+n.sz.w-PAD/2}" y2="${b}" ${W}/>
+    <line x1="${x}" y1="${mid}" x2="${x+PAD/2}" y2="${mid}" ${W}/><line x1="${x+n.sz.w-PAD/2}" y1="${mid}" x2="${x+n.sz.w}" y2="${mid}" ${W}/>
+    <circle cx="${x+PAD/2}" cy="${mid}" r="3" fill="currentColor"/><circle cx="${x+n.sz.w-PAD/2}" cy="${mid}" r="3" fill="currentColor"/>`);
+}
+function drawCirc(){
+  const W = 'stroke="currentColor" stroke-opacity=".55" stroke-width="2" fill="none"';
+  size(root);
+  const x0 = 90, y0 = 24, w = root.sz.w, h = root.sz.h, my = y0 + h/2, bot = y0 + h + 26, xr = x0 + w + 24;
+  const out = [];
+  draw(root, x0, y0, out);
+  const bt = (my + bot)/2;
+  out.push(`<path d="M ${x0} ${my} L 40 ${my} L 40 ${bt-12} M 40 ${bt+12} L 40 ${bot} L ${xr} ${bot} L ${xr} ${my} L ${x0+w} ${my}" ${W}/>
+    <line x1="26" y1="${bt-12}" x2="54" y2="${bt-12}" stroke="${color('--U')}" stroke-width="3"/><line x1="32" y1="${bt+12}" x2="48" y2="${bt+12}" stroke="${color('--U')}" stroke-width="3"/>
+    <text x="58" y="${bt+5}" font-size="13" fill="${color('--U')}" font-weight="600">${fmt(num($("#mU"))??0)} V</text>`);
+  const VW = Math.max(xr + 20, 300), VH = bot + 14;
+  const svg = $("#circ");
+  svg.setAttribute("viewBox", `0 0 ${VW} ${VH}`);
+  svg.style.maxWidth = Math.min(980, VW*1.15) + "px";
+  svg.innerHTML = `<g font-family="Inter,sans-serif">${out.join("")}</g>`;
+}
+
+/* computation */
+const req = n => n.t === "R" ? n.v : n.t === "S" ? n.c.reduce((a,k) => a + req(k), 0) : 1/n.c.reduce((a,k) => a + 1/req(k), 0);
+function solve(n, I){ n.I = I; n.U = I*req(n); if (n.t === "R") return; n.c.forEach(k => solve(k, n.t === "S" ? I : n.U/req(k))); }
+function steps(n, list, isRoot){
+  if (n.t === "R") return;
+  n.c.forEach(k => steps(k, list, false));
+  const parts = n.c.map(k => k.t === "R" ? names.get(k.id) : "R" + sub(label(k)));
+  const vals = n.c.map(k => fmt(req(k)));
+  const nm = isRoot ? "Réq" : sub(label(n, true));
+  list.push(n.t === "S"
+    ? `<li><b>Série ${isRoot ? "(circuit entier)" : sub(label(n, true))}</b> : on additionne → ${vals.join(" + ")} = <b>${fmt(req(n))} Ω</b></li>`
+    : `<li><b>Parallèle ${sub(label(n, true))}</b> : 1/R = ${vals.map(v => "1/"+v).join(" + ")} → <b>${fmt(req(n))} Ω</b></li>`);
+}
+function calcM(){
+  drawCirc();
+  const U = num($("#mU")), rs = [];
+  (function w(n){ if (n.t === "R") rs.push(n); else n.c.forEach(w); })(root);
+  if (U === null || rs.some(r => r.v === null || !(r.v > 0))){ $("#mRes").innerHTML = `<div class="result">Entre une tension et des résistances positives.</div>`; return; }
+  const Req = req(root), I = U/Req; solve(root, I);
+  const st = []; steps(root, st, true);
+  const nm = r => sub(names.get(r.id)), un = r => nm(r).replace("R", "U"), in_ = r => nm(r).replace("R", "I");
+  const sR = root.c.filter(k => k.t === "R"), gP = root.c.filter(k => k.t === "P");
+  /* cas mixte simple (une partie série + un seul groupe parallèle de résistances) : les six étapes détaillées */
+  const simple = gP.length === 1 && sR.length >= 1 && sR.length + 1 === root.c.length && gP[0].c.every(k => k.t === "R");
+  const kind = rs.length === 1 ? "une seule résistance" : root.c.every(k => k.t === "R") ? "un circuit série" : root.c.length === 1 && root.c[0].t === "P" && root.c[0].c.every(k => k.t === "R") ? "un circuit parallèle" : simple ? "un circuit mixte simple" : "un circuit mixte";
+  let detail;
+  if (simple){
+    const G = gP[0], Rp = req(G), Rs = sR.reduce((a,k) => a + k.v, 0), Up = I*Rp;
+    detail = `<ol style="margin:8px 0 0;padding-left:20px;font-size:.9rem">
+      <li><b>On réduit le groupe parallèle</b> ${G.c.map(nm).join(" ∥ ")} : 1/Rp = ${G.c.map(k => "1/"+fmt(k.v)).join(" + ")} → <b>Rp = ${fmt(Rp)} Ω</b></li>
+      <li><b>On ajoute la partie série</b> : Réq = ${sR.map(nm).join(" + ")} + Rp = ${sR.map(k => fmt(k.v)).join(" + ")} + ${fmt(Rp)} = <b>${fmt(Req)} Ω</b></li>
+      <li><b>Courant total</b> (il traverse ${sR.map(nm).join(", ")}) : I = U / Réq = ${fmt(U)} ÷ ${fmt(Req)} = <b>${fmt(I)} A</b></li>
+      <li><b>Tension de chaque résistance série</b> : U = R × I${sR.map(k => ` · ${un(k)} = ${fmt(k.v)} × ${fmt(I)} = ${fmt(k.v*I)} V`).join("")}</li>
+      <li><b>Tension du groupe parallèle</b> : Up = Rp × I = ${fmt(Rp)} × ${fmt(I)} = <b>${fmt(Up)} V</b> (vérif. : ${fmt(U)} − ${fmt(I*Rs)} = ${fmt(U - I*Rs)} V)</li>
+      <li><b>Courant dans chaque branche</b> : I = Up / R${G.c.map(k => ` · ${in_(k)} = ${fmt(Up)} ÷ ${fmt(k.v)} = ${fmt(Up/k.v)} A`).join("")} (somme = ${fmt(G.c.reduce((a,k) => a + Up/k.v, 0))} A = I total)</li></ol>`;
+  } else {
+    detail = `<ol style="margin:8px 0 0;padding-left:20px;font-size:.9rem">${rs.length > 1 ? st.join("") : ""}
+      <li><b>Courant total</b> : I = U / Réq = ${fmt(U)} ÷ ${fmt(Req)} = <b>${fmt(I)} A</b></li>
+      <li><b>On redescend</b> : dans une série, le courant est le même et U = R × I ; dans un groupe parallèle, la tension est la même et I = U / R. Résultats dans le tableau.</li></ol>`;
+  }
+  const pos = r => { const p = findParent(root, r.id); return p === root ? "série" : p.t === "P" ? "parallèle" : "branche série"; };
+  const showPos = kind !== "un circuit série" && kind !== "un circuit parallèle" && rs.length > 1;
+  $("#mRes").innerHTML = `<div class="result"><b style="color:var(--R)">Réq = ${fmt(Req)} Ω</b> · <b style="color:var(--I)">I total = ${fmt(I)} A</b> · <b style="color:var(--P)">P total = ${fmt(U*I)} W</b>
+    <div class="steps" style="margin-top:6px">C'est ${kind} : ${sub(label(root, true))}</div>${detail}</div>
+    <table style="margin-top:14px"><thead><tr><th>Résistance</th>${showPos ? "<th>Position</th>" : ""}<th>Valeur (Ω)</th><th>Courant (A)</th><th>Tension (V)</th><th>Puissance (W)</th></tr></thead>
+    <tbody>${rs.map(r => `<tr><td>${nm(r)}</td>${showPos ? `<td>${pos(r)}</td>` : ""}<td>${fmt(r.v)}</td><td>${fmt(r.I)}</td><td>${fmt(r.U)}</td><td>${fmt(r.U*r.I)}</td></tr>`).join("")}</tbody></table>
+    <p class="hint" style="margin-top:10px">Vérification : somme des puissances = ${fmt(rs.reduce((a,r) => a + r.U*r.I, 0))} W = P total. Méthode : on réduit les groupes du plus petit au plus grand, on calcule I total, puis on redescend vers chaque résistance.</p>`;
+}
+renderTree();
+
+/* Quiz */
+let qOk = 0, qN = 0, streak = 0;
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const pick = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const generators = [
+  () => { const R = rnd([10,20,47,100,220,470]), I = rnd([0.1,0.2,0.5,1,2]); const U = R*I;
+    return {t:`Une résistance de <b>${R} Ω</b> est traversée par un courant de <b>${fmt(I)} A</b>. Quelle est la tension à ses bornes ?`, a:U, u:"V", why:`U = R × I = ${R} × ${fmt(I)} = ${fmt(U)} V`}; },
+  () => { const U = rnd([6,9,12,24,230]), R = rnd([2,4,6,10,20,100]); const I = U/R;
+    return {t:`Une lampe de résistance <b>${R} Ω</b> est branchée sur <b>${U} V</b>. Quel courant la traverse ?`, a:I, u:"A", why:`I = U / R = ${U} ÷ ${R} = ${fmt(I)} A`}; },
+  () => { const I = rnd([0.5,1,2,3,5]), U = rnd([6,12,24,230]); const R = U/I;
+    return {t:`Sous <b>${U} V</b>, un appareil absorbe <b>${fmt(I)} A</b>. Quelle est sa résistance ?`, a:R, u:"Ω", why:`R = U / I = ${U} ÷ ${fmt(I)} = ${fmt(R)} Ω`}; },
+  () => { const U = rnd([12,230]), I = rnd([0.5,2,4,5,10]); const P = U*I;
+    return {t:`Un appareil fonctionne sous <b>${U} V</b> et consomme <b>${fmt(I)} A</b>. Quelle est sa puissance ?`, a:P, u:"W", why:`P = U × I = ${U} × ${fmt(I)} = ${fmt(P)} W`}; },
+  () => { const P = rnd([460,920,1150,2300]); const I = P/230;
+    return {t:`Un radiateur de <b>${P} W</b> est branché sur le secteur <b>230 V</b>. Quel courant consomme-t-il ?`, a:I, u:"A", why:`I = P / U = ${P} ÷ 230 = ${fmt(I)} A`}; },
+  () => { const R = rnd([2,5,10,20]), I = rnd([1,2,3,4]); const P = R*I*I;
+    return {t:`Une résistance de <b>${R} Ω</b> est parcourue par <b>${I} A</b>. Quelle puissance dissipe-t-elle ?`, a:P, u:"W", why:`P = R × I² = ${R} × ${I}² = ${fmt(P)} W`}; },
+  () => { const P = rnd([1000,1500,2000,2500]), h = rnd([0.5,1,2,3]); const E = P/1000*h;
+    return {t:`Un appareil de <b>${P} W</b> fonctionne pendant <b>${fmt(h)} h</b>. Quelle énergie consomme-t-il ?`, a:E, u:"kWh", why:`E = P × t = ${fmt(P/1000)} kW × ${fmt(h)} h = ${fmt(E)} kWh`}; },
+  () => { const a = rnd([10,22,47,100]), b = rnd([10,33,68,150]); const R = a+b;
+    return {t:`Deux résistances de <b>${a} Ω</b> et <b>${b} Ω</b> sont en <b>série</b>. Quelle est la résistance équivalente ?`, a:R, u:"Ω", why:`Réq = R₁ + R₂ = ${a} + ${b} = ${R} Ω`}; },
+  () => { const [a,b] = rnd([[10,10],[20,20],[6,3],[12,6],[30,60],[100,100]]); const R = a*b/(a+b);
+    return {t:`Deux résistances de <b>${a} Ω</b> et <b>${b} Ω</b> sont en <b>parallèle</b>. Quelle est la résistance équivalente ?`, a:R, u:"Ω", why:`Réq = (R₁ × R₂) / (R₁ + R₂) = ${a*b} ÷ ${a+b} = ${fmt(R)} Ω`}; },
+  () => { const r1 = rnd([10,20,40,50]), [a,b] = rnd([[10,10],[20,20],[30,60],[12,6],[40,40]]); const Rp = a*b/(a+b), R = r1+Rp;
+    return {t:`<b>${r1} Ω</b> est en série avec un groupe de <b>${a} Ω</b> et <b>${b} Ω</b> en parallèle. Quelle est la résistance équivalente ?`, a:R, u:"Ω", why:`Rp = ${a}×${b}/(${a}+${b}) = ${fmt(Rp)} Ω, puis Réq = ${r1} + ${fmt(Rp)} = ${fmt(R)} Ω`}; },
+  () => { const [r1,a,b,U] = rnd([[10,20,20,20],[5,10,10,20],[20,30,60,40],[8,8,8,24],[6,12,12,24]]); const Rp=a*b/(a+b), I=U/(r1+Rp);
+    return {t:`Circuit mixte sur <b>${U} V</b> : R₁ = <b>${r1} Ω</b> en série avec R₂ = <b>${a} Ω</b> ∥ R₃ = <b>${b} Ω</b>. Quel est le courant total ?`, a:I, u:"A", why:`Rp = ${fmt(Rp)} Ω, Réq = ${r1} + ${fmt(Rp)} = ${fmt(r1+Rp)} Ω, I = ${U} ÷ ${fmt(r1+Rp)} = ${fmt(I)} A`}; },
+  () => { const [r1,a,b,U] = rnd([[10,20,20,20],[5,10,10,20],[20,30,60,40],[8,8,8,24],[6,12,12,24]]); const Rp=a*b/(a+b), I=U/(r1+Rp), Up=I*Rp;
+    return {t:`Circuit mixte sur <b>${U} V</b> : R₁ = <b>${r1} Ω</b> en série avec R₂ = <b>${a} Ω</b> ∥ R₃ = <b>${b} Ω</b>. Quelle est la tension aux bornes du groupe parallèle ?`, a:Up, u:"V", why:`Rp = ${fmt(Rp)} Ω, I = ${U} ÷ ${fmt(r1+Rp)} = ${fmt(I)} A, Up = Rp × I = ${fmt(Rp)} × ${fmt(I)} = ${fmt(Up)} V`}; },
+  () => { const U = rnd([9,12,24]), u1 = pick(2, U-2);
+    return {t:`Deux lampes sont en <b>série</b> sur un générateur de <b>${U} V</b>. La première a <b>${u1} V</b> à ses bornes. Quelle tension aux bornes de la seconde ?`, a:U-u1, u:"V", why:`Loi des mailles : U₂ = U – U₁ = ${U} – ${u1} = ${U-u1} V`}; },
+  () => { const i1 = rnd([0.2,0.5,1,1.5]), i2 = rnd([0.3,0.5,1,2]);
+    return {t:`Deux branches en <b>parallèle</b> sont parcourues par <b>${fmt(i1)} A</b> et <b>${fmt(i2)} A</b>. Quel courant dans la branche principale ?`, a:i1+i2, u:"A", why:`Loi des nœuds : I = I₁ + I₂ = ${fmt(i1)} + ${fmt(i2)} = ${fmt(i1+i2)} A`}; },
+];
+const theory = [
+  {t:"Comment branche-t-on un <b>ampèremètre</b> ?", o:["En série","En dérivation","Hors circuit","Peu importe"], a:0, why:"L'ampèremètre se place en série : le courant doit le traverser."},
+  {t:"Comment branche-t-on un <b>voltmètre</b> ?", o:["En dérivation","En série","Hors circuit","Sur le générateur uniquement"], a:0, why:"Le voltmètre se branche en dérivation, aux bornes du dipôle."},
+  {t:"Quelle est l'unité de la <b>résistance</b> ?", o:["L'ohm (Ω)","Le volt (V)","Le watt (W)","L'ampère (A)"], a:0, why:"La résistance se mesure en ohms (Ω)."},
+  {t:"Dans un circuit en <b>série</b>, le courant est…", o:["Le même partout","Plus fort près du générateur","Partagé entre les dipôles","Nul"], a:0, why:"En série, il n'y a qu'un chemin : I est identique partout."},
+  {t:"Dans un circuit en <b>parallèle</b>, la tension est…", o:["La même aux bornes de chaque branche","Partagée entre les branches","Nulle","Plus grande dans la branche la plus résistante"], a:0, why:"En dérivation, chaque branche est soumise à la même tension."},
+  {t:"Combien vaut <b>1 kWh</b> en joules ?", o:["3 600 000 J","1 000 J","3 600 J","60 000 J"], a:0, why:"1 kWh = 1 000 W × 3 600 s = 3 600 000 J."},
+  {t:"Quelle formule donne la <b>puissance</b> ?", o:["P = U × I","P = U / I","P = R / I","P = I / U"], a:0, why:"P = U × I (en watts)."},
+  {t:"Dans un circuit <b>mixte</b>, par quoi commence-t-on ?", o:["Calculer la résistance équivalente du groupe parallèle","Additionner toutes les résistances","Calculer les courants de chaque branche","Mesurer la puissance"], a:0, why:"On remplace d'abord le groupe parallèle par Rp, puis on l'additionne à la partie série."},
+  {t:"Si on double la résistance à tension constante, le courant…", o:["Est divisé par 2","Double","Reste le même","Est multiplié par 4"], a:0, why:"I = U / R : si R double, I est divisé par 2."},
+];
+let cur = null;
+function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function nextQ(){
+  $("#qFb").innerHTML = "";
+  if (Math.random() < 0.3){
+    const q = rnd(theory);
+    const opts = shuffle(q.o.map((o,i) => ({txt:o, good:i===q.a})));
+    cur = {why:q.why}; $("#qText").innerHTML = q.t;
+    renderOpts(opts);
+  } else {
+    const q = rnd(generators)();
+    const wrongs = new Set();
+    const mults = shuffle([2, 0.5, 10, 0.1, 1.5, 4, 0.25]);
+    for (const m of mults){ const w = q.a*m; if (fmt(w) !== fmt(q.a)) wrongs.add(fmt(w)); if (wrongs.size === 3) break; }
+    const opts = shuffle([{txt:`${fmt(q.a)} ${q.u}`, good:true}, ...[...wrongs].map(w => ({txt:`${w} ${q.u}`, good:false}))]);
+    cur = {why:q.why}; $("#qText").innerHTML = q.t;
+    renderOpts(opts);
+  }
+}
+function renderOpts(opts){
+  $("#qOpts").innerHTML = "";
+  opts.forEach(o => {
+    const b = document.createElement("button"); b.innerHTML = o.txt;
+    b.onclick = () => {
+      qN++; if (o.good){ qOk++; streak++; } else streak = 0;
+      $("#qOpts").querySelectorAll("button").forEach((x,i) => { x.disabled = true; if (opts[i].good) x.classList.add("good"); });
+      if (!o.good) b.classList.add("wrong");
+      $("#qFb").innerHTML = `<b style="color:var(${o.good?'--ok':'--bad'})">${o.good ? "Bravo !" : "Pas tout à fait."}</b> <span class="mono">${cur.why}</span>`;
+      $("#qOk").textContent = qOk; $("#qN").textContent = qN; $("#qStreak").textContent = streak;
+    };
+    $("#qOpts").appendChild(b);
+  });
+}
+$("#qNext").onclick = nextQ;
+nextQ();
+</script>
+</body>
+</html>

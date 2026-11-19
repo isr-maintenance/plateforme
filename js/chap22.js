@@ -5,6 +5,8 @@
    Les questions de la plateforme ne sont PAS celles de l'évaluation formative 2.2.
    ========================================================= */
 (function(){
+/* lien vers le labo « Lois de base en électricité » (Outils), ouvert sur le bon onglet */
+const labo=(tab,txt)=>`<div class="note" style="margin:14px 0"><b>Pour aller plus loin : le labo des lois de base</b>${txt} <a class="btn sm" style="margin-left:6px" href="outils/lois-electricite.html#${tab}" target="_blank" rel="noopener">Ouvrir le labo ↗</a></div>`;
 const R3=Math.sqrt(3), RHO=0.0225, RHO_AL=0.036;
 const Q22 = {
   b1q1:{q:"Qu'est-ce qu'un courant électrique ?",o:["Le déplacement d'ensemble des électrons libres dans une même direction","L'agitation des électrons au hasard","La chaleur qui circule dans le métal"],g:0,e:"Tant que les électrons libres s'agitent au hasard, il ne se passe rien. Dès qu'on les pousse tous du même côté, il y a courant.",r:'b1'},
@@ -231,6 +233,7 @@ defChapter({
       <div class="note bad" style="margin-top:14px"><b>Retour sur le danger électrique</b>Un corps aux mains sèches présente environ 1 500 Ω. Sous 230 V : I = 230 ÷ 1 500 = 0,153 A, soit 153 mA — trois fois le seuil de fibrillation. Peau humide : quelques centaines d'ohms, et un courant multiplié par cinq ou par dix.</div>
       <div class="note warn" style="margin-top:10px"><b>Une limite à connaître</b>La loi d'Ohm s'applique aux conducteurs, éléments chauffants, bobines vues en continu. Pas au courant d'un moteur ou d'un tube fluorescent : pour ceux-là, on lit la plaque signalétique.</div>
       ${terrain('Quel courant va absorber la résistance de chauffe que je remplace, et le calibre en place suffit-il ? Pourquoi cette borne desserrée a-t-elle brûlé ? Pourquoi la tension chute-t-elle en bout de ligne ? Et pourquoi 230 V est-il mortel ? C’est la formule qui transforme une mesure en diagnostic.')}
+      ${labo('ohm','Le triangle de la loi d’Ohm avec n’importe quelles valeurs, l’analogie du barrage et un quiz qui génère des exercices à volonté.')}
       ${exbox('b5d','Drill — la loi d’Ohm','Convertis d’abord en unités de base, écris la forme utilisée, puis calcule.')}`,
      mount:root=>{ mountOhmLab(root);
        mountDrillW(root.querySelector('#b5d'),'b5ohm',{rows:[
@@ -249,6 +252,7 @@ defChapter({
       <h3>Calculer une association de deux résistances</h3>
       ${tbl(['','En série','En parallèle'],[['Résistance','R = R1 + R2','R = (R1 × R2) ÷ (R1 + R2)'],['Courant','Le même dans les deux : I = U ÷ R','I = I1 + I2'],['Tension','U = U1 + U2','La même sur les deux branches'],['Vérification','R plus GRANDE que chacune des deux','R plus PETITE que la plus petite des deux']])}
       ${terrain('Une chaîne de sécurité est en série : quand une machine refuse de démarrer, on suit la branche organe par organe, à la continuité, jusqu’à trouver celui qui est ouvert. Un circuit de prises est en parallèle : si une seule prise est morte, le défaut est dans sa branche. Savoir dans quel montage on se trouve dit immédiatement où chercher.')}
+      ${labo('montages','Construis ton propre circuit série, parallèle ou mixte : le schéma se dessine et chaque calcul est détaillé étape par étape.')}
       ${exbox('b6d','Drill — série et parallèle','En parallèle, vérifie que le résultat est plus petit que la plus petite des résistances.')}`,
      mount:root=>{ mountSP(root);
        mountDrillW(root.querySelector('#b6d'),'b6sp',{rows:[
@@ -260,6 +264,7 @@ defChapter({
     {id:'b7', sec:'2.2.6', t:'Puissance, énergie et effet Joule', pdf:34, quiz:['b7q1','b7q2'], ex:{keys:['b7p','b7w','b7j'], lbl:'Les trois drills'},
      body:()=>`<p class="lead">La puissance, notée P, se mesure en watts (W). Elle dit à quelle vitesse un appareil consomme de l'énergie.</p>
       ${formula('P = U × I','en monophasé — une lampe de 0,26 A sous 230 V : 230 × 0,26 ≈ 60 W')}
+      ${labo('puissance','Calculateur de puissance à partir de deux grandeurs, et énergie consommée avec son coût en euros.')}
       ${exbox('passe','Est-ce que ça passe ?','On convertit chaque puissance en courant, on additionne, on compare au calibre de la protection.')}
       ${formula('P = √3 × U × I × cos φ','en triphasé, avec √3 ≈ 1,73 — le cos φ (facteur de puissance, entre 0 et 1) se lit sur la plaque du moteur')}
       <p class="small">Exemple : un moteur sous 400 V absorbe 5 A avec un cos φ de 0,85. P = 1,73 × 400 × 5 × 0,85 ≈ 2 940 W, soit environ 2,9 kW.</p>

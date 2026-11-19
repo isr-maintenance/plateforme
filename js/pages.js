@@ -260,11 +260,12 @@ const MODULES = {
   cours:{t:'Cours',k:'Ce que tu vois ici',d:'Capsules animées, vérifications, tests, feu vert TP et suivi du prof.',c:'var(--elec)'},
   dossier:{t:'Dossier TP',k:'Module existant',d:'Schéma de principe, unifilaire et de câblage, bon de commande avec catalogue, liste d’outillage, photo du schéma fait à la main.',c:'var(--tp)'},
   banc:{t:'Banc de câblage',k:'Module existant',d:'Simulateur de câblage : l’élève câble un schéma et le teste. Un chapitre peut l’ouvrir avec un exercice préchargé, et le résultat remonte au tableau de bord.',c:'var(--amber)'},
+  lois:{t:'Lois de base en électricité',k:'Labo en ligne · ouvert à tous',d:'Fiches à retourner, analogie du barrage, triangle de la loi d’Ohm, calculateurs de puissance et d’énergie, constructeur de circuits série, parallèle et mixte avec calculs détaillés, quiz à volonté.',c:'var(--elec)',url:'outils/lois-electricite.html'},
   arduino:{t:'Labo Arduino',k:'Module existant',d:'Simulateur d’électronique et d’Arduino, pour les parties électronique et programmation.',c:'var(--meca)'},
 };
 function pageOutils(){
   return `<div class="page-head"><div><div class="kicker">Une seule connexion</div><h1>Outils</h1><p class="muted small">Chaque module reste un projet séparé : on peut le modifier sans toucher aux autres, et il ne se charge que quand on l'ouvre.</p></div></div>
-  <div class="grid g2">${Object.entries(MODULES).map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':`<button class="btn sm" data-module="${k}">Comment il s'intègre</button>`}</div>`).join('')}</div>`;
+  <div class="grid g2">${Object.entries(MODULES).map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<a class="btn sm primary" href="${m.url}" target="_blank" rel="noopener">Ouvrir ↗</a>`:`<button class="btn sm" data-module="${k}">Comment il s'intègre</button>`}</div>`).join('')}</div>`;
 }
 function moduleInfo(k){
   const m=MODULES[k];
