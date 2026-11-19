@@ -219,6 +219,7 @@ function bindCommon(m){
   m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap));
   m.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ const v=b.dataset.back; S.view = v==='home'?{page:'home'}:{page:v,course:'4-elec'}; render(); });
   m.querySelectorAll('[data-module]').forEach(b=>b.onclick=()=>moduleInfo(b.dataset.module));
+  m.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app));
   m.querySelectorAll('[data-journal]').forEach(b=>b.onclick=()=>{ const [per,...st]=b.dataset.journal.split('|'); openJournal(per, st.join('|')||S.me.mail); });
   const pageHooks = { cours:bindCours, biblio:bindBiblio, dash:bindDash, contenus:bindContenus, admin:bindAdmin, carnet:bindCarnet, acces:bindAcces, stages:bindStages, monstage:bindMonStage };
   if(S.view.page==='home' && pageHooks[S.tab]) pageHooks[S.tab](m);

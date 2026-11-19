@@ -28,6 +28,27 @@ function makeApi(store, deps) {
   }
   function err(code, msg){ var e = new Error(msg); e.code = code; return e; }
 
+  /* ---------- connexion unique vers les autres apps (Dossier TP, Banc de câblage) ----------
+     La plateforme remet un ticket valable 2 minutes, pour une app précise. L'app l'envoie à son propre
+     script, qui le fait vérifier ici (ssoCheck) avant de délivrer sa clé habituelle. Le ticket est signé
+     différemment des jetons : il ne peut pas servir à se connecter à la plateforme. */
+  var SSO_APPS = ['dossier', 'banc'], SSO_MS = 120000;
+  function makeTicket(mail, app){
+    var body = b64(JSON.stringify({ s: 'sso', e: mail, app: app, x: deps.now() + SSO_MS }));
+    return body + '.' + deps.hmac('sso.' + body);
+  }
+  function ssoCheck(p){
+    try {
+      var t = String(p.ticket || ''), app = String(p.app || ''), i = t.indexOf('.');
+      if (i < 0 || deps.hmac('sso.' + t.slice(0, i)) !== t.slice(i + 1)) throw err('auth', 'Ticket de connexion invalide.');
+      var o = JSON.parse(unb64(t.slice(0, i)));
+      if (o.s !== 'sso' || o.app !== app) throw err('auth', 'Ticket prévu pour une autre application.');
+      if (o.x < deps.now()) throw err('auth', 'Ticket expiré : rouvre l’application depuis la plateforme.');
+      var me = identify(o.e);                              // compte toujours autorisé (pas bloqué, etc.)
+      return { ok: true, mail: me.mail, nom: me.nom, role: me.role };
+    } catch (e) { return { ok: false, code: e.code || 'error', msg: e.message || String(e) }; }
+  }
+
   /* ---------- documents ---------- */
   function doc(k, def){ var v = store.get(k); return v == null ? def : v; }
   function put(k, v, by){
@@ -282,7 +303,9 @@ function makeApi(store, deps) {
   /* ---------- point d'entrée ---------- */
   function handle(req){
     try {
+      if (req && req.a === 'ssoCheck') return ssoCheck(req.p || {});     // appelé par le script d'une autre app, sans jeton
       var mail = readToken(req && req.t), me = identify(mail), a = req.a, p = req.p || {};
+      if (a === 'ssoTicket') { need(SSO_APPS.indexOf(p.app) >= 0, 'Application inconnue.'); return { ok: true, ticket: makeTicket(me.mail, p.app) }; }
       if (a === 'boot') return { ok: true, data: boot(me) };
       if (a === 'checkMail') { try { var who = identify(p.mail); return { ok: true, res: { ok: true, role: who.role, nom: who.nom } }; } catch (e) { return { ok: true, res: { ok: false, msg: e.message } }; } }
       if (me.role === 'eleve') { need(ELEVE[a], 'Action non autorisée.'); return ELEVE[a](me, p); }

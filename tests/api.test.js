@@ -181,3 +181,20 @@ console.log(`✓ ${n} vérifications réussies`);
   clock = Date.UTC(2027, 7, 15); ok(H(co, 'boot').data.myProg === null, 'le 15 août : nouvelle année, progression remise à zéro');
   H(co, 'saveMyProg', { prog: { visited: ['c1'] } }); ok(H(co, 'boot').data.myProg.visited.join() === 'c1', 'nouvelle progression pour la nouvelle année');
   clock = save; console.log(`✓ ${n} vérifications réussies (avec progression du prof)`); }
+
+// connexion unique vers Dossier TP et le Banc
+{ const st7 = memStore(), a7 = ctx.makeApi(st7, deps); a7.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a7.handle({ t: a7.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', e7 = 'sam.k.student@elmarche.be';
+  H(e7, 'setClasse', { classe: '3qem1' });
+  const tk = H(e7, 'ssoTicket', { app: 'dossier' }).ticket; ok(!!tk, 'élève reçoit un ticket');
+  let r = a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'dossier' } });
+  ok(r.ok && r.mail === e7 && r.role === 'eleve', 'ticket vérifié sans jeton : adresse et rôle');
+  ok(!a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'banc' } }).ok, 'ticket refusé pour une autre app');
+  ok(a7.handle({ t: tk, a: 'boot' }).code === 'auth', 'un ticket ne sert pas de jeton pour la plateforme');
+  ok(!a7.handle({ a: 'ssoCheck', p: { ticket: tk.slice(0, -2) + 'xx', app: 'dossier' } }).ok, 'ticket falsifié refusé');
+  ok(!a7.handle({ a: 'ssoCheck', p: { ticket: a7.makeToken(e7), app: 'dossier' } }).ok, 'un jeton de plateforme n’est pas un ticket');
+  const save = clock; clock += 121000; ok(/expiré/.test(a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'dossier' } }).msg), 'ticket expiré après 2 minutes'); clock = save;
+  ok(H(co, 'ssoTicket', { app: 'arduino' }).ok === false, 'app inconnue refusée');
+  const tp = H(co, 'ssoTicket', { app: 'banc' }).ticket; ok(a7.handle({ a: 'ssoCheck', p: { ticket: tp, app: 'banc' } }).role === 'prof', 'prof : rôle prof');
+  H(co, 'setAccess', { blocked: [e7] }); ok(!a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'dossier' } }).ok, 'élève bloqué entre-temps : refusé');
+  console.log(`✓ ${n} vérifications réussies (avec connexion unique)`); }

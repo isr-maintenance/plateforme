@@ -70,8 +70,7 @@ function pageTP(){
     return `<div class="chap ${demo?'avail':''}"><span class="num">${k}</span><div class="ti"><b>${t}</b><span class="tiny muted">${demo?'Théorie : chapitre 2.3 du cours d’Électricité':'Feu vert en préparation'}</span></div>
       ${demo?`<span class="chip ${fvN===6?'ok':'warn'}">${fvN===6?'Feu vert':`${fvN}/6 prérequis`}</span><button class="btn sm primary" data-cap="fv">Voir le feu vert</button>`:`<span class="chip">En préparation</span>`}</div>`; }).join('')}</div>
   <div class="grid g2" style="margin-top:18px">
-    <div class="card pad"><div class="kicker" style="color:var(--tp)">Module Dossier TP</div><h3 style="margin:6px 0">Schémas, bon de commande, outillage</h3><p class="small muted">Le dossier de chaque TP se prépare dans le module Dossier TP, avec la même connexion.</p><button class="btn sm" data-module="dossier">En savoir plus</button></div>
-    <div class="card pad"><div class="kicker" style="color:var(--tp)">Module Banc de câblage</div><h3 style="margin:6px 0">Câbler avant l'atelier</h3><p class="small muted">Les exercices du TP peuvent d'abord être câblés et testés sur le simulateur.</p><button class="btn sm" data-module="banc">En savoir plus</button></div>
+    <div class="card pad"><div class="kicker" style="color:var(--tp)">Banc de câblage</div><h3 style="margin:6px 0">Câbler avant l'atelier</h3><p class="small muted">Les exercices du TP peuvent d'abord être câblés et testés sur le simulateur.</p><button class="btn sm primary" data-app="banc">Ouvrir le Banc ↗</button></div>
   </div>`;
 }
 function bindTP(m){ m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap)); }
@@ -246,7 +245,7 @@ function fvHTML(){
     <div class="fv">${FEUVERT.map(x=>`<div class="it ${feuVert(x.k)?'ok':''}"><span class="lamp"></span><span>${x.t}</span><span class="src">${x.src}${x.cap&&!feuVert(x.k)?`<br><button class="revoir btn sm ghost" style="padding:2px 0" data-goto="${x.cap}">y aller →</button>`:''}</span></div>`).join('')}</div>
     <div class="card pad" style="margin-top:16px;border-color:var(--tp)"><div class="row between wrap"><div><div class="kicker" style="color:var(--tp)">Module Banc de câblage</div><b>Exercice : câbler le circuit à auto-maintien de la figure 2.25, sans modèle</b>
       <div class="small muted">Entraîne-toi sur le Banc de câblage ou sur le panneau de l'atelier : c'est ton prof qui valide ce point quand ton câblage fonctionne.</div></div>
-      ${S.prog.banc?`<span class="chip ok">✓ Validé par ton prof</span>`:`<button class="btn" data-banc style="border-color:var(--tp);color:var(--tp)">Voir le schéma à câbler</button>`}</div></div></div>`;
+      ${S.prog.banc?`<span class="chip ok">✓ Validé par ton prof</span>`:`<span class="row" style="gap:8px"><button class="btn" data-banc style="border-color:var(--tp);color:var(--tp)">Voir le schéma à câbler</button><button class="btn primary" data-app="banc">Ouvrir le Banc ↗</button></span>`}</div></div></div>`;
 }
 function bindFV(m){
   m.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto));
@@ -258,14 +257,31 @@ function bindFV(m){
 /* ---------------- Outils ---------------- */
 const MODULES = {
   cours:{t:'Cours',k:'Ce que tu vois ici',d:'Capsules animées, vérifications, tests, feu vert TP et suivi du prof.',c:'var(--elec)'},
-  dossier:{t:'Dossier TP',k:'Module existant',d:'Schéma de principe, unifilaire et de câblage, bon de commande avec catalogue, liste d’outillage, photo du schéma fait à la main.',c:'var(--tp)'},
-  banc:{t:'Banc de câblage',k:'Module existant',d:'Simulateur de câblage : l’élève câble un schéma et le teste. Un chapitre peut l’ouvrir avec un exercice préchargé, et le résultat remonte au tableau de bord.',c:'var(--amber)'},
   lois:{t:'Lois de base en électricité',k:'Labo en ligne · ouvert à tous',d:'Fiches à retourner, analogie du barrage, triangle de la loi d’Ohm, calculateurs de puissance et d’énergie, constructeur de circuits série, parallèle et mixte avec calculs détaillés, quiz à volonté.',c:'var(--elec)',url:'outils/lois-electricite.html'},
-  arduino:{t:'Labo Arduino',k:'Module existant',d:'Simulateur d’électronique et d’Arduino, pour les parties électronique et programmation.',c:'var(--meca)'},
+  banc:{t:'Banc de câblage',k:'App · connexion automatique',d:'Simulateur de câblage : l’élève câble un schéma et le teste. Tu entres avec ton compte de la plateforme ; l’accès d’un élève reste à autoriser par son prof dans le Banc.',c:'var(--amber)',app:'banc'},
+  dossier:{t:'Dossier TP',k:'App · 3QEM · connexion automatique',d:'Schéma de principe, unifilaire et de câblage, bon de commande avec catalogue, liste d’outillage, photo du schéma fait à la main.',c:'var(--tp)',app:'dossier',pour:cl=>/^3qem/.test(cl)},
+  arduino:{t:'Labo Arduino',k:'App · ouverte à tous',d:'Simulateur d’électronique et d’Arduino : montages sur platine, programmation en blocs ou en code, défis par niveaux.',c:'var(--meca)',app:'arduino'},
 };
+/* les apps séparées : chacune garde son adresse et son propre serveur. Pour Dossier TP et le Banc,
+   la plateforme remet un ticket de 2 minutes que l'app échange contre sa propre connexion. */
+const APPS = {
+  banc:{url:'https://olivier7887.github.io/banc-de-cablage/', sso:true},
+  dossier:{url:'https://olivier7887.github.io/dossier-tp/', sso:true},
+  arduino:{url:'https://olivier7887.github.io/Labo-Arduino/', sso:false},
+};
+async function openApp(k){
+  const A=APPS[k]; if(!A) return;
+  const w=window.open('about:blank','_blank');            // ouvert tout de suite (sinon bloqué), gardé lié à la plateforme pour le bouton retour
+  const to=u=>{ if(w) w.location.href=u; else location.href=u; };
+  if(!A.sso || LOCAL){ to(A.url+'#plateforme'); return; }
+  const r=await API.call('ssoTicket',{app:k});
+  if(!r.ok){ if(w) w.close(); toast(r.msg||'Ouverture impossible'); return; }
+  to(A.url+'#plateforme&pt='+r.ticket);
+}
+function modulesVisibles(){ return Object.entries(MODULES).filter(([k,m])=>!m.pour || isProf() || m.pour(S.eleveClass||'')); }
 function pageOutils(){
-  return `<div class="page-head"><div><div class="kicker">Une seule connexion</div><h1>Outils</h1><p class="muted small">Chaque module reste un projet séparé : on peut le modifier sans toucher aux autres, et il ne se charge que quand on l'ouvre.</p></div></div>
-  <div class="grid g2">${Object.entries(MODULES).map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<a class="btn sm primary" href="${m.url}" target="_blank" rel="opener">Ouvrir ↗</a>`:`<button class="btn sm" data-module="${k}">Comment il s'intègre</button>`}</div>`).join('')}</div>`;
+  return `<div class="page-head"><div><div class="kicker">Une seule connexion</div><h1>Outils</h1><p class="muted small">Chaque app reste un projet séparé, avec sa propre adresse : elle s'ouvre dans un nouvel onglet, déjà connectée avec ton compte de la plateforme. Son bouton « ← Plateforme » te ramène ici.</p></div></div>
+  <div class="grid g2">${modulesVisibles().map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<a class="btn sm primary" href="${m.url}" target="_blank" rel="opener">Ouvrir ↗</a>`:m.app?`<button class="btn sm primary" data-app="${m.app}">Ouvrir ↗</button>${m.pour&&isProf()?' <span class="tiny muted">visible par les 3QEM et les profs</span>':''}`:''}</div>`).join('')}</div>`;
 }
 function moduleInfo(k){
   const m=MODULES[k];
