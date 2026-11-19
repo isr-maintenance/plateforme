@@ -121,7 +121,7 @@ table.t th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacin
 table.t td{padding:9px 10px;border-bottom:1px solid var(--line-2);vertical-align:middle}
 table.t tr.live td{background:var(--amber-soft)}
 .scroll-x{overflow-x:auto}
-select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+select,input[type=text],input[type=tel],input[type=email],input[type=date],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 textarea{width:100%;min-height:90px;resize:vertical}
 label.chk{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
 label.chk input{margin-top:3px;width:17px;height:17px;accent-color:var(--elec)}
@@ -391,3 +391,4 @@ table.t tr.mine td:first-child{box-shadow:inset 5px 0 0 var(--hl)}
 .chtog b{font-size:15px;color:var(--ink)}
 .chtog span{font-size:11px;font-weight:700}
 .chtog.on{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+table.t tr.verif td{background:var(--amber-soft)}

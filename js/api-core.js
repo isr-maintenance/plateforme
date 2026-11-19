@@ -146,8 +146,45 @@ function makeApi(store, deps) {
       return { ok: true, entry: e };
     },
     setTel: function(me, p){ var t = doc('stage:tel', {}); t[me.mail] = str(p.tel, 30); put('stage:tel', t, me.mail); return { ok: true }; },
+    /* l'élève encode lui-même son entreprise de stage : elle est ajoutée au carnet d'adresses (à vérifier par un prof) et lui est attribuée */
+    addLieu: function(me, p){
+      var per = str(p.per, 40); need(/^[\w-]+$/.test(per), 'Stage inconnu.');
+      var el = doc('eleve:' + me.mail, null); need(el && el.classe, 'Choisis d’abord ta classe.');
+      var k = 'stage:aff:' + per, A = doc(k, {}), a = A[me.mail] || {};
+      var L = doc('stage:lieux', []), cur = a.lieu ? L.filter(function(l){ return l.id === a.lieu; })[0] : null;
+      need(!a.lieu || (cur && cur.by === me.mail && cur.verif), 'Ton lieu de stage est déjà encodé par ton professeur : demande-lui pour le changer.');
+      var f = p.lieu || {}, v = {};
+      LIEU_F.forEach(function(x){ v[x] = str(f[x], x === 'adresse' ? 200 : 120).trim(); });
+      need(v.nom.length >= 2, 'Indique le nom de l’entreprise.'); need(v.localite.length >= 2, 'Indique la localité.');
+      need(v.tuteur.length >= 2, 'Indique le nom de ton tuteur.'); need(v.tel || v.mail, 'Indique au moins un téléphone ou une adresse mail de l’entreprise.');
+      var same = L.filter(function(l){ return norm(l.nom) === norm(v.nom) && norm(l.localite) === norm(v.localite) && (!cur || l.id !== cur.id); })[0];
+      var note = 'Ajouté par ' + me.nom + ' (élève) — à vérifier', id, lieu;
+      if (same) {                                              // entreprise déjà connue : on la réutilise telle quelle
+        id = same.id; lieu = same;
+        if (cur && !lieuUsed(cur.id, per, me.mail)) L = L.filter(function(l){ return l.id !== cur.id; });
+      } else if (cur) {                                        // l'élève corrige sa propre fiche, pas encore vérifiée
+        LIEU_F.forEach(function(x){ cur[x] = v[x]; }); cur.note = note; id = cur.id; lieu = cur;
+      } else {
+        var fl = el.classe.slice(1); fl = (fl === 'eqem' || fl === 'eqmm') ? [fl] : ['eqem', 'eqmm'];
+        id = 'l' + deps.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
+        lieu = { id: id, fil: fl, note: note, by: me.mail, verif: true };
+        LIEU_F.forEach(function(x){ lieu[x] = v[x]; });
+        need(L.length < 300, 'Le carnet d’adresses est plein : demande à ton professeur.');
+        L.push(lieu);
+      }
+      put('stage:lieux', L, me.mail);
+      a.lieu = id; A[me.mail] = a; put(k, A, me.mail);
+      return { ok: true, lieu: lieu };
+    },
     fcor: fcorGet
   };
+  var LIEU_F = ['nom', 'adresse', 'localite', 'secteur', 'tuteur', 'tel', 'mail'];
+  function norm(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ''); }
+  /* ce lieu est-il attribué à quelqu'un d'autre que (per, mail) ? */
+  function lieuUsed(id, per, mail){
+    return store.list('stage:aff:').some(function(r){ var P = r.value || {}, pk = r.key.slice(10);
+      return Object.keys(P).some(function(m){ return P[m] && P[m].lieu === id && !(pk === per && m === mail); }); });
+  }
 
   /* ---------- actions prof ---------- */
   var PROF = {
@@ -174,7 +211,15 @@ function makeApi(store, deps) {
     setSom: function(me, p){ var S = doc('som', {}); S[str(p.mail, 120) + '|' + str(p.uaa, 10)] = str(p.v, 20); put('som', S, me.mail); return { ok: true }; },
     setPeriodes: function(me, p){ need(Array.isArray(p.periodes) && p.periodes.length, 'Au moins une période.'); put('periodes', p.periodes.slice(0, 12), me.mail); return { ok: true }; },
     setStagePeriodes: function(me, p){ need(Array.isArray(p.periodes), 'Liste invalide.'); put('stage:periodes', p.periodes.slice(0, 20), me.mail); return { ok: true }; },
-    setLieux: function(me, p){ need(Array.isArray(p.lieux), 'Liste invalide.'); put('stage:lieux', p.lieux.slice(0, 300), me.mail); return { ok: true }; },
+    /* la liste envoyée par le prof remplace le carnet, sauf les lieux attribués à un élève qui n'y figurent pas
+       (ajoutés par un élève pendant que la page du prof était ouverte) */
+    setLieux: function(me, p){
+      need(Array.isArray(p.lieux), 'Liste invalide.');
+      var inc = p.lieux.slice(0, 300), ids = {}; inc.forEach(function(l){ if (l) ids[l.id] = 1; });
+      var cur = doc('stage:lieux', []), extra = cur.filter(function(l){ return !ids[l.id] && lieuUsed(l.id, '', ''); });
+      inc = inc.concat(extra); put('stage:lieux', inc, me.mail);
+      return { ok: true, lieux: inc, added: extra.length };
+    },
     stageAff: function(me, p){
       var k = 'stage:aff:' + str(p.per, 40), A = doc(k, {}), m = str(p.mail, 120), a = A[m] || {};
       need(['lieu','conv','visite','app','prof'].indexOf(p.field) >= 0, 'Champ inconnu.');

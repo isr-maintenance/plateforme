@@ -136,3 +136,35 @@ console.log(`✓ ${n} vérifications réussies`);
   H('zz.y.student@elmarche.be','setClasse',{classe:'4eqmm'});
   ok(H('zz.y.student@elmarche.be','boot').data.ouv['4eqmm|4-elec'].length===3, 'élève reçoit les chapitres ouverts');
   console.log(`✓ ${n} vérifications réussies (avec chapitres ouverts)`); }
+
+// l'élève encode son entreprise de stage : ajoutée au carnet et attribuée automatiquement
+{ const st5 = memStore(), a5 = ctx.makeApi(st5, deps); a5.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a5.handle({ t: a5.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be';
+  const e1 = 'tom.a.student@elmarche.be', e2 = 'luc.b.student@elmarche.be', e3 = 'max.c.student@elmarche.be';
+  [e1, e2, e3].forEach(e => H(e, 'setClasse', { classe: '4eqem' }));
+  H(co, 'setLieux', { lieux: [{ id: 'l1', nom: 'Carmeuse', localite: 'Aye', fil: ['eqem'] }] });
+  const F = { nom: 'Électro Famenne', adresse: 'Rue du Parc 3', localite: 'Marche-en-Famenne', secteur: 'Maintenance', tuteur: 'J. Dupont', tel: '084 11 22 33', mail: '' };
+  ok(H(e1, 'addLieu', { per: 's4', lieu: Object.assign({}, F, { tuteur: '' }) }).ok === false, 'tuteur obligatoire');
+  let r = H(e1, 'addLieu', { per: 's4', lieu: F });
+  ok(r.ok && r.lieu.by === e1 && r.lieu.verif && r.lieu.fil.join() === 'eqem' && /à vérifier/.test(r.lieu.note), 'lieu ajouté, marqué à vérifier, filière de l’élève');
+  const id = r.lieu.id; ok(st5.get('stage:aff:s4')[e1].lieu === id, 'attribué automatiquement à l’élève');
+  let d = H(e1, 'boot').data; ok(d.stage.lieux.length === 1 && d.stage.lieux[0].id === id && d.stage.mine.s4.lieu === id, 'l’élève voit son entreprise');
+  r = H(e1, 'addLieu', { per: 's4', lieu: Object.assign({}, F, { tel: '084 99 99 99' }) });
+  ok(r.ok && r.lieu.id === id && st5.get('stage:lieux').length === 2 && st5.get('stage:lieux')[1].tel === '084 99 99 99', 'l’élève corrige sa fiche non vérifiée');
+  r = H(e2, 'addLieu', { per: 's4', lieu: Object.assign({}, F, { nom: 'electro  FAMENNE', tel: 'x' }) });
+  ok(r.ok && r.lieu.id === id && st5.get('stage:lieux').length === 2, 'même entreprise reconnue (casse, accents) : pas de doublon');
+  r = H(e3, 'addLieu', { per: 's4', lieu: { nom: 'carmeuse', localite: 'AYE', tuteur: 'X Y', tel: '1' } });
+  ok(r.ok && r.lieu.id === 'l1' && r.lieu.verif === undefined, 'entreprise du carnet réutilisée sans modification');
+  ok(H(e3, 'addLieu', { per: 's4', lieu: F }).ok === false, 'lieu encodé par le prof : l’élève ne peut plus le changer');
+  // un prof enregistre une liste ancienne (sans le nouveau lieu) : le lieu attribué est conservé
+  r = H(co, 'setLieux', { lieux: [{ id: 'l1', nom: 'Carmeuse', localite: 'Aye', fil: ['eqem'] }] });
+  ok(r.added === 1 && st5.get('stage:lieux').some(l => l.id === id), 'liste du prof périmée : le lieu de l’élève n’est pas perdu');
+  // le prof vérifie : l'élève ne peut plus modifier
+  const L = st5.get('stage:lieux').map(l => l.id === id ? Object.assign({}, l, { verif: false, note: '' }) : l);
+  H(co, 'setLieux', { lieux: L });
+  ok(H(e1, 'addLieu', { per: 's4', lieu: F }).ok === false, 'fiche vérifiée par le prof : verrouillée pour l’élève');
+  // un lieu non attribué peut toujours être supprimé par le prof
+  H(co, 'stageAff', { per: 's4', mail: e1, field: 'lieu', v: '' }); H(co, 'stageAff', { per: 's4', mail: e2, field: 'lieu', v: '' });
+  H(co, 'setLieux', { lieux: [{ id: 'l1', nom: 'Carmeuse' }] }); ok(st5.get('stage:lieux').length === 1, 'suppression d’un lieu libre');
+  ok(H(co, 'addLieu', { per: 's4', lieu: F }).ok === false, 'action réservée aux élèves');
+  console.log(`✓ ${n} vérifications réussies (avec lieux encodés par les élèves)`); }

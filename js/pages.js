@@ -441,6 +441,7 @@ function pageStages(){
   return `<div class="page-head"><div><div class="kicker">4e : 1 × 2 semaines · 5e : 2 × 2 semaines · 6e : 2 × 3 semaines</div><h1>Stages</h1></div>
     <div class="row wrap"><select data-scl>${CLASSES.filter(x=>x.annee>=4).map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${x.nom}</option>`).join('')}</select>
     <select data-sper>${pers.map(p=>`<option value="${p.id}" ${p.id===st.per?'selected':''}>${esc(p.nom)} · ${fmtDs(p.debut)} → ${fmtDs(p.fin)}</option>`).join('')}</select></div></div>
+  ${(()=>{ const nv=st.lieux.filter(l=>l.verif).length; return nv?`<div class="note warn" style="margin-bottom:16px"><b>${nv} entreprise${nv>1?'s':''} ajoutée${nv>1?'s':''} par des élèves, à vérifier</b>Contrôle les coordonnées dans « Lieux de stage » puis clique « ✓ Vérifié ». Une fois vérifiée, l'élève ne peut plus la modifier. <button class="btn sm" data-goto-lieux style="margin-top:6px">Voir les lieux à vérifier</button></div>`:''; })()}
   <div class="grid g4" style="margin-bottom:16px">
     <div class="card kpi"><div class="v">${studs.length?placed+'/'+studs.length:'—'}</div><div class="l">élèves avec un lieu de stage</div></div>
     <div class="card kpi"><div class="v">${studs.length?conv+'/'+studs.length:'—'}</div><div class="l">conventions signées</div></div>
@@ -466,10 +467,10 @@ function pageStages(){
       <td style="white-space:nowrap">${(()=>{ const js=journalStats(st.per,s); return `<button class="btn sm" data-journal="${esc(ck(st.per,s))}">${js.filled}/${js.days.length} jours</button>${js.unseen?` <span class="chip warn">${js.unseen} à lire</span>`:''}`; })()}</td></tr>`; }).join('')}
     </table></div>`:`<div class="pad"><p class="small muted" style="margin:0">Aucun élève dans cette classe pour l’instant : ils apparaissent à leur première connexion.</p></div>`}</div>
 
-  <div class="card" style="margin-top:16px"><div class="pad row between wrap" style="border-bottom:1px solid var(--line)"><div><h3>Lieux de stage</h3><p class="small muted" style="margin:4px 0 0">Le carnet d'adresses de la section, partagé par tous les profs.</p></div><button class="btn" data-ladd>+ Ajouter un lieu</button></div>
-    <div class="scroll-x"><table class="t"><tr><th>Entreprise</th><th>Localité</th><th>Secteur</th><th>Tuteur</th><th>Téléphone</th><th>Adresse mail</th><th>Filières</th><th>Élèves</th><th></th></tr>
+  <div class="card" style="margin-top:16px" id="lieux"><div class="pad row between wrap" style="border-bottom:1px solid var(--line)"><div><h3>Lieux de stage</h3><p class="small muted" style="margin:4px 0 0">Le carnet d'adresses de la section, partagé par tous les profs. Les élèves peuvent y ajouter leur entreprise : elle leur est attribuée et apparaît ici « à vérifier ».</p></div><button class="btn" data-ladd>+ Ajouter un lieu</button></div>
+    <div class="scroll-x"><table class="t"><tr><th>Entreprise</th><th>Adresse</th><th>Localité</th><th>Secteur</th><th>Tuteur</th><th>Téléphone</th><th>Adresse mail</th><th>Filières</th><th>Élèves</th><th></th></tr>
     ${st.lieux.map((l,i)=>{ const n=Object.values(st.aff).reduce((t,per)=>t+Object.values(per).filter(a=>a.lieu===l.id).length,0); const f=(k,w)=>`<input type="text" data-lieu="${i}|${k}" value="${esc(l[k]||'')}" style="width:${w}px">`;
-      return `<tr><td>${f('nom',170)}${l.note?`<div class="tiny muted">${esc(l.note)}</div>`:''}</td><td>${f('localite',120)}</td><td>${f('secteur',170)}</td><td>${f('tuteur',130)}</td><td>${f('tel',110)}</td><td>${f('mail',170)}</td>
+      return `<tr class="${l.verif?'verif':''}"><td>${f('nom',170)}${l.verif?`<div class="tiny" style="margin-top:4px"><span class="chip warn">${esc(l.note||'Ajouté par un élève — à vérifier')}</span> <button class="btn sm" data-lok="${i}">✓ Vérifié</button></div>`:l.note?`<div class="tiny muted">${esc(l.note)}</div>`:''}</td><td>${f('adresse',170)}</td><td>${f('localite',120)}</td><td>${f('secteur',170)}</td><td>${f('tuteur',130)}</td><td>${f('tel',110)}</td><td>${f('mail',170)}</td>
       <td class="small" style="white-space:nowrap">${['eqem','eqmm'].map(x=>`<label style="margin-right:8px"><input type="checkbox" data-lfil="${i}|${x}" ${l.fil.includes(x)?'checked':''}> ${fil(x).code}</label>`).join('')}</td>
       <td class="small">${n}</td><td><button class="btn sm ghost" data-ldel="${i}" ${n?'disabled title="Des élèves y sont placés"':''}>Supprimer</button></td></tr>`; }).join('')}
     </table></div></div>
@@ -488,8 +489,10 @@ function bindStages(m){
   m.querySelectorAll('[data-saff]').forEach(i=>i.onchange=async()=>{ const parts=i.dataset.saff.split('|'); const field=parts.pop(); const mail=parts.pop(); const per=parts.join('|');
     const v = i.type==='checkbox'? i.checked : i.value; const P=st.aff[per]||(st.aff[per]={}); const a=P[mail]||(P[mail]={}); a[field]=v; rer();
     await act('stageAff',{per, mail, field, v}); });
-  const pushLieux=()=>act('setLieux',{lieux:st.lieux});
-  m.querySelectorAll('[data-lieu]').forEach(i=>i.onchange=()=>{ const [idx,f]=i.dataset.lieu.split('|'); st.lieux[+idx][f]=i.value; if(f!=='note') st.lieux[+idx].note=''; rer(); pushLieux(); });
+  const pushLieux=async()=>{ const r=await act('setLieux',{lieux:st.lieux}); if(r && r.added){ st.lieux=r.lieux; rer(); toast(`${r.added} lieu(x) ajouté(s) entre-temps par des élèves`); } };
+  m.querySelectorAll('[data-lieu]').forEach(i=>i.onchange=()=>{ const [idx,f]=i.dataset.lieu.split('|'); st.lieux[+idx][f]=i.value; if(f!=='note'){ st.lieux[+idx].note=''; st.lieux[+idx].verif=false; } rer(); pushLieux(); });
+  m.querySelectorAll('[data-lok]').forEach(b=>b.onclick=()=>{ const L=st.lieux[+b.dataset.lok]; L.verif=false; L.note=''; rer(); pushLieux(); toast('Lieu vérifié'); });
+  const gl=m.querySelector('[data-goto-lieux]'); if(gl) gl.onclick=()=>{ const t=m.querySelector('#lieux tr.verif')||m.querySelector('#lieux'); t.scrollIntoView({behavior:'smooth',block:'center'}); };
   m.querySelectorAll('[data-lfil]').forEach(i=>i.onchange=()=>{ const [idx,f]=i.dataset.lfil.split('|'); const L=st.lieux[+idx]; L.fil = i.checked? [...new Set([...L.fil,f])] : L.fil.filter(x=>x!==f); rer(); pushLieux(); });
   m.querySelectorAll('[data-ldel]').forEach(b=>b.onclick=()=>{ if(!confirm('Supprimer ce lieu de stage ?')) return; st.lieux.splice(+b.dataset.ldel,1); rer(); pushLieux(); });
   m.querySelector('[data-ladd]').onclick=()=>{ st.lieux.push({ id:'l'+Date.now().toString(36), nom:'Nouvelle entreprise', localite:'', secteur:'', tuteur:'', tel:'', mail:'', fil:['eqem','eqmm'], note:'' }); rer(); pushLieux(); toast('Lieu ajouté : complète la ligne'); };
@@ -499,8 +502,8 @@ function bindStages(m){
   const mi=m.querySelector('[data-mine]'); if(mi) mi.onchange=()=>{ st.onlyMine=mi.checked; rer(); };
   m.querySelectorAll('[data-stel]').forEach(i=>i.onchange=async()=>{ (st.tel||(st.tel={}))[i.dataset.stel]=i.value.trim(); await act('stageTel',{mail:i.dataset.stel, tel:i.value.trim()},'Numéro enregistré'); });
   const ex=m.querySelector('[data-scsv]'); if(ex) ex.onclick=()=>{ const c=cls(st.cl), P=st.periodes.find(p=>p.id===st.per);
-    const rows=[['Élève','Adresse','Tél. élève','Classe','Stage','Du','Au','Entreprise','Localité','Tuteur','Tél. entreprise','Mail entreprise','Prof visiteur','Convention','Date de visite','Appréciation']].concat(stageEleves(c.id).map(s=>{ const a=affOf_(st.per,s), l=lieu(a.lieu)||{};
-      return [nomEl(s),s,(st.tel||{})[s]||'',c.nom,P.nom,fmtD(P.debut),fmtD(P.fin),l.nom||'',l.localite||'',l.tuteur||'',l.tel||'',l.mail||'',a.prof||'',a.conv?'signée':'',a.visite?fmtD(a.visite):'',a.app||'']; }));
+    const rows=[['Élève','Adresse','Tél. élève','Classe','Stage','Du','Au','Entreprise','Adresse entreprise','Localité','Tuteur','Tél. entreprise','Mail entreprise','Prof visiteur','Convention','Date de visite','Appréciation']].concat(stageEleves(c.id).map(s=>{ const a=affOf_(st.per,s), l=lieu(a.lieu)||{};
+      return [nomEl(s),s,(st.tel||{})[s]||'',c.nom,P.nom,fmtD(P.debut),fmtD(P.fin),l.nom||'',l.adresse||'',l.localite||'',l.tuteur||'',l.tel||'',l.mail||'',a.prof||'',a.conv?'signée':'',a.visite?fmtD(a.visite):'',a.app||'']; }));
     const txt='\ufeff'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download=`stages-${c.nom}-${P.nom}.csv`.replace(/\s+/g,'-'); a.click(); toast('Liste des stages exportée'); };
 }
@@ -512,10 +515,32 @@ function pageMonStage(){
     return `<div class="card pad"><div class="row between wrap"><div><h3>${esc(p.nom)}</h3><div class="small muted">du ${fmtD(p.debut)} au ${fmtD(p.fin)} · ${weeksOf(p.debut,p.fin)} semaines</div></div>
       <button class="btn primary" data-journal="${p.id}" ${isProf()?'disabled title="Disponible pour les élèves"':''}>Mon journal de stage · ${js.filled}/${js.days.length} jours</button></div>
       <div class="grid g2" style="margin-top:12px">
-        <div class="small">${l?`<div class="kicker">Lieu de stage</div><b>${esc(l.nom)}</b> · ${esc(l.localite)}<div class="muted">${esc(l.secteur||'')}</div><div style="margin-top:6px">Tuteur : <b>${esc(l.tuteur||'—')}</b>${l.tel?` · <a href="tel:${esc(l.tel.replace(/\s/g,''))}">${esc(l.tel)}</a>`:''}${l.mail?` · ${esc(l.mail)}`:''}</div>`:'<span class="chip warn">lieu de stage à trouver</span>'}</div>
+        <div class="small">${l?`<div class="kicker">Lieu de stage</div><b>${esc(l.nom)}</b> · ${esc(l.localite)}${l.adresse?`<div>${esc(l.adresse)}</div>`:''}<div class="muted">${esc(l.secteur||'')}</div><div style="margin-top:6px">Tuteur : <b>${esc(l.tuteur||'—')}</b>${l.tel?` · <a href="tel:${esc(l.tel.replace(/\s/g,''))}">${esc(l.tel)}</a>`:''}${l.mail?` · ${esc(l.mail)}`:''}</div>${l.verif?'<div style="margin-top:8px"><span class="chip warn">en attente de vérification par ton prof</span></div>':''}`:'<span class="chip warn">lieu de stage à trouver</span>'}
+          ${lieuEditable(p.id)?`<div style="margin-top:10px"><button class="btn sm${l?'':' primary'}" data-addlieu="${p.id}">${l?'Modifier mon entreprise':'J’ai trouvé mon entreprise de stage'}</button></div>`:''}</div>
         <div class="small"><div class="kicker">Suivi</div>${a.conv?'<span class="chip ok">convention signée</span>':'<span class="chip warn">convention à signer</span>'}${a.prof?`<div style="margin-top:6px">Visite : <b>${esc(a.prof)}</b>${a.visite?' le '+fmtD(a.visite):''}</div>`:''}</div></div></div>`; }).join('')}
     <div class="card pad"><label class="small"><b>Mon numéro de téléphone</b> <span class="muted">(pour que l'école puisse te joindre pendant le stage)</span><br>
       <input type="tel" data-mytel value="${esc((S.stage.tel||{})[me]||'')}" placeholder="04.. .. .. .." style="width:200px;margin-top:6px" ${isProf()?'disabled':''}></label></div></div>`;
+}
+/* l'élève peut encoder son entreprise tant qu'aucun prof ne l'a encodée ou vérifiée */
+function lieuEditable(per){ if(isProf()) return false; const a=affOf_(per,S.me.mail), l=lieu(a.lieu); return !a.lieu || !!(l && l.by===S.me.mail && l.verif); }
+const LIEU_FORM=[['nom','Nom de l’entreprise',true,'ex. Électro Famenne SPRL'],['adresse','Adresse (rue et numéro)',false,'ex. Rue du Parc 3'],['localite','Localité',true,'ex. Marche-en-Famenne'],['secteur','Activité de l’entreprise',false,'ex. maintenance industrielle, électricité du bâtiment'],['tuteur','Nom de ton tuteur',true,'la personne qui s’occupe de toi sur place'],['tel','Téléphone de l’entreprise ou du tuteur',false,'ex. 084 12 34 56'],['mail','Adresse mail de l’entreprise ou du tuteur',false,'ex. info@entreprise.be']];
+function lieuForm(per){
+  const P=S.stage.periodes.find(p=>p.id===per)||{}, a=affOf_(per,S.me.mail), l=lieu(a.lieu)||{};
+  const md=modal('Mon entreprise de stage', `<p class="small muted" style="margin-top:0">${esc(P.nom||'Stage')}${P.debut?` · du ${fmtD(P.debut)} au ${fmtD(P.fin)}`:''}. Ton prof vérifiera ces informations ; tant qu'il ne l'a pas fait, tu peux les corriger.</p>
+    <div class="stack" style="gap:10px">${LIEU_FORM.map(([k,lab,req,ph])=>`<label class="small"><b>${lab}</b>${req?' <span class="muted">*</span>':''}<br><input type="${k==='mail'?'email':k==='tel'?'tel':'text'}" data-lf="${k}" value="${esc(l[k]||'')}" placeholder="${esc(ph)}" style="width:100%;margin-top:4px" maxlength="${k==='adresse'?200:120}"></label>`).join('')}</div>
+    <p class="tiny muted">* obligatoire, ainsi qu'au moins un téléphone ou une adresse mail.</p>
+    <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" data-close>Annuler</button><button class="btn primary" data-lfok>Enregistrer</button></div>`);
+  const ok=md.querySelector('[data-lfok]');
+  ok.onclick=async()=>{ const v={}; md.querySelectorAll('[data-lf]').forEach(i=>v[i.dataset.lf]=i.value.trim());
+    if(v.nom.length<2||v.localite.length<2||v.tuteur.length<2) return toast('Complète le nom, la localité et ton tuteur.');
+    if(!v.tel && !v.mail) return toast('Indique au moins un téléphone ou une adresse mail.');
+    ok.disabled=true; const r=await act('addLieu',{per, lieu:v},'Entreprise enregistrée : ton prof va la vérifier'); ok.disabled=false;
+    if(!r) return;
+    const L=S.stage.lieux, i=L.findIndex(x=>x.id===r.lieu.id); if(i>=0) L[i]=r.lieu; else L.push(r.lieu);
+    const mine=S.stage.mine[per]||(S.stage.mine[per]={}); mine.lieu=r.lieu.id;
+    (S.stage.aff[per]||(S.stage.aff[per]={}))[S.me.mail]=mine;
+    S.stage.lieux=L.filter(x=>Object.values(S.stage.mine).some(m=>m.lieu===x.id));
+    closeModal(); render(); };
 }
 /* ---------------- Journal de stage ---------------- */
 const JOURS=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];

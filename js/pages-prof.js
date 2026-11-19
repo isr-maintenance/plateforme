@@ -136,6 +136,7 @@ function signalForm(capId){
     const r=await act('signal',{cap:cap.sec,txt:v},'Signalement envoyé'); if(r){ S.signal.unshift({cap:cap.sec,txt:v,who:ME}); closeModal(); } };
 }
 function bindMonStage(m){
+  m.querySelectorAll('[data-addlieu]').forEach(b=>b.onclick=()=>lieuForm(b.dataset.addlieu));
   const i=m.querySelector('[data-mytel]'); if(i && !isProf()) i.onchange=async()=>{ S.stage.tel[S.me.mail]=i.value.trim(); await act('setTel',{tel:i.value.trim()},'Numéro enregistré'); };
 }
 
