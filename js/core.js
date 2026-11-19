@@ -37,15 +37,16 @@ let saveTimer=null, previewProg=null;
 function save(){
   savePrefs();
   if(!S.me) return;
-  if(isProf()){ previewProg=S.prog; return; }          // aperçu élève d'un prof : rien n'est envoyé
+  if(isProf()){ if(S.role!=='eleve') return; previewProg=S.prog; }   // aperçu élève d'un prof : sa progression est gardée à part, hors suivi et carnet
   clearTimeout(saveTimer); saveTimer=setTimeout(pushProg, 1500);
 }
 async function pushProg(){
   clearTimeout(saveTimer); saveTimer=null;
+  if(isProf()){ const r = await API.call('saveMyProg', { prog: previewProg||S.prog }); setSync(r.ok?'ok':'err', r.msg); return; }
   const r = await API.call('saveProg', { prog: S.prog });
   if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; setSync('ok'); } else setSync('err', r.msg);
 }
-window.addEventListener('beforeunload', ()=>{ if(saveTimer && !LOCAL){ navigator.sendBeacon && navigator.sendBeacon(CONFIG.API_URL, JSON.stringify({ t: (()=>{try{return localStorage.getItem('plateforme-jeton')}catch(e){return null}})(), a:'saveProg', p:{ prog:S.prog } })); } });
+window.addEventListener('beforeunload', ()=>{ if(saveTimer && !LOCAL){ navigator.sendBeacon && navigator.sendBeacon(CONFIG.API_URL, JSON.stringify({ t: (()=>{try{return localStorage.getItem('plateforme-jeton')}catch(e){return null}})(), a:isProf()?'saveMyProg':'saveProg', p:{ prog:isProf()?(previewProg||S.prog):S.prog } })); } });
 function setSync(st,msg){ const el=$('#sync'); if(!el) return; el.className='sync '+st; el.title= st==='ok'?'Enregistré':(msg||'Non enregistré'); el.textContent= st==='ok'?'✓ enregistré':'⚠ non enregistré'; }
 
 /* ---------- élèves (vue prof) ---------- */
@@ -75,6 +76,7 @@ async function boot(){
     S.carnet.evals = d.evals||{}; S.notes=d.notes||{}; S.carnet.som=d.som||{}; S.signal=d.signal||[];
     S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{};
     S.eleveClass = S.eleveClass || '4eqmm';
+    previewProg = d.myProg ? normProg(d.myProg) : null;
     if(S.tab==='cours') S.tab='dash';
   }
   render();
@@ -183,8 +185,8 @@ function render(){
     ${LOCAL?'<span class="demo-badge" title="Les données restent dans ce navigateur">test local</span>':''}
     <nav class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</nav>
     <div class="spacer"></div>
-    ${S.me.role==='eleve'?'<span class="sync ok tiny" id="sync">✓ enregistré</span>':''}
-    ${isProf()?`<div class="role-switch" role="group" aria-label="Changer de vue"><button class="${S.role==='prof'?'on':''}" data-role="prof">Prof</button><button class="${S.role==='eleve'?'on':''}" data-role="eleve" title="Voir la plateforme comme un élève (rien n’est enregistré)">Aperçu élève</button></div>`:''}
+    ${S.role==='eleve'?'<span class="sync ok tiny" id="sync">✓ enregistré</span>':''}
+    ${isProf()?`<div class="role-switch" role="group" aria-label="Changer de vue"><button class="${S.role==='prof'?'on':''}" data-role="prof">Prof</button><button class="${S.role==='eleve'?'on':''}" data-role="eleve" title="Faire les capsules comme un élève : ta progression est gardée pour toi seul, hors suivi et carnet, et repart à zéro chaque année scolaire">Aperçu élève</button></div>`:''}
     <button class="who" data-menu title="Mon compte" style="border:0;background:none;cursor:pointer"><div class="avatar">${ini}</div><div style="text-align:left"><b>${esc(S.me.nom)}</b><div class="tiny muted">${esc(sub)}</div></div></button>
   </div>`;
   $('#top').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>go(b.dataset.tab));

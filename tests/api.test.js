@@ -168,3 +168,16 @@ console.log(`✓ ${n} vérifications réussies`);
   H(co, 'setLieux', { lieux: [{ id: 'l1', nom: 'Carmeuse' }] }); ok(st5.get('stage:lieux').length === 1, 'suppression d’un lieu libre');
   ok(H(co, 'addLieu', { per: 's4', lieu: F }).ok === false, 'action réservée aux élèves');
   console.log(`✓ ${n} vérifications réussies (avec lieux encodés par les élèves)`); }
+
+// progression du prof (aperçu élève) : enregistrée à part, remise à zéro à la nouvelle année scolaire
+{ const st6 = memStore(), a6 = ctx.makeApi(st6, deps); a6.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a6.handle({ t: a6.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', save = clock;
+  ok(H(co, 'boot').data.myProg === null, 'prof : pas encore de progression');
+  clock = Date.UTC(2026, 10, 19);
+  ok(H(co, 'saveMyProg', { prog: { visited: ['a1','b5'], quiz: { a1q1: { sel: 1, ok: true } } } }).ok, 'prof enregistre sa progression');
+  let d = H(co, 'boot').data; ok(d.myProg.visited.join() === 'a1,b5' && !d.progs[co], 'prof retrouve sa progression, absente du suivi des élèves');
+  ok(H('x.y.student@elmarche.be', 'saveMyProg', { prog: {} }).ok === false, 'action réservée aux profs');
+  clock = Date.UTC(2027, 7, 14); ok(H(co, 'boot').data.myProg.visited.length === 2, 'le 14 août, toujours la même année scolaire');
+  clock = Date.UTC(2027, 7, 15); ok(H(co, 'boot').data.myProg === null, 'le 15 août : nouvelle année, progression remise à zéro');
+  H(co, 'saveMyProg', { prog: { visited: ['c1'] } }); ok(H(co, 'boot').data.myProg.visited.join() === 'c1', 'nouvelle progression pour la nouvelle année');
+  clock = save; console.log(`✓ ${n} vérifications réussies (avec progression du prof)`); }

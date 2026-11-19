@@ -115,6 +115,8 @@ function makeApi(store, deps) {
     out.stage.tel = doc('stage:tel', {});
     out.stage.journal = listDocs('journal:');
     out.fcor = fcorList(me);
+    var mp = doc('profprog:' + me.mail, null);                 // la progression du prof dans les capsules, remise à zéro chaque année scolaire
+    out.myProg = mp && mp.annee === anneeSco(deps.now()) ? mp.prog : null;
     return out;
   }
 
@@ -186,8 +188,19 @@ function makeApi(store, deps) {
       return Object.keys(P).some(function(m){ return P[m] && P[m].lieu === id && !(pk === per && m === mail); }); });
   }
 
+  /* année scolaire « 2026-2027 » : elle change le 15 août, avant la rentrée de fin août */
+  function anneeSco(t){ var d = new Date(t), y = d.getUTCFullYear(), m = d.getUTCMonth();
+    return (m > 7 || (m === 7 && d.getUTCDate() >= 15)) ? y + '-' + (y + 1) : (y - 1) + '-' + y; }
+
   /* ---------- actions prof ---------- */
   var PROF = {
+    /* le prof qui fait les capsules (aperçu élève) retrouve où il s'est arrêté ; rien ne va dans le suivi ni dans le carnet */
+    saveMyProg: function(me, p){
+      need(p.prog && typeof p.prog === 'object', 'Progression manquante.');
+      var n = p.prog; n.maj = deps.now();
+      put('profprog:' + me.mail, { annee: anneeSco(deps.now()), prog: n }, me.mail);
+      return { ok: true };
+    },
     grade: function(me, p){
       var k = 'prog:' + str(p.mail, 120), pr = doc(k, null); need(pr && pr.test && pr.test.submitted, 'Pas d’évaluation à corriger.');
       var v = +p.v; need(v >= 0 && v <= 20, 'Note invalide.');
