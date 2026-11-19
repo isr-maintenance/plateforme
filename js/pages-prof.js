@@ -120,14 +120,16 @@ function dashTP(cl, studs){
 function bindDash(m){
   m.querySelectorAll('[data-ouv]').forEach(b=>b.onclick=async()=>{ const cl=S.dashKey.split('|')[0], k=b.dataset.ouv, cur=chapsOuverts(cl).slice();
     const i=cur.indexOf(k); if(i>=0) cur.splice(i,1); else cur.push(k); cur.sort((x,y)=>x.localeCompare(y,'fr',{numeric:true}));
-    const r=await act('setOuv',{key:ouvKey(cl),chaps:cur}, `${k} ${i>=0?'fermé':'ouvert'} pour ${cls(cl).nom}`);
-    if(r){ S.ouv[ouvKey(cl)]=r.chaps||cur; const y=window.scrollY; render(); window.scrollTo(0,y); } });
+    const avant=S.ouv[ouvKey(cl)]; S.ouv[ouvKey(cl)]=cur; const y=window.scrollY; render(); window.scrollTo(0,y);
+    const r=await act('setOuv',{key:ouvKey(cl),chaps:cur});
+    if(!r){ if(avant) S.ouv[ouvKey(cl)]=avant; else delete S.ouv[ouvKey(cl)]; const y2=window.scrollY; render(); window.scrollTo(0,y2); } });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };
   m.querySelectorAll('[data-grade]').forEach(b=>b.onclick=async()=>{ const [mail,q,v]=b.dataset.grade.split('|');
-    const r=await act('grade',{mail,q,v:+v},'Note enregistrée — elle passe dans le carnet de cotes');
-    if(r){ const p=S.progs[mail]; p.test.open=p.test.open||{}; p.test.open[q]=+v; const y=window.scrollY; render(); window.scrollTo(0,y); } });
-  m.querySelectorAll('[data-banc]').forEach(c=>c.onchange=async()=>{ const mail=c.dataset.banc; const r=await act('setBanc',{mail,v:c.checked},c.checked?'Câblage validé':'Validation retirée');
-    if(r){ (S.progs[mail]||(S.progs[mail]={})).banc=c.checked; const y=window.scrollY; render(); window.scrollTo(0,y); } });
+    const p=S.progs[mail]; p.test.open=p.test.open||{}; const avant=p.test.open[q]; p.test.open[q]=+v; const y=window.scrollY; render(); window.scrollTo(0,y);
+    const r=await act('grade',{mail,q,v:+v});
+    if(!r){ if(avant===undefined) delete p.test.open[q]; else p.test.open[q]=avant; render(); } });
+  m.querySelectorAll('[data-banc]').forEach(c=>c.onchange=async()=>{ const mail=c.dataset.banc, v=c.checked, P=(S.progs[mail]||(S.progs[mail]={})); P.banc=v; const y=window.scrollY; render(); window.scrollTo(0,y);
+    const r=await act('setBanc',{mail,v}); if(!r){ P.banc=!v; render(); } });
 }
 function signalForm(capId){
   const cap=capById(capId);
@@ -187,7 +189,8 @@ function bindAcces(m){
   m.querySelectorAll('[data-prole]').forEach(s=>s.onchange=()=>{ S.access.profs[+s.dataset.prole].role=s.value; pushProfs(); });
   m.querySelectorAll('[data-pdel]').forEach(b=>b.onclick=()=>{ if(!confirm('Retirer ce professeur ? Il ne pourra plus se connecter.')) return; S.access.profs.splice(+b.dataset.pdel,1); pushProfs(); });
   m.querySelectorAll('[data-block]').forEach(b=>b.onclick=async()=>{ const k=b.dataset.block, i=S.access.blocked.indexOf(k); if(i>=0) S.access.blocked.splice(i,1); else S.access.blocked.push(k); rer(); await act('setAccess',{blocked:S.access.blocked}, i>=0?'Adresse débloquée':'Adresse bloquée'); });
-  m.querySelectorAll('[data-ecl]').forEach(s=>s.onchange=async()=>{ const r=await act('setEleveClasse',{mail:s.dataset.ecl, classe:s.value},'Classe modifiée'); if(r) S.eleves[s.dataset.ecl].classe=s.value; });
+  m.querySelectorAll('[data-ecl]').forEach(s=>s.onchange=async()=>{ const mail=s.dataset.ecl, avant=S.eleves[mail].classe; S.eleves[mail].classe=s.value;
+    const r=await act('setEleveClasse',{mail, classe:s.value}); if(!r){ S.eleves[mail].classe=avant; s.value=avant; } });
 }
 
 /* ---------------- Administration (coordinateur) ---------------- */

@@ -26,28 +26,57 @@ function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify({ dashK
 function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); if(p.dashKey) S.dashKey=p.dashKey; if(p.ckey) S.carnet.key=p.ckey; if(p.cper) S.carnet.per=p.cper; if(p.ech) S.carnet.echelle=p.ech; if(p.arr) S.carnet.arrondi=p.arr; if(p.scl) S.stage.cl=p.scl; if(p.sper) S.stage.per=p.sper; if(p.colors) S.stage.colors=p.colors; S.stage.onlyMine=!!p.onlyMine; if(p.lib) S.lib.sel=p.lib; }catch(e){} }
 
 /* ---------- envoi au serveur ---------- */
+/* Les enregistrements partent en arrière-plan : l'écran est déjà à jour, l'indicateur en haut
+   passe à « enregistrement… » puis au vert quand tout est arrivé. On peut donc enchaîner plusieurs
+   changements sans attendre. Deux changements de la même donnée partent l'un après l'autre, dans l'ordre. */
+const LECTURES = ['fcor','checkMail','boot','ssoTicket'];
+let PENDING = 0, PEND_ERR = '';
+const CHAINS = {};
 async function act(a, p, okMsg){
-  const r = await API.call(a, p);
-  if(!r.ok){ toast(r.msg || 'Erreur : non enregistré'); return null; }
-  if(okMsg) toast(okMsg);
-  return r;
+  if(LECTURES.includes(a)){
+    const r = await API.call(a, p);
+    if(!r.ok){ toast(r.msg || 'Erreur'); return null; }
+    if(okMsg) toast(okMsg);
+    return r;
+  }
+  const ck = a + '|' + (p && (p.key || p.per || p.mail) || '');
+  PENDING++; PEND_ERR=''; setSync('cours');
+  const run = (CHAINS[ck] || Promise.resolve()).then(() => API.call(a, p)).catch(e => ({ ok:false, msg: e && e.message }));
+  CHAINS[ck] = run;
+  const r = await run;
+  if(CHAINS[ck] === run) delete CHAINS[ck];
+  PENDING--;
+  if(!r.ok){ PEND_ERR = r.msg || 'Erreur : non enregistré'; toast('Non enregistré : ' + PEND_ERR); }
+  else if(okMsg && PENDING === 0) toast(okMsg);
+  if(PENDING === 0) setSync(PEND_ERR ? 'err' : 'ok', PEND_ERR);
+  else setSync('cours');
+  return r.ok ? r : null;
 }
+window.addEventListener('beforeunload', e => { if(PENDING > 0){ e.preventDefault(); e.returnValue = ''; } });
 /* la progression de l'élève part au serveur 1,5 s après le dernier changement */
 let saveTimer=null, previewProg=null;
 function save(){
   savePrefs();
   if(!S.me) return;
   if(isProf()){ if(S.role!=='eleve') return; previewProg=S.prog; }   // aperçu élève d'un prof : sa progression est gardée à part, hors suivi et carnet
-  clearTimeout(saveTimer); saveTimer=setTimeout(pushProg, 1500);
+  clearTimeout(saveTimer); saveTimer=setTimeout(pushProg, 1500); setSync('cours');
 }
 async function pushProg(){
   clearTimeout(saveTimer); saveTimer=null;
-  if(isProf()){ const r = await API.call('saveMyProg', { prog: previewProg||S.prog }); setSync(r.ok?'ok':'err', r.msg); return; }
-  const r = await API.call('saveProg', { prog: S.prog });
-  if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; setSync('ok'); } else setSync('err', r.msg);
+  PENDING++; setSync('cours');
+  let r;
+  if(isProf()) r = await API.call('saveMyProg', { prog: previewProg||S.prog });
+  else { r = await API.call('saveProg', { prog: S.prog }); if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; } }
+  PENDING--;
+  if(!r.ok) PEND_ERR = r.msg || 'Non enregistré';
+  if(saveTimer || PENDING > 0) setSync('cours'); else setSync(r.ok && !PEND_ERR ? 'ok' : 'err', PEND_ERR);
 }
 window.addEventListener('beforeunload', ()=>{ if(saveTimer && !LOCAL){ navigator.sendBeacon && navigator.sendBeacon(CONFIG.API_URL, JSON.stringify({ t: (()=>{try{return localStorage.getItem('plateforme-jeton')}catch(e){return null}})(), a:isProf()?'saveMyProg':'saveProg', p:{ prog:isProf()?(previewProg||S.prog):S.prog } })); } });
-function setSync(st,msg){ const el=$('#sync'); if(!el) return; el.className='sync '+st; el.title= st==='ok'?'Enregistré':(msg||'Non enregistré'); el.textContent= st==='ok'?'✓ enregistré':'⚠ non enregistré'; }
+let SYNC_ST = { st:'ok', msg:'' };
+function syncHTML(){ const {st,msg}=SYNC_ST;
+  const txt = st==='ok' ? '✓ enregistré' : st==='cours' ? `⏳ enregistrement…${PENDING>1?' ('+PENDING+')':''}` : '⚠ non enregistré';
+  return `<span class="sync ${st} tiny" id="sync" title="${esc(st==='ok'?'Tout est enregistré':st==='cours'?'Enregistrement en cours : attends le vert avant de fermer':(msg||'Non enregistré'))}">${txt}</span>`; }
+function setSync(st,msg){ SYNC_ST={ st, msg:msg||'' }; const el=$('#sync'); if(el) el.outerHTML=syncHTML(); }
 
 /* ---------- élèves (vue prof) ---------- */
 function elevesOf(cl){ return Object.keys(S.eleves).map(m=>Object.assign({mail:m},S.eleves[m])).filter(e=>e.classe===cl).sort((a,b)=>a.nom.localeCompare(b.nom,'fr')); }
@@ -185,7 +214,7 @@ function render(){
     ${LOCAL?'<span class="demo-badge" title="Les données restent dans ce navigateur">test local</span>':''}
     <nav class="tabs">${tabs.map(([k,l])=>`<button class="tab ${S.tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('')}</nav>
     <div class="spacer"></div>
-    ${S.role==='eleve'?'<span class="sync ok tiny" id="sync">✓ enregistré</span>':''}
+    ${syncHTML()}
     ${isProf()?`<div class="role-switch" role="group" aria-label="Changer de vue"><button class="${S.role==='prof'?'on':''}" data-role="prof">Prof</button><button class="${S.role==='eleve'?'on':''}" data-role="eleve" title="Faire les capsules comme un élève : ta progression est gardée pour toi seul, hors suivi et carnet, et repart à zéro chaque année scolaire">Aperçu élève</button></div>`:''}
     <button class="who" data-menu title="Mon compte" style="border:0;background:none;cursor:pointer"><div class="avatar">${ini}</div><div style="text-align:left"><b>${esc(S.me.nom)}</b><div class="tiny muted">${esc(sub)}</div></div></button>
   </div>`;
