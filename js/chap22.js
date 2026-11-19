@@ -6,7 +6,7 @@
    ========================================================= */
 (function(){
 /* lien vers le labo « Lois de base en électricité » (Outils), ouvert sur le bon onglet */
-const labo=(tab,txt)=>`<div class="note" style="margin:14px 0"><b>Pour aller plus loin : le labo des lois de base</b>${txt} <a class="btn sm" style="margin-left:6px" href="outils/lois-electricite.html#${tab}" target="_blank" rel="noopener">Ouvrir le labo ↗</a></div>`;
+const labo=(tab,txt)=>`<div class="note" style="margin:14px 0"><b>Pour aller plus loin : le labo des lois de base</b>${txt} <a class="btn sm" style="margin-left:6px" href="outils/lois-electricite.html#${tab}" target="_blank" rel="opener">Ouvrir le labo ↗</a></div>`;
 const R3=Math.sqrt(3), RHO=0.0225, RHO_AL=0.036;
 const Q22 = {
   b1q1:{q:"Qu'est-ce qu'un courant électrique ?",o:["Le déplacement d'ensemble des électrons libres dans une même direction","L'agitation des électrons au hasard","La chaleur qui circule dans le métal"],g:0,e:"Tant que les électrons libres s'agitent au hasard, il ne se passe rien. Dès qu'on les pousse tous du même côté, il y a courant.",r:'b1'},

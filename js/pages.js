@@ -265,7 +265,7 @@ const MODULES = {
 };
 function pageOutils(){
   return `<div class="page-head"><div><div class="kicker">Une seule connexion</div><h1>Outils</h1><p class="muted small">Chaque module reste un projet séparé : on peut le modifier sans toucher aux autres, et il ne se charge que quand on l'ouvre.</p></div></div>
-  <div class="grid g2">${Object.entries(MODULES).map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<a class="btn sm primary" href="${m.url}" target="_blank" rel="noopener">Ouvrir ↗</a>`:`<button class="btn sm" data-module="${k}">Comment il s'intègre</button>`}</div>`).join('')}</div>`;
+  <div class="grid g2">${Object.entries(MODULES).map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<a class="btn sm primary" href="${m.url}" target="_blank" rel="opener">Ouvrir ↗</a>`:`<button class="btn sm" data-module="${k}">Comment il s'intègre</button>`}</div>`).join('')}</div>`;
 }
 function moduleInfo(k){
   const m=MODULES[k];

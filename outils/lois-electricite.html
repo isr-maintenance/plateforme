@@ -21,8 +21,13 @@ body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:
 .wrap{max-width:980px;margin:0 auto;padding:28px 18px 60px}
 h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:-.02em}
 .sub{color:var(--muted);margin:0 0 22px}
-.back{display:inline-block;margin:0 0 14px;color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500}
-.back:hover{color:var(--ink)}
+.plat{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.plat .in{max-width:980px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:12px}
+.plat .logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.95rem;color:var(--ink);text-decoration:none}
+.plat .logo img{width:26px;height:26px;border-radius:7px}
+.plat .ret{margin-left:auto;font:inherit;font-weight:600;font-size:.9rem;padding:8px 14px;border-radius:9px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;text-decoration:none;white-space:nowrap}
+.plat .ret:hover{opacity:.88}
+@media (max-width:480px){ .plat .logo span{display:none} }
 nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;border-bottom:1px solid var(--line)}
 nav button{background:none;border:0;padding:10px 14px;font:inherit;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 nav button.on{color:var(--ink);border-color:var(--ink)}
@@ -109,8 +114,11 @@ th{color:var(--muted);font-weight:500}
 </style>
 </head>
 <body>
+<header class="plat"><div class="in">
+  <a class="logo" href="../"><img src="../icons/icon.svg" alt=""><span>Plateforme technique</span></a>
+  <a class="ret" href="../" id="retour">← Retour à la plateforme</a>
+</div></header>
 <div class="wrap">
-  <a class="back" href="../">← Plateforme technique</a>
   <h1>Lois de base en électricité</h1>
   <p class="sub">Courant, tension, résistance, puissance : fiches à retourner, calculateurs et quiz.</p>
 
@@ -290,6 +298,8 @@ const color = v => getComputedStyle(document.documentElement).getPropertyValue(v
 const num = el => { const v = parseFloat(String(el.value).replace(",", ".")); return isFinite(v) ? v : null; };
 
 /* Tabs */
+/* ouvert depuis la plateforme dans un nouvel onglet : on referme cet onglet pour retrouver la capsule où on était */
+document.querySelectorAll('a[href="../"]').forEach(a => a.onclick = e => { if (window.opener && !window.opener.closed){ e.preventDefault(); try { window.opener.focus(); } catch(x){} window.close(); setTimeout(() => { location.href = "../"; }, 300); } });
 function showTab(t){
   if (!document.getElementById(t)) return;
   document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x.dataset.t === t));
