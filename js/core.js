@@ -58,7 +58,7 @@ let saveTimer=null, previewProg=null;
 function save(){
   savePrefs();
   if(!S.me) return;
-  if(isProf()){ if(S.role!=='eleve') return; previewProg=S.prog; }   // aperçu élève d'un prof : sa progression est gardée à part, hors suivi et carnet
+  if(isProf()) previewProg=S.prog;   // la progression d'un prof (en vue prof comme en aperçu élève) est gardée à part, hors suivi et carnet
   clearTimeout(saveTimer); saveTimer=setTimeout(pushProg, 1500); setSync('cours');
 }
 async function pushProg(){
@@ -105,7 +105,7 @@ async function boot(){
     S.carnet.evals = d.evals||{}; S.notes=d.notes||{}; S.carnet.som=d.som||{}; S.signal=d.signal||[];
     S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{};
     S.eleveClass = S.eleveClass || '4eqmm';
-    previewProg = d.myProg ? normProg(d.myProg) : null;
+    previewProg = normProg(d.myProg); S.prog = previewProg;   // une seule progression pour le prof, en vue prof et en aperçu élève
     if(S.tab==='cours') S.tab='dash';
   }
   render();
@@ -225,7 +225,7 @@ function render(){
   $('#top').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>go(b.dataset.tab));
   $('#top').querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{
     S.role=b.dataset.role;
-    if(S.role==='eleve'){ S.prog=previewProg||DEF_PROG(); S.tab='cours'; } else { S.tab='dash'; }
+    S.prog=previewProg||S.prog; if(S.role==='eleve'){ S.tab='cours'; } else { S.tab='dash'; }
     S.view={page:'home'}; render(); });
   $('#top').querySelector('[data-menu]').onclick=()=>{ const md=modal('Mon compte', `<p><b>${esc(S.me.nom)}</b><br><span class="small muted">${esc(S.me.mail)}</span></p>
       <div class="row wrap"><button class="btn" data-refresh>↻ Recharger les données</button><button class="btn" data-logout>Se déconnecter</button>${LOCAL?'<button class="btn ghost" data-reset>Effacer les données de test</button>':''}</div>`);
@@ -297,7 +297,7 @@ function init(){
   loadPrefs(); API.readHash();
   document.body.addEventListener('click',e=>{ const t=e.target.closest('[data-try]'); if(!t) return;
     const k=t.dataset.try;
-    if(k==='relais'){ if(isProf()){ S.role='eleve'; S.prog=previewProg||DEF_PROG(); } S.tab='cours'; openCap('c1'); }
+    if(k==='relais'){ if(isProf()){ S.role='eleve'; S.prog=previewProg||S.prog; } S.tab='cours'; openCap('c1'); }
     if(k==='tp'){ S.tab='cours'; S.view={page:'tp',course:'4eqem-tpe'}; render(); window.scrollTo(0,0); }
     if(k==='dash'||k==='carnet'||k==='stages'){ S.role='prof'; go(k); }
   });
