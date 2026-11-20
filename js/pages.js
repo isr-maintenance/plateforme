@@ -206,7 +206,7 @@ function capHTML(id){
   const ch=chapOf(id)||CHAPTERS['2.3'], L=ch.caps;
   const i=L.findIndex(c=>c.id===id), cap=L[i];
   const prev=L[i-1], next=L[i+1];
-  const exLbl = cap.ex && typeof cap.ex==='object' ? cap.ex.lbl : {parts:'Défi des pièces',coil:'Faire coller puis retomber le relais',pins:'Les deux exercices de brochage',steps:'Les six étapes de la simulation',ohm:'Les quatre diagnostics',calc:'Le calcul de la bobine'}[cap.ex];
+  const exLbl = exLabel(cap);
   const pdfPg = ch.legacy ? ch.pdf[i] : cap.pdf;
   return `<div class="cap-body">
     <div class="row between wrap"><div class="kicker">${cap.sec} · capsule ${i+1}/${L.length}</div>
@@ -219,9 +219,18 @@ function capHTML(id){
   </div>
   <div class="cap-foot">
     ${prev?`<button class="btn" data-cap="${prev.id}">← ${prev.t}</button>`:'<span></span>'}
-    <span class="small" id="capstatus">${capDone(cap)?'<b style="color:var(--ok)">✓ Capsule validée</b>':'<span class="muted">Réponds juste à toutes les questions'+(exLbl?' et termine l’exercice':'')+'</span>'}</span>
+    <span class="small" id="capstatus">${capStatus(cap)}</span>
     ${next?`<button class="btn primary" data-cap="${next.id}">${next.t} →</button>`:ch.legacy?`<button class="btn primary" data-cap="test">Passer au test →</button>`:`<button class="btn primary" data-cap="syn:${ch.num}">${ch.synT||'Synthèse et évaluation'} →</button>`}
   </div>`;
+}
+/* ce qui valide une capsule : le nom de l'exercice, et ce qu'il reste à faire */
+function exLabel(cap){ return cap.ex && typeof cap.ex==='object' ? cap.ex.lbl : {parts:'Défi des pièces',coil:'Faire coller puis retomber le relais',pins:'Les deux exercices de brochage',steps:'Les six étapes de la simulation',ohm:'Les quatre diagnostics',calc:'Le calcul de la bobine'}[cap.ex]; }
+function capStatus(cap){
+  if(capDone(cap)) return '<b style="color:var(--ok)">✓ Capsule validée</b>';
+  const nq=cap.quiz.filter(id=>!quizOk(id)).length, lbl=exLabel(cap), todo=[];
+  if(nq) todo.push(`${nq} question${nq>1?'s':''} ci-dessous`);
+  if(lbl && !exOk(cap)) todo.push(`l’exercice plus haut : « ${lbl} »`);
+  return `<span class="muted">Encore à faire : ${todo.join(' et ')}</span>`;
 }
 function afterPlayer(){
   const m=$('#main'); bindCommon(m);
@@ -249,7 +258,7 @@ function updateTocChecks(){
   const b=$('#tocbar'); if(b) b.style.width=capsDoneCount()/CAPS.length*100+'%';
   const t=$('#toccount'); if(t) t.textContent=`${capsDoneCount()}/${CAPS.length} capsules validées`;
   const cap=CAPS.find(c=>c.id===S.view.cap);
-  if(cap){ const st=$('#capstatus'); if(st) st.innerHTML = capDone(cap)?'<b style="color:var(--ok)">✓ Capsule validée</b>':'<span class="muted">Réponds juste à toutes les questions'+(cap.ex?' et termine l’exercice':'')+'</span>';
+  if(cap){ const st=$('#capstatus'); if(st) st.innerHTML = capStatus(cap);
     const ch=$('#exchip'); if(ch){ ch.classList.toggle('ok',exOk(cap)); ch.textContent=(exOk(cap)?'✓ ':'')+ch.textContent.replace(/^✓ /,''); } }
 }
 let clock=null;

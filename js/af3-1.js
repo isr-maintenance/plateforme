@@ -116,7 +116,7 @@ defAF(1, {
       ${exbox('a1el','Quel est le rôle de chaque élément ?')}`,
      mount:root=>mountSortW(root.querySelector('#a1el'),'A1el',{cats:[['al','Alimentation'],['co','Conducteur'],['re','Récepteur'],['cm','Commande']],items:[
        ['La prise de courant 230 V','al'],['Le fil de cuivre','co'],['La lampe','re'],['L’interrupteur simple','cm'],['Une pile de 4,5 V','al'],['Un bouton-poussoir','cm']],ok:'Juste : alimentation, conducteur, récepteur, commande.'})},
-    {id:'A1b', sec:'1.2.4 — 1.2.5', t:'Les expériences : ouvert, fermé, court-circuit', quiz:['A1bq1','A1bq2'], ex:{keys:['A1sim'], lbl:'Les trois situations'},
+    {id:'A1b', sec:'1.2.4 — 1.2.5', t:'Les expériences : ouvert, fermé, court-circuit', quiz:['A1bq1','A1bq2'], ex:{keys:['A1sim'], lbl:'Les trois situations du circuit'},
      body:()=>`<p class="lead">Fais les expériences du cours sur le circuit ci-dessous : ferme et ouvre l’interrupteur, interromps un fil, puis relie les deux bornes de la lampe avec un fil de cuivre.</p>
       <div class="figure" id="a1sim"></div>
       <div class="note bad" style="margin-top:14px"><b>Remarque — danger</b>Quand on relie directement les deux fils de la source (ou les deux bornes de la lampe) avec un fil de cuivre, le récepteur ne se retrouve plus dans le circuit : on dit que le circuit est « court ». Il y a DANGER, car c’est un <b>court-circuit</b>.</div>
