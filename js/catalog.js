@@ -12,7 +12,7 @@ const FILIERES = [
 /* statut : demo = chapitre animé disponible · attente = ressources attendues */
 const COURS = [
   // --- 3QEM (grille de la brochure) — disparaît à la rentrée 2028
-  { id:'3em-elec', titre:'Électricité', sous:'électricité, dessin, technologie', type:'elec', per:3, pour:[['3qem',3]], statut:'attente' },
+  { id:'3em-elec', titre:'Électricité', sous:'Ampère & Fils — électricité fondamentale', type:'elec', per:3, pour:[['3qem',3]], statut:'demo', chip:'20 chapitres en ligne' },
   { id:'3em-meca', titre:'Mécanique', sous:'mécanique, dessin', type:'meca', per:3, pour:[['3qem',3]], statut:'attente' },
   { id:'3em-tpe',  titre:'TP électricité', type:'tp', per:4, pour:[['3qem',3]], statut:'attente', module:'dossier' },
   { id:'3em-tpm',  titre:'TP mécanique', type:'tp', per:4, pour:[['3qem',3]], statut:'attente' },
@@ -62,11 +62,46 @@ const AFFECT_DEF = [
   { cl:'3qem2', c:'3em-tpe', profs:['O. Lesenfants'] },
   { cl:'3qem3', c:'3em-tpe', profs:['G. Baudson'] },
   { cl:'4eqmm', c:'4-elec', profs:['O. Lesenfants'] },
+  { cl:'3qemct1', c:'3em-elec', profs:['O. Lesenfants'] },
+  { cl:'3qemct2', c:'3em-elec', profs:['O. Lesenfants'] },
   { cl:'4eqem', c:'4eqem-tpe', profs:['O. Lesenfants','P. Dachelet'] },
 ];
 let AFFECT = [];
 const affOf = (cl,c) => AFFECT.find(x=>x.cl===cl && x.c===c);
 const profsOf = (cl,c) => (affOf(cl,c)||{profs:[]}).profs;
+
+/* Plans des cours qui ont des chapitres dans la plateforme (hors Électricité 4e, qui garde sa page propre).
+   Clé interne d'un chapitre de 3QEM : « 0.N » (le serveur n'accepte que des numéros du type 2.3) ; il s'affiche « N ». */
+const AF3 = [
+  ['Éclairage d’un local','Circuit ouvert ou fermé, conducteurs et isolants'],
+  ['Le circuit électrique','Éléments du circuit, schéma normalisé'],
+  ['La matière','Molécules, atomes, ions, électrons libres'],
+  ['Notions générales','Générateur, tension, courant, résistance'],
+  ['Utilisation des appareils de mesures électriques','Voltmètre, ampèremètre, ohmmètre'],
+  ['La quantité d’électricité (loi de Coulomb)','Q = I . t'],
+  ['La loi de Pouillet','R = ρ . L / S'],
+  ['La loi d’Ohm','U = R . I'],
+  ['La loi de Mathiessen','Rt = R0 . (1 + α . t)'],
+  ['La puissance électrique','P = U . I'],
+  ['L’effet Joule','W = R . I² . t'],
+  ['Les résistances séries','Un seul courant, les tensions s’additionnent'],
+  ['La chute de tension en ligne','UL = RL . IL'],
+  ['Les résistances parallèles','Une seule tension, les courants s’additionnent'],
+  ['Les résistances mixtes','Réduire un circuit pas à pas'],
+  ['Les appareils de mesures','Multiplicateur de voltmètre, shunt d’ampèremètre'],
+  ['Les piles','F.é.m., résistance interne, polarisation'],
+  ['Les accumulateurs','Charge, décharge, accumulateur au plomb'],
+  ['Couplage des générateurs','Piles en série et en parallèle'],
+  ['Multiples et sous-multiples','Préfixes et puissances de dix'],
+];
+const COURSE_PLANS = {
+  '4-elec': { court:'Électricité 4e' },
+  '3em-elec': { court:'Électricité 3QEM', titre:'Cours d’Électricité — 3e Électromécanique', kicker:'3QEM · groupes de CT · Ampère & Fils',
+    sous:'Partie 1 « Électricité fondamentale » · programme FESeC Électromécanique · contenu original : M. Evrard',
+    noteT:'Pour chaque exercice chiffré : le tableau en quatre colonnes.',
+    note:'Données, inconnue, formule, solution : tu écris toi-même la formule, en t’aidant du formulaire du cours si besoin. Le résultat est vérifié tout de suite.',
+    parts:[{ t:'Partie 1 — Électricité fondamentale', sub:'20 chapitres', chaps: AF3.map(([t,i],n)=>['0.'+(n+1), String(n+1), t, i]) }] },
+};
 
 /* Cours d'Électricité 4e — version révisée (pages du PDF de la plateforme) */
 const ELEC4 = [

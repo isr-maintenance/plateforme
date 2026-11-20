@@ -118,7 +118,7 @@ const cls = id => CLASSES.find(c=>c.id===id) || { id, nom:id, annee:0, fil:'' };
 const coursFor = (filId, annee) => COURS.filter(c=>c.pour.some(([f,a])=>f===filId && a===annee));
 const TYPE = { elec:{l:'Électricité',c:'var(--elec)',chip:'elec'}, meca:{l:'Mécanique',c:'var(--meca)',chip:'meca'}, tp:{l:'Pratique',c:'var(--tp)',chip:'tp'} };
 function statutChip(c){
-  if(c.statut==='demo') return `<span class="chip ok"><span class="dot"></span>Chapitre 2.3 en ligne + PDF</span>`;
+  if(c.statut==='demo') return `<span class="chip ok"><span class="dot"></span>${c.chip||'Chapitre 2.3 en ligne + PDF'}</span>`;
   if(c.statut==='demo-tp') return `<span class="chip ok"><span class="dot"></span>Feu vert TP É03</span>`;
   if(S.pdfs[c.id]) return `<span class="chip elec"><span class="dot"></span>PDF disponible</span>`;
   return `<span class="chip"><span class="dot"></span>Contenu en préparation</span>`;
@@ -139,6 +139,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 let PDF_URL=null;
 function pdfUrl(key){
   if(key && S.pdfs[key]) return S.pdfs[key].url;
+  if(key && key!=='4-elec' && COURS.some(c=>c.id===key)) return null;   // un autre cours : seulement son propre PDF
   if(S.pdfs['4-elec']) return S.pdfs['4-elec'].url;
   if(S.role==='prof' && CONFIG.PDF_ELEC4_PROF) return CONFIG.PDF_ELEC4_PROF;   // version avec corrigés (pas en aperçu élève)
   if(CONFIG.PDF_ELEC4) return CONFIG.PDF_ELEC4;
@@ -193,8 +194,9 @@ function openCourse(id){
   modal(esc(c.titre), `<p class="muted small">${filtxt}${c.per?` · ${c.per} périodes/semaine`:''}</p>
     <p>Ce cours fait partie de la plateforme : son contenu arrivera chapitre par chapitre.${S.pdfs[c.id]?' Le PDF est déjà disponible dans la Bibliothèque.':''}</p>`);
 }
-function openCap(cap){ const och=chapOf(cap); if(S.role==='eleve' && och && !chapOpen(och.num)){ toast('Ce chapitre n’est pas encore ouvert : ton prof l’ouvrira au moment du TP.'); return; }
-  S.view={page:'player',course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && capById(cap)){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
+function openCap(cap){ const och=chapOf(cap); if(S.role==='eleve' && och && !chapOpen(och.num)){ toast(och.course==='4-elec'?'Ce chapitre n’est pas encore ouvert : ton prof l’ouvrira au moment du TP.':'Ce chapitre n’est pas encore ouvert : ton prof l’ouvrira quand vous y arriverez en classe.'); return; }
+  if(S.tab!=='cours' && S.tab!=='contenus') S.tab = S.role==='prof'?'contenus':'cours';
+  S.view={page:'player',course:och?och.course:'4-elec',cap}; if(!S.prog.visited.includes(cap) && capById(cap)){ S.prog.visited.push(cap); save(); } render(); window.scrollTo(0,0); }
 
 /* =========================================================
    RENDU
@@ -243,10 +245,11 @@ function bindCommon(m){
   m.querySelectorAll('[data-open-course]').forEach(b=>b.onclick=()=>openCourse(b.dataset.openCourse));
   m.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>openPdf(+b.dataset.pdf||null, b.dataset.pdfkey||null, b.dataset.pdftitle||null));
   m.querySelectorAll('[data-pdfurl]').forEach(b=>b.onclick=()=>window.open(b.dataset.pdfurl,'_blank','noopener'));
+  m.querySelectorAll('[data-formulaire]').forEach(b=>b.onclick=()=>openFormulaire(b.dataset.formulaire));
   m.querySelectorAll('[data-fcor]').forEach(b=>b.onclick=()=>openFcor(b.dataset.fcor));
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
   m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap));
-  m.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ const v=b.dataset.back; S.view = v==='home'?{page:'home'}:{page:v,course:'4-elec'}; render(); });
+  m.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ const v=b.dataset.back; S.view = v==='home'?{page:'home'}:{page:v,course:S.view.course||'4-elec'}; render(); window.scrollTo(0,0); });
   m.querySelectorAll('[data-module]').forEach(b=>b.onclick=()=>moduleInfo(b.dataset.module));
   m.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app));
   m.querySelectorAll('[data-journal]').forEach(b=>b.onclick=()=>{ const [per,...st]=b.dataset.journal.split('|'); openJournal(per, st.join('|')||S.me.mail); });

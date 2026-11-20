@@ -5,7 +5,10 @@
    questions rapides et exercices interactifs génériques.
    ========================================================= */
 const CHAPTERS = {};
-function defChapter(ch){ ch.caps.forEach(c=>{ c.chap=ch.num; }); CHAPTERS[ch.num]=ch; if(ch.Q) Object.assign(Q, ch.Q); }
+function defChapter(ch){ ch.course=ch.course||'4-elec'; ch.caps.forEach(c=>{ c.chap=ch.num; }); CHAPTERS[ch.num]=ch; if(ch.Q) Object.assign(Q, ch.Q); }
+/* numéro affiché : « 2.3 » en 4e ; en 3QEM la clé interne « 0.6 » s'affiche « 6 » */
+const chapLbl = num => { const ch=CHAPTERS[num]; return ch&&ch.lbl ? ch.lbl : num; };
+const courseOfChap = num => (CHAPTERS[num]||{}).course || '4-elec';
 function chapOf(capId){
   if(!capId) return null;
   if(capId.startsWith('syn:')) return CHAPTERS[capId.slice(4)]||null;
@@ -18,12 +21,20 @@ function chapResume(num){ const ch=CHAPTERS[num]; const c=ch.caps.find(x=>!capDo
 function exSet(k){ const p=P(); if(!p.ex[k]){ p.ex[k]=true; save(); } updateTocChecks(); }
 function DR(){ const p=P(); if(!p.dr||typeof p.dr!=='object') p.dr={}; return p.dr; }
 
-/* chapitres ouverts : le prof les ouvre pour sa classe (Suivi). Par défaut : 2.1 à 2.3. */
-const OUV_DEF=['2.1','2.2','2.3'];
-const ouvKey = cl => (cl||S.eleveClass)+'|4-elec';
-function chapsOuverts(cl){ const o=(S.ouv||{})[ouvKey(cl)]; return Array.isArray(o)?o:OUV_DEF; }
-function chapOpen(num){ return S.role==='prof' || chapsOuverts().includes(num); }
-const chapNums = () => Object.keys(CHAPTERS).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
+/* chapitres ouverts : le prof les ouvre pour sa classe et son cours (Suivi). Par défaut : les trois premiers.
+   En 3QEM, les cours techniques sont donnés aux groupes de CT : c'est le groupe de CT de l'élève qui compte. */
+const OUV_DEF={ '4-elec':['2.1','2.2','2.3'], '3em-elec':['0.1','0.2','0.3'] };
+function classeDuCours(course){
+  const co=COURS.find(c=>c.id===course);
+  if(S.me && S.me.role==='eleve' && co && co.type!=='tp' && /^3qem/.test(S.me.classe||'') && S.me.ct) return S.me.ct;
+  return S.eleveClass;
+}
+const ouvKey = (cl, course='4-elec') => (cl||classeDuCours(course))+'|'+course;
+function chapsOuverts(cl, course='4-elec'){ const o=(S.ouv||{})[ouvKey(cl,course)]; return Array.isArray(o)?o:(OUV_DEF[course]||[]); }
+function chapOpen(num){ return S.role==='prof' || chapsOuverts(null, courseOfChap(num)).includes(num); }
+const chapNums = (course='4-elec') => Object.keys(CHAPTERS).filter(k=>CHAPTERS[k].course===course).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
+/* cours dont les chapitres sont dans la plateforme */
+const courseHasChaps = id => Object.values(CHAPTERS).some(ch=>ch.course===id);
 
 /* le 2.3 dans le registre (ses capsules, ses pages PDF) */
 defChapter({ num:'2.3', titre:'Le relais électromécanique', tp:'É03', caps:CAPS, legacy:true, pdf:[53,53,54,54,55,57,59,61] });
@@ -84,7 +95,7 @@ function mountDrillW(box, key, cfg){
   box._w={key,cfg};
   const dr=DR(), vals = dr[key] || (dr[key]={});
   const st = WS[key] || (WS[key]={ checked:false });
-  const okRow=(r,i)=>{ const v=num(vals[i]); if(isNaN(v)) return false; const tol=r.tol!=null?r.tol:0.02; return Math.abs(v-r.ans) <= Math.max(Math.abs(r.ans)*tol, r.abs||1e-9); };
+  const okRow=(r,i)=>{ let v=num(vals[i]); if(isNaN(v) && typeof parseVal==='function') v=parseVal(vals[i]); if(isNaN(v)) return false; const tol=r.tol!=null?r.tol:0.02; return Math.abs(v-r.ans) <= Math.max(Math.abs(r.ans)*tol, r.abs||1e-9); };
   const draw=()=>{
     const done=!!P().ex[key];
     box.innerHTML = `${cfg.intro?`<p class="small" style="margin-top:0">${cfg.intro}</p>`:''}<div class="drill">${cfg.rows.map((r,i)=>{
@@ -114,16 +125,16 @@ const exbox = (id, title, sub) => `<div class="figure exw"><div class="row betwe
 function synHTML(num){
   const ch=CHAPTERS[num], open=typeof fcorOpen==='function' && fcorOpen(num), f=(S.fcor||[]).find(x=>x.ch===num);
   const pre=ch.prereq||[], nOk=pre.filter(x=>x.cap&&capDone(capById(x.cap))).length;
-  return `<div class="cap-body"><div class="kicker">Fin du chapitre ${num}</div><h2>Synthèse et évaluation</h2>
+  return `<div class="cap-body"><div class="kicker">Fin du chapitre ${chapLbl(num)}</div><h2>Synthèse et évaluation</h2>
     ${ch.noEval?'':`<div class="card pad" style="margin:12px 0"><div class="row between wrap"><div><div class="kicker">Évaluation formative ${num}</div>
       <b>${f?esc(f.titre):esc(ch.titre)}</b><div class="small muted">${ch.evalInfo||'Elle se passe sur papier, en classe, avec ton prof.'} ${open?'Elle est terminée : tu peux relire les questions et le corrigé.':'Quand elle sera corrigée, tu pourras relire ici les questions et le corrigé.'}</div></div>
       ${open?`<button class="btn primary" data-fcor="${num}">Évaluation et corrigé</button>`:'<span class="chip">🔒 après l’évaluation</span>'}</div></div>`}
     <h3>${ch.prereqTitle||`Ce que tu dois maîtriser avant d'entrer au TP ${ch.tp}`}</h3>
-    <p class="small muted">Chaque point se coche quand la capsule correspondante est validée. Le geste lui-même se vérifie à l'atelier, avec ton prof.</p>
+    <p class="small muted">${ch.prereqNote||'Chaque point se coche quand la capsule correspondante est validée. Le geste lui-même se vérifie à l’atelier, avec ton prof.'}</p>
     <div class="fv">${pre.map(x=>{ const c=x.cap&&capById(x.cap), ok=c&&capDone(c); return `<div class="it ${ok?'ok':''}"><span class="lamp"></span><span>${x.t}</span><span class="src">${c?`${c.sec} · ${c.t}${ok?'':`<br><button class="revoir btn sm ghost" style="padding:2px 0" data-goto="${c.id}">y aller →</button>`}`:'à l’atelier'}</span></div>`; }).join('')}</div>
     <div class="small muted" style="margin-top:6px">${nOk}/${pre.filter(x=>x.cap).length} points de théorie validés</div>
-    <h3 style="margin-top:20px">Questions de contrôle</h3>
-    <p class="small muted">Les questions de la synthèse du cours. Réponds-y de tête ou dans ton cahier : si une réponse ne vient pas, relis la capsule indiquée.</p>
+    ${(ch.controle||[]).length?`<h3 style="margin-top:20px">Questions de contrôle</h3>
+    <p class="small muted">Les questions de la synthèse du cours. Réponds-y de tête ou dans ton cahier : si une réponse ne vient pas, relis la capsule indiquée.</p>`:''}
     <ol class="ctrlq">${(ch.controle||[]).map(([q,cap])=>`<li>${q}${cap?` <button class="revoir" data-goto="${cap}">${capById(cap).sec}</button>`:''}</li>`).join('')}</ol>
   </div>
   <div class="cap-foot"><button class="btn" data-cap="${ch.caps[ch.caps.length-1].id}">← ${ch.caps[ch.caps.length-1].t}</button><span></span><button class="btn primary" data-back="course">Retour au cours</button></div>`;

@@ -21,6 +21,8 @@ Les profs qui ajoutent des chapitres avec Claude travaillent sur une branche et 
 | `js/config.js` | Les 3 adresses à remplir après l'installation Google |
 | `js/catalog.js` | Filières, classes, cours, plan du cours d'Électricité 4e, évaluations, stages |
 | `js/relais.js` | Le chapitre 2.3 (capsules, animations, évaluation, feu vert TP É03) |
+| `js/formules.js` | Écriture des formules (fractions…), tableau d'exercice Données · Inconnue · Formule · Solution, formulaire, triangle |
+| `js/af3*.js` | Le cours d'Électricité 3QEM « Ampère & Fils » (20 chapitres) et son formulaire |
 | `apps-script/donnees/` | Script du Google Sheet : stockage et droits (`Api.gs` + `Code.gs`) |
 | `apps-script/connexion/` | Petit script séparé qui lit seulement l'adresse @elmarche.be |
 | `tests/` | `node tests/api.test.js` vérifie le script (droits, notes, journal…) |

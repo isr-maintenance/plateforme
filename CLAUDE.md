@@ -14,12 +14,14 @@ Lis ce fichier en entier avant de toucher au dépôt. Il remplace les longues ex
 | Tu peux | Demande d'abord à Olivier |
 |---|---|
 | Ajouter ou corriger un chapitre, des capsules, des quiz, des exercices (`js/chapXX.js`) | Toucher à `apps-script/` (le serveur) : chaque changement doit être redéployé par Olivier |
-| Corriger un texte, une coquille, une page PDF | Ajouter un nouveau cours interactif autre que l'Électricité 4e (voir « Limites actuelles ») |
+| Corriger un texte, une coquille, une page PDF | Ajouter un nouveau cours interactif (voir « Les cours interactifs ») |
 | Ajouter un outil autonome dans `outils/` | Changer la connexion, les droits, le carnet de cotes, les stages |
 
 **Toujours** : travailler sur une branche, puis ouvrir une *pull request* vers `main`. Olivier relit et fusionne. Ne pousse jamais directement sur `main`.
 
 ## Ajouter un chapitre (cours d'Électricité 4e)
+
+Pour l'Électricité 3QEM (« Ampère & Fils »), voir plus bas « Le cours d'Électricité 3QEM ».
 
 Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/chap22.js` (calculs) ou `js/chap26.js` (classements et ordres).
 
@@ -45,6 +47,29 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
    - ajouter le fichier à la liste `FILES` de `sw.js` et incrémenter `CACHE` (`plateforme-vN` → `plateforme-vN+1`).
 7. **Ouverture** : un chapitre est fermé aux élèves tant que leur prof ne l'ouvre pas (Suivi › « Chapitres ouverts »). Rien à faire dans le code.
 
+## Les cours interactifs
+
+Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`) et **Électricité 3QEM** (`3em-elec`, « Ampère & Fils »).
+
+- Chaque chapitre appartient à un cours : `defChapter({ course:'3em-elec', … })` (par défaut `4-elec`).
+- Le plan d'un cours (titre, parties, chapitres) est dans `COURSE_PLANS` (`js/catalog.js`) ; le cours y a `statut:'demo'` et un `chip`.
+- **Numéro de chapitre** : le serveur n'accepte que des clés du type `2.3`. Un cours qui numérote 1, 2, 3… utilise une clé interne `0.N` et `lbl:'N'` pour l'affichage (c'est le cas du 3QEM).
+- Chapitres ouverts par défaut : `OUV_DEF` dans `js/chapitres.js`. En 3QEM, c'est le **groupe de CT** de l'élève qui compte pour les cours techniques.
+- Ajouter un troisième cours : une entrée dans `COURSE_PLANS`, `statut:'demo'` dans `COURS`, ses chapitres avec `course`, son `OUV_DEF`. Le suivi prof, la page du cours et le lecteur s'adaptent seuls.
+
+## Le cours d'Électricité 3QEM (Ampère & Fils)
+
+- Fichiers : `js/af3.js` (formulaire du cours + outils), `js/af3-1.js` (chapitres 1 à 5), `af3-2.js` (6 à 11), `af3-3.js` (12 à 16), `af3-4.js` (17 à 20).
+- Un chapitre se déclare avec `defAF(n, {Q, caps, prereq})` : clé `0.n`, cours, synthèse « ce que tu sais faire » (les compétences exercées du cours, chacune liée à une capsule).
+- Identifiants : capsules `A6a`, questions `A6aq1`, exercices `A6x1` (A = Ampère & Fils, puis le numéro du chapitre).
+- **Les exercices chiffrés** se font dans le tableau en quatre colonnes **Données · Inconnue · Formule · Solution** :
+  `AX(n, clé, numéro, énoncé, [{lbl, unit, ans, tol}], {hint, tip, sans})`. `ans` est **calculé dans le code**. Tolérance par défaut 2 %, à resserrer quand une réponse fausse serait trop proche (`tol:0.004`).
+  Liste de résultats vide (`[]`) : pas de correction automatique (par exemple quand le schéma manque) ; `sans` explique pourquoi, et le prof voit le tableau dans Suivi (clic sur le nom de l'élève).
+  L'exercice est validé quand les quatre colonnes sont remplies, que la formule contient un « = » et que les résultats sont justes.
+- **Formules** (`js/formules.js`) : l'élève écrit en ligne, la plateforme affiche en vrai. `/` fait une fraction (`(ρ . L) / S`), `^` un exposant, `_` un indice (`R1` devient R₁ tout seul), `√(…)` une racine, `.` le point de multiplication. Dans le contenu : `fm('R = ρ . L / S')` (dans le texte), `fbox(formule, légende)` (encadré), `triangle(haut, gauche, droite)` (triangle mnémotechnique cliquable, haut = gauche × droite).
+- **Le formulaire** (bouton 📐) : `FORMULAIRES['3em-elec']` dans `js/af3.js`. Il est en lecture seule, volontairement : l'élève recopie la formule lui-même. Toute nouvelle loi du cours s'y ajoute.
+- Les devoirs du cours papier ne sont pas dans la plateforme.
+
 ## Règles de rédaction
 
 - **Langue** : français de Belgique. Écris « septante » et « nonante », pas « soixante-dix » ni « quatre-vingt-dix ».
@@ -62,7 +87,8 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
 
 ## Limites actuelles (à savoir avant de promettre quelque chose)
 
-- **Un seul cours interactif.** Le moteur de chapitres n'est branché que sur le cours **Électricité 4e** (`4-elec`). Ajouter des chapitres à un autre cours (Mécanique, TP, 5e-6e…) demande d'abord une petite adaptation du moteur. Signale-le à Olivier au lieu de bricoler.
+- **Deux cours interactifs** : Électricité 4e et Électricité 3QEM. Ajouter un autre cours (Mécanique, TP, 5e-6e…) suit « Les cours interactifs » ; demande d'abord l'accord d'Olivier.
+- **Taille de la progression** : tout ce qu'un élève fait est enregistré dans un seul document, limité à 45 000 caractères par le serveur. Les cases du tableau en quatre colonnes sont limitées à 250 caractères pour cette raison.
 - **Les PDF des cours** sont sur Google Drive (liens dans `js/config.js` ou réglés dans Bibliothèque) ; ils ne vont pas dans le dépôt.
 - **3QEM** : la classe de l'élève est son groupe de TP (`3qem1` à `3qem3`). Les cours techniques sont donnés aux groupes de CT (`3qemct1`, `3qemct2`), dans lesquels un prof place les élèves.
 - **Les apps séparées** (Banc de câblage, Dossier TP, Labo Arduino) ont leurs propres dépôts. On ne les modifie pas depuis ici.
