@@ -8,7 +8,7 @@ function pill(c){
 }
 function lane(filId, annee, title, note){
   const f=fil(filId);
-  return `<div class="lane"><h4><span class="chip ${TYPE[f.type].chip}">${annee}${f.code}</span>${title||f.nom}${note?` <span class="chip warn">${note}</span>`:''}</h4><div class="courses">${coursFor(filId,annee).map(pill).join('')}</div></div>`;
+  return `<div class="lane"><h4><span class="chip ${TYPE[f.type].chip}">${clsCode(filId,annee)}</span>${title||f.nom}${note?` <span class="chip warn">${note}</span>`:''}</h4><div class="courses">${coursFor(filId,annee).map(pill).join('')}</div></div>`;
 }
 /* ---------- évaluation formative du chapitre ---------- */
 function calcPts(a){
@@ -92,7 +92,7 @@ function pageBiblio(){
   <div class="lib">
     <aside class="card tree" style="padding:8px">${libGroups().map(([y,items])=>`<div class="grp">${y} année</div>${items.map(([fi,a,l])=>`<button class="${an==a&&fl===fi?'on':''}" data-lib="${a}|${fi}">${l}</button>`).join('')}`).join('')}</aside>
     <section class="card">
-      <div class="pad" style="border-bottom:1px solid var(--line)"><div class="kicker">${an}${f.code}</div><h2>${f.nom}</h2></div>
+      <div class="pad" style="border-bottom:1px solid var(--line)"><div class="kicker">${clsCode(fl,an)}</div><h2>${f.nom}</h2></div>
       ${list.map(c=>{
         const has = S.pdfs[c.id] || (c.pdf && (CONFIG.PDF_ELEC4 || typeof PDF_B64!=='undefined'));
         return `<div class="doc"><div class="ic ${has?'':'empty'}">PDF</div><div class="meta"><b>${esc(c.titre)}</b>${c.sous?` <span class="small muted">— ${esc(c.sous)}</span>`:''}
@@ -127,7 +127,7 @@ function pageCours(){
 }
 function courseCard(c){
   const t=TYPE[c.type]; let prog='';
-  if(c.statut==='demo'){ const ON=chapNums().filter(chapOpen), ALL=ON.flatMap(k=>CHAPTERS[k].caps), n=ALL.filter(capDone).length; prog=`<div class="small muted">${ON.length>1?`Chapitres ${ON[0]} à ${ON[ON.length-1]}`:`Chapitre ${ON[0]||'—'}`} · ${n}/${ALL.length} capsules</div><div class="bar ${n===ALL.length?'ok':''}"><i style="width:${n/ALL.length*100}%"></i></div>`; }
+  if(c.statut==='demo'){ const ON=chapNums(c.id).filter(chapOpen), ALL=ON.flatMap(k=>CHAPTERS[k].caps), n=ALL.filter(capDone).length; prog=`<div class="small muted">${ON.length>1?`Chapitres ${chapLbl(ON[0])} à ${chapLbl(ON[ON.length-1])}`:`Chapitre ${ON[0]?chapLbl(ON[0]):'—'}`} · ${n}/${ALL.length} capsules</div><div class="bar ${ALL.length&&n===ALL.length?'ok':''}"><i style="width:${ALL.length?n/ALL.length*100:0}%"></i></div>`; }
   if(c.statut==='demo-tp'){ const n=FEUVERT.filter(x=>feuVert(x.k)).length; prog=`<div class="small muted">Feu vert É03 · ${n}/${FEUVERT.length} prérequis</div><div class="bar ${n===6?'ok':''}"><i style="width:${n/6*100}%"></i></div>`; }
   return `<button class="ccard ${c.type}" data-open-course="${c.id}"><div class="row between"><span class="chip ${t.chip}">${t.l}</span>${c.per?`<span class="tiny muted">${c.per} p./sem.</span>`:''}</div>
     <span class="t1">${esc(c.titre)}</span>${c.sous?`<span class="small muted">${esc(c.sous)}</span>`:''}
@@ -141,6 +141,7 @@ function bindCours(m){
 /* ---------------- Page du cours Électricité 4e ---------------- */
 function pageCourse(){
   const c=COURS.find(x=>x.id===S.view.course);
+  if(c && c.id!=='4-elec' && COURSE_PLANS[c.id]) return pageCourseGen(c, COURSE_PLANS[c.id]);
   const mode = S.modes[S.eleveClass]||'strict';
   const sc=testScore(); const passed = sc && sc.pending===0 && sc.total>=SEUIL;
   const n=capsDoneCount();
@@ -160,6 +161,24 @@ function pageCourse(){
       ${st}<button class="btn sm" data-pdf="${pg}" title="Ouvrir le PDF à la page ${pg}">PDF</button>${avail?`<button class="btn sm primary" data-cap="${chapResume(num)}">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}
   <div class="uaa"><h3>Annexes</h3><div class="chapters">${elec4Annexes().map(([t,p,pr])=>`<div class="chap"><span class="num">${pr?'🔒':'—'}</span><div class="ti"><b>${t}</b>${pr?'<span class="tiny muted">Réservée aux profs : les élèves ne la voient pas</span>':''}</div><button class="btn sm" data-pdf="${p}">PDF p. ${p}</button></div>`).join('')}</div></div>
   ${fcorBlock()}`;
+}
+
+/* ---------------- Page d'un cours décrit par COURSE_PLANS (3QEM…) ---------------- */
+function pageCourseGen(c, plan){
+  const ON=chapNums(c.id).filter(chapOpen), nx=ON.find(k=>chapCapsDone(k)<CHAPTERS[k].caps.length)||ON[ON.length-1];
+  const prof=S.role==='prof', pdf=S.pdfs[c.id];
+  return `<div class="crumbs"><button data-back="home">${prof?'Contenus':'Mes cours'}</button> › ${esc(plan.court)}</div>
+  <div class="page-head"><div><div class="kicker">${esc(plan.kicker)}</div><h1>${esc(plan.titre)}</h1>
+    <p class="muted small" style="margin-top:4px">${esc(plan.sous)}</p></div>
+    <div class="row wrap">${pdf?`<button class="btn" data-pdf="1" data-pdfkey="${c.id}" data-pdftitle="${esc(plan.titre)}">📄 Cours (PDF)</button>`:''}<button class="btn" data-formulaire="${c.id}">📐 Formulaire</button>${nx?`<button class="btn primary" data-cap="${chapResume(nx)}">Continuer le chapitre ${chapLbl(nx)} →</button>`:''}</div></div>
+  <div class="note"><b>${plan.noteT}</b>${plan.note} ${prof?'Tu ouvres les chapitres pour ton groupe dans <b>Suivi</b>.':'Ton prof ouvre chaque chapitre quand vous y arrivez en classe.'}</div>
+  ${plan.parts.map(u=>`<div class="uaa"><h3>${esc(u.t)}${u.sub?` <span class="tiny" style="font-weight:600">· ${esc(u.sub)}</span>`:''}</h3><div class="chapters">${u.chaps.map(([k,lbl,t,info])=>{
+    const CH=CHAPTERS[k], open=!!CH && chapOpen(k);
+    let st;
+    if(CH && !open) st=`<span class="chip warn">🔒 pas encore ouvert</span>`;
+    else if(CH){ const d=chapCapsDone(k); st=`<span class="chip ${d===CH.caps.length?'ok':'elec'}">${d===CH.caps.length?'✓ ':''}${d}/${CH.caps.length} capsules</span>`; }
+    else st=`<span class="chip">En préparation</span>`;
+    return `<div class="chap ${open?'avail':''} ${CH&&!open?'locked':''}"><span class="num">${lbl}</span><div class="ti"><b>${t}</b>${info?`<span class="tiny muted">${info}</span>`:''}</div>${st}${open?`<button class="btn sm primary" data-cap="${chapResume(k)}">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}`;
 }
 
 /* ---------------- Lecteur de chapitre ---------------- */
@@ -191,7 +210,7 @@ function capHTML(id){
   const pdfPg = ch.legacy ? ch.pdf[i] : cap.pdf;
   return `<div class="cap-body">
     <div class="row between wrap"><div class="kicker">${cap.sec} · capsule ${i+1}/${L.length}</div>
-      <div class="row">${S.role==='prof'?`<button class="btn sm" data-signal="${cap.id}">⚑ Signaler une erreur</button>`:''}<button class="btn sm ghost" data-pdf="${pdfPg}">Voir dans le PDF</button></div></div>
+      <div class="row">${S.role==='prof'?`<button class="btn sm" data-signal="${cap.id}">⚑ Signaler une erreur</button>`:''}${ch.course!=='4-elec'&&typeof FORMULAIRES!=='undefined'&&FORMULAIRES[ch.course]?`<button class="btn sm" data-formulaire="${ch.course}">📐 Formulaire</button>`:''}${pdfPg?`<button class="btn sm ghost" data-pdf="${pdfPg}">Voir dans le PDF</button>`:''}</div></div>
     <h2>${cap.t}</h2>
     <div id="capbody">${capBody(id)}</div>
     <div class="hr"></div>
@@ -201,7 +220,7 @@ function capHTML(id){
   <div class="cap-foot">
     ${prev?`<button class="btn" data-cap="${prev.id}">← ${prev.t}</button>`:'<span></span>'}
     <span class="small" id="capstatus">${capDone(cap)?'<b style="color:var(--ok)">✓ Capsule validée</b>':'<span class="muted">Réponds juste à toutes les questions'+(exLbl?' et termine l’exercice':'')+'</span>'}</span>
-    ${next?`<button class="btn primary" data-cap="${next.id}">${next.t} →</button>`:ch.legacy?`<button class="btn primary" data-cap="test">Passer au test →</button>`:`<button class="btn primary" data-cap="syn:${ch.num}">Synthèse et évaluation →</button>`}
+    ${next?`<button class="btn primary" data-cap="${next.id}">${next.t} →</button>`:ch.legacy?`<button class="btn primary" data-cap="test">Passer au test →</button>`:`<button class="btn primary" data-cap="syn:${ch.num}">${ch.synT||'Synthèse et évaluation'} →</button>`}
   </div>`;
 }
 function afterPlayer(){
@@ -631,8 +650,8 @@ function pageContenus(){
   return `<div class="page-head"><div><div class="kicker">Suivi de la transformation des cours</div><h1>Contenus</h1><p class="muted small">Où en est chaque cours : ressources reçues, chapitres transformés, relecture.</p></div></div>
   <div class="card"><div class="scroll-x"><table class="t"><tr><th>Année</th><th>Cours</th><th>Classe(s)</th><th>Périodes</th><th>Chapitres animés</th><th>Statut</th><th></th></tr>
   ${order.flatMap(([f,a])=>coursFor(f,a)).filter(c=>{ if(seen.has(c.id)) return false; seen.add(c.id); return true; }).map(c=>{
-    const cl=c.pour.map(([f,a])=>a+fil(f).code).join(' + ');
-    const anim = c.statut==='demo'? `1 / 20 <span class="tiny muted">(2.3)</span>` : c.statut==='demo-tp'? `feu vert É03` : '—';
+    const cl=c.pour.map(([f,a])=>clsCode(f,a)).join(' + ');
+    const nCh=chapNums(c.id).length, anim = c.statut==='demo'? (c.id==='4-elec'?`${nCh} / 20`:`${nCh} / ${((COURSE_PLANS[c.id]||{}).parts||[]).reduce((n,u)=>n+u.chaps.length,0)}`) : c.statut==='demo-tp'? `feu vert É03` : '—';
     return `<tr><td><b>${c.pour[0][1]}e</b></td><td><b>${esc(c.titre)}</b>${c.pour[0][0]==='3qem'?' <span class="chip warn">jusqu’en 2028</span>':''}</td><td class="small">${esc(cl)}</td><td>${c.per||'—'}</td><td class="small">${anim}</td><td>${statutChip(c)}</td><td>${c.statut.startsWith('demo')?`<button class="btn sm" data-open-course="${c.id}">Ouvrir</button>`:''}</td></tr>`; }).join('')}
   </table></div></div>
   <div class="grid g3" style="margin-top:16px">
@@ -647,15 +666,16 @@ function bindContenus(){}
 function pagePlayerD(ch, capId){
   const L=ch.caps, n=L.filter(capDone).length, syn='syn:'+ch.num, open=typeof fcorOpen==='function'&&fcorOpen(ch.num);
   const toc=L.map(c=>`<button class="item ${capId===c.id?'on':''}" data-cap="${c.id}"><span class="ck ${capDone(c)?'done':capPart(c)?'part':''}" data-ck="${c.id}">${capDone(c)?'✓':''}</span><span><span class="tiny muted">${c.sec}</span><br>${c.t}</span></button>`).join('');
-  return `<div class="crumbs"><button data-back="home">${S.role==='prof'?'Contenus':'Mes cours'}</button> › <button data-back="course">Électricité 4e</button> › ${ch.num} ${ch.titre}</div>
+  const plan=COURSE_PLANS[ch.course];
+  return `<div class="crumbs"><button data-back="home">${S.role==='prof'?'Contenus':'Mes cours'}</button> › <button data-back="course">${plan?esc(plan.court):'Électricité 4e'}</button> › ${chapLbl(ch.num)} ${ch.titre}</div>
   <div class="player">
     <aside class="card toc" style="padding:10px">
-      <div style="padding:6px 10px 10px"><div class="kicker">Chapitre ${ch.num}</div><b>${ch.titre}</b>
+      <div style="padding:6px 10px 10px"><div class="kicker">Chapitre ${chapLbl(ch.num)}</div><b>${ch.titre}</b>
         <div class="bar ${n===L.length?'ok':''}" style="margin-top:8px"><i id="tocbar" style="width:${n/L.length*100}%"></i></div>
         <div class="tiny muted" id="toccount" style="margin-top:4px">${n}/${L.length} capsules validées</div></div>
       ${toc}
       <div class="sep">Terminer</div>
-      <button class="item ${capId===syn?'on':''}" data-cap="${syn}"><span class="ck ${open?'done':''}">${open?'✓':''}</span><span>Synthèse et évaluation<br><span class="tiny muted">prérequis du TP ${ch.tp} · formative ${ch.num}</span></span></button>
+      <button class="item ${capId===syn?'on':''}" data-cap="${syn}"><span class="ck ${open?'done':''}">${open?'✓':''}</span><span>${ch.synT||'Synthèse et évaluation'}<br><span class="tiny muted">${ch.synSub||`prérequis du TP ${ch.tp} · formative ${ch.num}`}</span></span></button>
     </aside>
     <section class="card cap fade-in" id="capcard">${capId===syn?synHTML(ch.num):capHTML(capId)}</section>
   </div>`;
