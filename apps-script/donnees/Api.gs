@@ -155,12 +155,13 @@ function makeApi(store, deps) {
       need(p.prog && typeof p.prog === 'object', 'Progression manquante.');
       var old = doc('prog:' + me.mail, {}) || {}, n = p.prog;
       n.banc = !!old.banc;                                  // validé par le prof uniquement
+      n.atel = old.atel || {};                              // points « à l'atelier » : cochés par le prof uniquement
       var ot = old.test || {}, nt = n.test || {};
       if (nt.submitted && ot.submitted && nt.sid && nt.sid === ot.sid) { nt.open = ot.open || {}; }  // notes du prof conservées
       else if (nt.submitted) { nt.open = {}; }
       n.test = nt; n.maj = deps.now();
       put('prog:' + me.mail, n, me.mail);
-      return { ok: true, open: nt.open || {}, banc: n.banc };
+      return { ok: true, open: nt.open || {}, banc: n.banc, atel: n.atel };
     },
     journal: function(me, p){
       var per = str(p.per, 40), date = str(p.date, 10); need(/^\d{4}-\d{2}-\d{2}$/.test(date), 'Date invalide.');
@@ -227,6 +228,15 @@ function makeApi(store, deps) {
       var k = 'prog:' + str(p.mail, 120), pr = doc(k, null); need(pr && pr.test && pr.test.submitted, 'Pas d’évaluation à corriger.');
       var v = +p.v; need(v >= 0 && v <= 20, 'Note invalide.');
       pr.test.open = pr.test.open || {}; pr.test.open[str(p.q, 10)] = v; put(k, pr, me.mail); return { ok: true };
+    },
+    /* point « à l'atelier » d'un chapitre, validé par un prof de l'élève (classe ou groupe de CT) */
+    setAtelier: function(me, p){
+      var mail = str(p.mail, 120), k = str(p.k, 20); need(/^[\w.-]+$/.test(k), 'Point inconnu.');
+      var el = doc('eleve:' + mail, null); need(el, 'Élève inconnu.');
+      need(isProfOf(me, el.classe) || (el.ct && isProfOf(me, el.ct)), 'Tu ne donnes pas cours à cet élève.');
+      var key = 'prog:' + mail, pr = doc(key, {}) || {}; pr.atel = pr.atel || {};
+      if (p.v) pr.atel[k] = deps.now(); else delete pr.atel[k];
+      put(key, pr, me.mail); return { ok: true };
     },
     setBanc: function(me, p){ var k = 'prog:' + str(p.mail, 120), pr = doc(k, {}) || {}; pr.banc = !!p.v; put(k, pr, me.mail); return { ok: true }; },
     setEleveClasse: function(me, p){

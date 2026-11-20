@@ -132,7 +132,7 @@ defAF(1, {
      mount:root=>mountSortW(root.querySelector('#a1ci'),'A1ci',{cats:[['c','Conducteur'],['i','Isolant']],items:[
        ['Cuivre','c'],['Aluminium','c'],['Or','c'],['Argent','c'],['Gaine en PVC','i'],['Caoutchouc','i'],['Verre','i'],['Porcelaine','i'],['Air sec','i'],['Papier','i']],ok:'Les métaux conduisent ; plastiques, caoutchouc, verre, porcelaine, air sec et papier isolent.'})},
   ],
-  prereq:[{t:'Distinguer les conducteurs de l’électricité des isolants',cap:'A1c'},{t:'Retrouver les principaux constituants d’un circuit électrique',cap:'A1a'},{t:'Comprendre que le courant doit suivre un chemin ininterrompu pour produire ses effets',cap:'A1b'},{t:'Réaliser un premier montage en respectant les mesures de sécurité',cap:null}],
+  prereq:[{t:'Distinguer les conducteurs de l’électricité des isolants',cap:'A1c'},{t:'Retrouver les principaux constituants d’un circuit électrique',cap:'A1a'},{t:'Comprendre que le courant doit suivre un chemin ininterrompu pour produire ses effets',cap:'A1b'},{t:'Réaliser un premier montage en respectant les mesures de sécurité',cap:null,atel:'A1mont'}],
 });
 
 /* =================== CHAPITRE 2 — LE CIRCUIT ÉLECTRIQUE =================== */

@@ -96,6 +96,7 @@ function dashChap(cl, studs, co='4-elec'){
   <div class="scroll-x"><table class="t"><tr><th>Élève</th>${OPEN.map(k=>`<th title="${esc(CHAPTERS[k].titre)}">${chapLbl(k)}</th>`).join('')}${e4?'<th>Formative 2.3</th>':''}<th>Temps</th><th>Dernière connexion</th></tr>
     ${rows.map(r=>`<tr><td>${e4?esc(r.nom):`<button class="linkbtn" data-voirex="${esc(r.mail)}|${co}" title="Voir ses tableaux d’exercices">${esc(r.nom)}</button>`}</td>${OPEN.map(k=>`<td>${cell(r.chaps[k],CHAPTERS[k].caps.length)}</td>`).join('')}${e4?`<td>${scoreCell(r.test,TOTAL,SEUIL)}</td>`:''}<td class="small muted">${r.min} min</td><td class="small muted">${fmtAgo(r.last)}</td></tr>`).join('')}
   </table></div><p class="tiny muted" style="padding:0 16px 12px;margin:0">✓ chapitre terminé · 3/8 capsules validées · « · » pas commencé.${e4?' Les formatives sur papier s’encodent dans le carnet de cotes.':''}</p></div>
+  ${e4?'':atelCard(rows, OPEN)}
   <div class="grid g2">
     <div class="card pad"><h3>Les questions qui bloquent</h3><p class="small muted">% d'élèves qui se trompent au premier essai, dans les chapitres ouverts.</p>
       ${errs.length?errs.map(([id,p,n])=>`<div class="hbar"><span class="lbl">${Q[id].q} <span class="tiny muted">· ${capById(Q[id].r).sec} · ${n} rép.</span></span><span class="track"><i style="width:${p}%"></i></span><span class="pct">${p}%</span></div>`).join(''):'<p class="small muted">Pas encore assez de réponses.</p>'}</div>
@@ -107,6 +108,14 @@ function dashChap(cl, studs, co='4-elec'){
       <h3 style="${e4?'margin-top:16px':'margin-top:0'}">Signalements</h3>
       ${S.signal.length? S.signal.slice(0,10).map(s=>`<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line-2)"><b>${esc(s.cap)}</b> — ${esc(s.txt)} <span class="tiny muted">· ${esc(s.who)}</span></div>`).join('') : `<p class="small muted">Aucun. Chaque capsule a un bouton « Signaler une erreur » pour les profs.</p>`}
     </div></div>`;
+}
+/* points « à l'atelier » des chapitres ouverts : le prof coche quand il a vu l'élève faire */
+function atelCard(rows, OPEN){
+  const pts=OPEN.flatMap(k=>(CHAPTERS[k].prereq||[]).filter(x=>x.atel).map(x=>({k:x.atel, t:x.t, ch:chapLbl(k)})));
+  if(!pts.length) return '';
+  return `<div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>À l’atelier — validé par toi</h3><p class="small muted" style="margin:4px 0 0">Coche quand tu as vu l’élève le faire. Le point se coche dans la synthèse du chapitre de l’élève, et lui seul ne peut pas le cocher.</p></div>
+  <div class="scroll-x"><table class="t"><tr><th>Élève</th>${pts.map(x=>`<th title="${esc(x.t)}" style="white-space:normal;min-width:150px">Chap. ${x.ch} · ${esc(x.t)}</th>`).join('')}</tr>
+  ${rows.map(r=>{ const a=progOf(r.mail).atel||{}; return `<tr><td>${esc(r.nom)}</td>${pts.map(x=>`<td><input type="checkbox" data-atel="${esc(r.mail)}|${x.k}" ${a[x.k]?'checked':''} aria-label="${esc(r.nom)} : ${esc(x.t)}" style="width:18px;height:18px;accent-color:var(--ok)"></td>`).join('')}</tr>`; }).join('')}</table></div></div>`;
 }
 function dashTP(cl, studs){
   const rows=studs.map(s=>Object.assign(rowOf(s.mail),{nom:s.nom}));
@@ -126,6 +135,9 @@ function bindDash(m){
     const avant=S.ouv[key]; S.ouv[key]=cur; const y=window.scrollY; render(); window.scrollTo(0,y);
     const r=await act('setOuv',{key,chaps:cur});
     if(!r){ if(avant) S.ouv[key]=avant; else delete S.ouv[key]; const y2=window.scrollY; render(); window.scrollTo(0,y2); } });
+  m.querySelectorAll('[data-atel]').forEach(c=>c.onchange=async()=>{ const [mail,k]=c.dataset.atel.split('|'), v=c.checked, pr=(S.progs[mail]||(S.progs[mail]={})); pr.atel=pr.atel||{};
+    if(v) pr.atel[k]=Date.now(); else delete pr.atel[k];
+    const r=await act('setAtelier',{mail,k,v}); if(!r){ if(v) delete pr.atel[k]; else pr.atel[k]=Date.now(); const y=window.scrollY; render(); window.scrollTo(0,y); } });
   m.querySelectorAll('[data-voirex]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.voirex.split('|'); voirExercices(mail,co); });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };
   m.querySelectorAll('[data-grade]').forEach(b=>b.onclick=async()=>{ const [mail,q,v]=b.dataset.grade.split('|');

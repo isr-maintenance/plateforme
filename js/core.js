@@ -5,8 +5,8 @@ const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'
 const $ = (sel,root=document)=>root.querySelector(sel);
 const ck=(...a)=>a.join('|');
 
-const DEF_PROG = ()=>({ quiz:{}, ex:{}, steps:[], ohm:{}, visited:[], banc:false, test:{submitted:false, ans:{}, pts:{}, open:{}, texts:{}}, sec:0 });
-function normProg(p){ const d=DEF_PROG(); p=p||{}; const o=Object.assign(d,p); o.test=Object.assign(DEF_PROG().test, p.test||{}); ['quiz','ex','ohm'].forEach(k=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; }); ['steps','visited'].forEach(k=>{ if(!Array.isArray(o[k])) o[k]=[]; }); return o; }
+const DEF_PROG = ()=>({ quiz:{}, ex:{}, steps:[], ohm:{}, visited:[], banc:false, atel:{}, test:{submitted:false, ans:{}, pts:{}, open:{}, texts:{}}, sec:0 });
+function normProg(p){ const d=DEF_PROG(); p=p||{}; const o=Object.assign(d,p); o.test=Object.assign(DEF_PROG().test, p.test||{}); ['quiz','ex','ohm','atel'].forEach(k=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; }); ['steps','visited'].forEach(k=>{ if(!Array.isArray(o[k])) o[k]=[]; }); return o; }
 
 const S = {
   me:null, booted:false, error:null,
@@ -66,7 +66,7 @@ async function pushProg(){
   PENDING++; setSync('cours');
   let r;
   if(isProf()) r = await API.call('saveMyProg', { prog: previewProg||S.prog });
-  else { r = await API.call('saveProg', { prog: S.prog }); if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; } }
+  else { r = await API.call('saveProg', { prog: S.prog }); if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; S.prog.atel = r.atel || {}; } }
   PENDING--;
   if(!r.ok) PEND_ERR = r.msg || 'Non enregistré';
   if(saveTimer || PENDING > 0) setSync('cours'); else setSync(r.ok && !PEND_ERR ? 'ok' : 'err', PEND_ERR);

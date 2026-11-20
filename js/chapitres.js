@@ -18,6 +18,8 @@ function chapOf(capId){
 function capById(id){ for(const ch of Object.values(CHAPTERS)){ const c=ch.caps.find(x=>x.id===id); if(c) return c; } return null; }
 function chapCapsDone(num){ const ch=CHAPTERS[num]; return ch ? ch.caps.filter(capDone).length : 0; }
 function chapResume(num){ const ch=CHAPTERS[num]; const c=ch.caps.find(x=>!capDone(x)); return c?c.id:(ch.legacy?'test':'syn:'+num); }
+/* point « à l'atelier » : coché par le prof (stocké côté serveur, l'élève ne peut pas le changer) */
+const atelOk = x => !!(x.atel && P().atel && P().atel[x.atel]);
 function exSet(k){ const p=P(); if(!p.ex[k]){ p.ex[k]=true; save(); } updateTocChecks(); }
 function DR(){ const p=P(); if(!p.dr||typeof p.dr!=='object') p.dr={}; return p.dr; }
 
@@ -131,8 +133,8 @@ function synHTML(num){
       ${open?`<button class="btn primary" data-fcor="${num}">Évaluation et corrigé</button>`:'<span class="chip">🔒 après l’évaluation</span>'}</div></div>`}
     <h3>${ch.prereqTitle||`Ce que tu dois maîtriser avant d'entrer au TP ${ch.tp}`}</h3>
     <p class="small muted">${ch.prereqNote||'Chaque point se coche quand la capsule correspondante est validée. Le geste lui-même se vérifie à l’atelier, avec ton prof.'}</p>
-    <div class="fv">${pre.map(x=>{ const c=x.cap&&capById(x.cap), ok=c&&capDone(c); return `<div class="it ${ok?'ok':''}"><span class="lamp"></span><span>${x.t}</span><span class="src">${c?`${c.sec} · ${c.t}${ok?'':`<br><button class="revoir btn sm ghost" style="padding:2px 0" data-goto="${c.id}">y aller →</button>`}`:'à l’atelier'}</span></div>`; }).join('')}</div>
-    <div class="small muted" style="margin-top:6px">${nOk}/${pre.filter(x=>x.cap).length} points de théorie validés</div>
+    <div class="fv">${pre.map(x=>{ const c=x.cap&&capById(x.cap), ok=c?capDone(c):atelOk(x); return `<div class="it ${ok?'ok':''}"><span class="lamp"></span><span>${x.t}</span><span class="src">${c?`${c.sec} · ${c.t}${ok?'':`<br><button class="revoir btn sm ghost" style="padding:2px 0" data-goto="${c.id}">y aller →</button>`}`:x.atel?(ok?'à l’atelier · ✓ validé par ton prof':'à l’atelier : ton prof le valide quand il t’a vu faire'):'à l’atelier'}</span></div>`; }).join('')}</div>
+    <div class="small muted" style="margin-top:6px">${nOk}/${pre.filter(x=>x.cap).length} points de théorie validés${pre.some(x=>x.atel)?` · ${pre.filter(x=>x.atel&&atelOk(x)).length}/${pre.filter(x=>x.atel).length} à l’atelier`:''}</div>
     ${(ch.controle||[]).length?`<h3 style="margin-top:20px">Questions de contrôle</h3>
     <p class="small muted">Les questions de la synthèse du cours. Réponds-y de tête ou dans ton cahier : si une réponse ne vient pas, relis la capsule indiquée.</p>`:''}
     <ol class="ctrlq">${(ch.controle||[]).map(([q,cap])=>`<li>${q}${cap?` <button class="revoir" data-goto="${cap}">${capById(cap).sec}</button>`:''}</li>`).join('')}</ol>

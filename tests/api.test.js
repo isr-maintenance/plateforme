@@ -137,6 +137,23 @@ console.log(`✓ ${n} vérifications réussies`);
   ok(H('zz.y.student@elmarche.be','boot').data.ouv['4eqmm|4-elec'].length===3, 'élève reçoit les chapitres ouverts');
   console.log(`✓ ${n} vérifications réussies (avec chapitres ouverts)`); }
 
+// points « à l'atelier » validés par le prof
+{ const st9 = memStore(), a9 = ctx.makeApi(st9, deps); a9.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a9.handle({ t: a9.makeToken(m), a, p }), co='olivier.lesenfants@elmarche.be', pd='philippe.dachelet@elmarche.be', e9='tom.x.student@elmarche.be';
+  H(co,'setProfs',{profs:[{nom:'O. Lesenfants',mail:co,role:'Coordinateur'},{nom:'P. Dachelet',mail:pd,role:'Professeur'}]});
+  H(e9,'setClasse',{classe:'3qem1'}); H(co,'setEleveCt',{mail:e9,ct:'3qemct1'});
+  ok(H(pd,'setAtelier',{mail:e9,k:'A1at3',v:true}).ok===false, 'un prof qui n’a pas l’élève ne peut pas cocher');
+  H(co,'setAffect',{affect:[{cl:'3qemct1',c:'3em-elec',profs:['P. Dachelet']}]});
+  ok(H(pd,'setAtelier',{mail:e9,k:'A1at3',v:true}).ok, 'le prof du groupe de CT coche le point');
+  ok(H(pd,'setAtelier',{mail:e9,k:'a b',v:true}).ok===false, 'clé invalide refusée');
+  ok(H(e9,'setAtelier',{mail:e9,k:'A1at3',v:true}).ok===false, 'élève ne peut pas cocher lui-même');
+  let r9 = H(e9,'saveProg',{prog:{quiz:{},atel:{A1at9:1}}});
+  ok(r9.ok && r9.atel.A1at3 && !r9.atel.A1at9, 'la sauvegarde de l’élève garde la case du prof et ignore la sienne');
+  ok(H(e9,'boot').data.prog.atel.A1at3, 'l’élève reçoit la case cochée');
+  ok(H(co,'boot').data.progs[e9].atel.A1at3, 'le prof la voit dans le suivi');
+  H(pd,'setAtelier',{mail:e9,k:'A1at3',v:false}); ok(!H(e9,'boot').data.prog.atel.A1at3, 'le prof peut décocher');
+  console.log(`✓ ${n} vérifications réussies (avec points à l’atelier)`); }
+
 // l'élève encode son entreprise de stage : ajoutée au carnet et attribuée automatiquement
 { const st5 = memStore(), a5 = ctx.makeApi(st5, deps); a5.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
   const H = (m, a, p) => a5.handle({ t: a5.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be';
