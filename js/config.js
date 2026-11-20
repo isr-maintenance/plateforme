@@ -9,5 +9,6 @@ const CONFIG = {
   PDF_ELEC4: 'https://drive.google.com/file/d/1QbbCTrHYv-l8N_PEeKn7Xe5yTZP2o_bV/view',        // version élèves, SANS corrigés ni évaluations formatives (lecture : tout elmarche.be)
   PDF_ELEC4_PROF: 'https://drive.google.com/file/d/1V9WnHxwNh3s3ZjSIhthrRC1mkZIClASv/view',   // version prof AVEC corrigés (Drive : partagée seulement avec les profs)
   PDF_ELEC4_EVAL: 'https://drive.google.com/file/d/177o8D8ta8BOtdRh7HdD7gs5J0eu8XBmN/view',   // évaluations formatives (annexe H) à imprimer — profs uniquement
+  AGENDA:    'c_o3imfls1u6q7d9bt7129qlipvs@group.calendar.google.com',   // Google Agenda de l'école (onglet Agenda, profs) : l'accès suit le partage de l'agenda dans Google
   ECOLE:     'Institut Saint-Roch · Marche'
 };

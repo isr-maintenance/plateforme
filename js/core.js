@@ -76,6 +76,9 @@ let SYNC_ST = { st:'ok', msg:'' };
 function syncHTML(){ const {st,msg}=SYNC_ST;
   const txt = st==='ok' ? '✓ enregistré' : st==='cours' ? `⏳ enregistrement…${PENDING>1?' ('+PENDING+')':''}` : '⚠ non enregistré';
   return `<span class="sync ${st} tiny" id="sync" title="${esc(st==='ok'?'Tout est enregistré':st==='cours'?'Enregistrement en cours : attends le vert avant de fermer':(msg||'Non enregistré'))}">${txt}</span>`; }
+/* onglets trop nombreux pour la largeur : ils passent sur une deuxième ligne au lieu d'être cachés */
+function fitTabs(){ const t=$('#top .topbar-in'), n=t&&t.querySelector('.tabs'); if(!n) return; t.classList.remove('wrapnav'); if(n.scrollWidth>n.clientWidth+2) t.classList.add('wrapnav'); }
+window.addEventListener('resize', ()=>{ clearTimeout(fitTabs.t); fitTabs.t=setTimeout(fitTabs,150); });
 function setSync(st,msg){ SYNC_ST={ st, msg:msg||'' }; const el=$('#sync'); if(el) el.outerHTML=syncHTML(); }
 
 /* ---------- élèves (vue prof) ---------- */
@@ -208,7 +211,7 @@ function render(){
   if(S.me.role==='eleve' && !S.me.classe){ renderChooseClass(); return; }
   const tabs = S.role==='eleve'
     ? [['presentation','Accueil'],['cours','Mes cours'],['monstage','Mon stage'],['biblio','Bibliothèque'],['outils','Outils']]
-    : [['presentation','Accueil'],['dash','Suivi'],['carnet','Cotes'],['stages','Stages'],['contenus','Contenus'],['biblio','Bibliothèque'],['outils','Outils']].concat(isCoord()?[['acces','Accès'],['admin','Admin']]:[]);
+    : [['presentation','Accueil'],['agenda','Agenda'],['dash','Suivi'],['carnet','Cotes'],['stages','Stages'],['contenus','Contenus'],['biblio','Bibliothèque'],['outils','Outils']].concat(isCoord()?[['acces','Accès'],['admin','Admin']]:[]);
   if(S.view.page==='journal') S.tab = S.role==='prof'?'stages':'monstage';
   if(!tabs.some(t=>t[0]===S.tab)) S.tab='presentation';
   const ini = S.me.nom.split(/[\s.]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -222,6 +225,7 @@ function render(){
     ${isProf()?`<div class="role-switch" role="group" aria-label="Changer de vue"><button class="${S.role==='prof'?'on':''}" data-role="prof">Prof</button><button class="${S.role==='eleve'?'on':''}" data-role="eleve" title="Faire les capsules comme un élève : ta progression est gardée pour toi seul, hors suivi et carnet, et repart à zéro chaque année scolaire">Aperçu élève</button></div>`:''}
     <button class="who" data-menu title="Mon compte" style="border:0;background:none;cursor:pointer"><div class="avatar">${ini}</div><div style="text-align:left"><b>${esc(S.me.nom)}</b><div class="tiny muted">${esc(sub)}</div></div></button>
   </div>`;
+  fitTabs();
   $('#top').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>go(b.dataset.tab));
   $('#top').querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{
     S.role=b.dataset.role;
@@ -234,7 +238,7 @@ function render(){
     const rs=md.querySelector('[data-reset]'); if(rs) rs.onclick=()=>{ if(confirm('Effacer toutes les données de test de ce navigateur ?')){ API.resetLocal(); API.logout(); } };
   };
   const m=$('#main');
-  const pages = { presentation:pagePresentation, cours:pageCours, monstage:pageMonStage, biblio:pageBiblio, outils:pageOutils, dash:pageDash, contenus:pageContenus, admin:pageAdmin, carnet:pageCarnet, acces:pageAcces, stages:pageStages };
+  const pages = { presentation:pagePresentation, cours:pageCours, monstage:pageMonStage, biblio:pageBiblio, outils:pageOutils, dash:pageDash, contenus:pageContenus, admin:pageAdmin, carnet:pageCarnet, acces:pageAcces, stages:pageStages, agenda:pageAgenda };
   if(S.view.page==='journal'){ m.innerHTML=pageJournal(); bindCommon(m); bindJournal(m); return; }
   if((S.tab==='cours'||S.tab==='contenus') && S.view.page!=='home'){
     if(S.view.page==='course') m.innerHTML=pageCourse();
@@ -255,7 +259,7 @@ function bindCommon(m){
   m.querySelectorAll('[data-module]').forEach(b=>b.onclick=()=>moduleInfo(b.dataset.module));
   m.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app));
   m.querySelectorAll('[data-journal]').forEach(b=>b.onclick=()=>{ const [per,...st]=b.dataset.journal.split('|'); openJournal(per, st.join('|')||S.me.mail); });
-  const pageHooks = { cours:bindCours, biblio:bindBiblio, dash:bindDash, contenus:bindContenus, admin:bindAdmin, carnet:bindCarnet, acces:bindAcces, stages:bindStages, monstage:bindMonStage };
+  const pageHooks = { cours:bindCours, biblio:bindBiblio, dash:bindDash, contenus:bindContenus, admin:bindAdmin, carnet:bindCarnet, acces:bindAcces, stages:bindStages, monstage:bindMonStage, agenda:bindAgenda };
   if(S.view.page==='home' && pageHooks[S.tab]) pageHooks[S.tab](m);
   if(S.view.page==='tp') bindTP(m);
 }
