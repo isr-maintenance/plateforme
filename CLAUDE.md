@@ -66,3 +66,16 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
 - **Les PDF des cours** sont sur Google Drive (liens dans `js/config.js` ou réglés dans Bibliothèque) ; ils ne vont pas dans le dépôt.
 - **3QEM** : la classe de l'élève est son groupe de TP (`3qem1` à `3qem3`). Les cours techniques sont donnés aux groupes de CT (`3qemct1`, `3qemct2`), dans lesquels un prof place les élèves.
 - **Les apps séparées** (Banc de câblage, Dossier TP, Labo Arduino) ont leurs propres dépôts. On ne les modifie pas depuis ici.
+
+
+## Déposer le PDF d'un cours (profs)
+
+Les PDF ne vont jamais dans ce dépôt. Ils vont dans le dossier Google Drive **Cours** d'Olivier, partagé en Éditeur avec les profs (il apparaît dans « Partagés avec moi ») : https://drive.google.com/drive/folders/1l2d0A9bqAI-9klFyZh0m2rtmpJhbl9Xn
+
+1. **Vérifie le PDF** : aucun nom d'élève, aucune cote, aucune adresse. Les corrigés et les évaluations formatives vont dans des PDF séparés, jamais dans la version élèves.
+2. **Nomme-le** comme ceux d'Olivier, sans accents ni espaces : `Cours_Matiere_4e_eleves.pdf`, `Cours_Matiere_4e_PROF_avec_corriges.pdf`, `Cours_Matiere_4e_evaluations_formatives_PROF.pdf` (par exemple `Cours_Mecanique_4e_eleves.pdf`).
+3. **Dépose-le** dans le dossier Cours, avec le navigateur du prof (Claude dans Chrome). Si tu ne peux pas envoyer le fichier toi-même, demande au prof de le glisser dans le dossier, puis continue.
+4. **Partage** : la version élèves en lecture pour toute l'école (Accès général : ELMA, lecteur), comme `Cours_Electricite_4e_eleves.pdf`. Les versions PROF gardent seulement l'accès du dossier (les profs) : n'y touche pas.
+5. **Lie la version élèves à la plateforme** : connecté avec le compte du prof, onglet **Bibliothèque** (vue prof), ajoute le lien Drive au bon cours. Ce lien est enregistré sur le serveur : rien à changer dans le dépôt pour cette étape.
+6. **Ne supprime ni ne modifie** aucun autre fichier du dossier Cours.
+7. Pour des chapitres interactifs ensuite, suis « Ajouter un chapitre » (branche et pull request), en tenant compte des « Limites actuelles ».
