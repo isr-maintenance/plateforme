@@ -68,6 +68,7 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
   L'exercice est validé quand les quatre colonnes sont remplies, que la formule contient un « = » et que les résultats sont justes.
 - **Formules** (`js/formules.js`) : l'élève écrit en ligne, la plateforme affiche en vrai. `/` fait une fraction (`(ρ . L) / S`), `^` un exposant, `_` un indice (`R1` devient R₁ tout seul), `√(…)` une racine, `.` le point de multiplication. Dans le contenu : `fm('R = ρ . L / S')` (dans le texte), `fbox(formule, légende)` (encadré), `triangle(haut, gauche, droite)` (triangle mnémotechnique cliquable, haut = gauche × droite).
 - **Le formulaire** (bouton 📐) : `FORMULAIRES['3em-elec']` dans `js/af3.js`. Il est en lecture seule, volontairement : l'élève recopie la formule lui-même. Toute nouvelle loi du cours s'y ajoute.
+- **Les points « à l'atelier »** : un élément de `prereq` sans capsule (`cap:null`) reçoit une clé `atel` (par exemple `A1mont`). Le prof le coche dans Suivi (« À l'atelier — validé par toi », action serveur `setAtelier`) ; l'élève ne peut pas le cocher lui-même.
 - Les devoirs du cours papier ne sont pas dans la plateforme.
 
 ## Règles de rédaction

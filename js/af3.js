@@ -10,6 +10,7 @@
 const AF_COURSE='3em-elec';
 /* déclare un chapitre du cours 3QEM : chaque capsule monte aussi ses tableaux et ses triangles */
 function defAF(n, ch){
+  (ch.prereq||[]).forEach((x,i)=>{ if(!x.cap && !x.atel) x.atel='A'+n+'at'+i; });   // point « à l'atelier » : case cochée par le prof dans Suivi
   ch.caps.forEach(c=>{ const m=c.mount; c.mount=root=>{ if(m) m(root); mountAllDIFS(root); mountTriangles(root); }; });
   defChapter(Object.assign({ num:'0.'+n, lbl:String(n), course:AF_COURSE, titre:AF3[n-1][0], tp:'', noEval:true,
     synT:'Synthèse du chapitre', synSub:'ce que tu sais faire maintenant',
