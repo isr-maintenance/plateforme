@@ -6,7 +6,8 @@
 var PLAT = {
   DOMAIN: 'elmarche.be',
   TOKEN_DAYS: 30,
-  CLASSES: ['3qem1','3qem2','3qem3','4eqem','4eqmm','5eqem','5eqmm','6eqem','6eqmm'],
+  CLASSES: ['3qem1','3qem2','3qem3','4eqem','4eqmm','5eqem','5eqmm','6eqem','6eqmm'],   // en 3QEM : groupes de TP
+  CT: ['3qemct1','3qemct2'],                                                             // groupes de CT des 3QEM (placés par un prof)
   MAX_DOC: 45000
 };
 
@@ -70,7 +71,7 @@ function makeApi(store, deps) {
     if (/\.student@/.test(mail)) {
       var el = doc('eleve:' + mail, null);
       if (!el && c.open === false) throw err('denied', 'L’accès est limité aux élèves déjà inscrits. Adresse-toi à ton professeur.');
-      return { mail: mail, role: 'eleve', nom: nameOf(mail), classe: el ? el.classe : null };
+      return { mail: mail, role: 'eleve', nom: nameOf(mail), classe: el ? el.classe : null, ct: el && el.ct || '' };
     }
     throw err('denied', 'Adresse de professeur non enregistrée : le coordinateur doit l’ajouter dans « Accès ».');
   }
@@ -231,7 +232,14 @@ function makeApi(store, deps) {
     setEleveClasse: function(me, p){
       need(PLAT.CLASSES.indexOf(p.classe) >= 0, 'Classe inconnue.');
       var k = 'eleve:' + str(p.mail, 120), el = doc(k, null); need(el, 'Élève inconnu.');
-      el.classe = p.classe; put(k, el, me.mail); return { ok: true };
+      el.classe = p.classe; if (!/^3qem/.test(p.classe)) delete el.ct; put(k, el, me.mail); return { ok: true };
+    },
+    /* groupe de CT d'un élève de 3QEM ('' = à placer) */
+    setEleveCt: function(me, p){
+      var ct = str(p.ct, 20); need(ct === '' || PLAT.CT.indexOf(ct) >= 0, 'Groupe inconnu.');
+      var k = 'eleve:' + str(p.mail, 120), el = doc(k, null); need(el, 'Élève inconnu.');
+      need(/^3qem/.test(el.classe || ''), 'Les groupes de CT ne concernent que les 3QEM.');
+      if (ct) el.ct = ct; else delete el.ct; put(k, el, me.mail); return { ok: true };
     },
     setEvals: function(me, p){ need(Array.isArray(p.evals), 'Liste invalide.'); put('evals:' + str(p.key, 60), p.evals.slice(0, 80), me.mail); return { ok: true }; },
     setNote: function(me, p){
@@ -268,7 +276,7 @@ function makeApi(store, deps) {
     /* chapitres ouverts pour une classe et un cours, par un prof de cette classe : {key:'4eqmm|4-elec', chaps:['2.1',…]} */
     setOuv: function(me, p){
       var key = str(p.key, 60), cl = key.split('|')[0];
-      need(PLAT.CLASSES.indexOf(cl) >= 0, 'Classe inconnue.'); need(isProfOf(me, cl), 'Tu ne donnes pas cours dans cette classe.');
+      need(PLAT.CLASSES.concat(PLAT.CT).indexOf(cl) >= 0, 'Classe inconnue.'); need(isProfOf(me, cl), 'Tu ne donnes pas cours dans cette classe.');
       need(Array.isArray(p.chaps), 'Liste invalide.');
       var O = doc('ouv', {}); O[key] = p.chaps.map(function(c){ return str(c, 10); }).filter(function(c){ return /^\d+\.\d+$/.test(c); }).slice(0, 60);
       put('ouv', O, me.mail); return { ok: true, chaps: O[key] };

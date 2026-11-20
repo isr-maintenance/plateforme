@@ -25,7 +25,7 @@ function pagePresentation(){
       <div class="legend"><span><i class="dot" style="color:var(--elec)"></i>Électricité</span><span><i class="dot" style="color:var(--meca)"></i>Mécanique</span><span><i class="dot" style="color:var(--tp)"></i>Pratique</span><span><span class="chip ok" style="padding:0 6px">en ligne</span> contenu disponible</span></div></div>
     <div class="map">
       <div></div><div class="kicker" style="color:var(--elec)">EQEM — ${fil('eqem').nom}</div><div class="kicker" style="color:var(--meca)">EQMM — ${fil('eqmm').nom}</div>
-      <div class="yr">3e<small>jusqu'en 2028</small></div><div class="span2">${lane('3qem',3,'Électromécanique — groupes 1, 2 et 3','dernière année : 2027-2028')}</div>
+      <div class="yr">3e<small>jusqu'en 2028</small></div><div class="span2">${lane('3qem',3,'Électromécanique — 3 groupes de TP, 2 groupes de CT','dernière année : 2027-2028')}</div>
       <div class="yr">4e<small>socle commun</small></div>${lane('eqem',4,'Électricien MI')}${lane('eqmm',4,'Mécanicien MI')}
       <div class="yr">5e</div>${lane('eqem',5,'Électricien MI')}${lane('eqmm',5,'Mécanicien MI')}
       <div class="yr">6e</div>${lane('eqem',6,'Électricien MI')}${lane('eqmm',6,'Mécanicien MI')}
@@ -41,7 +41,7 @@ function pagePresentation(){
 /* ---------------- Suivi (prof) ---------------- */
 function myPairs(){
   const order=c=>CLASSES.findIndex(x=>x.id===c);
-  return AFFECT.filter(x=>x.profs.includes(ME)).sort((a,b)=>order(a.cl)-order(b.cl)).map(x=>[x.cl+'|'+x.c, `${cls(x.cl).nom} — ${(COURS.find(c=>c.id===x.c)||{titre:x.c}).titre}`]);
+  return AFFECT.filter(x=>x.profs.includes(ME) && coursDe(cls(x.cl)).some(co=>co.id===x.c)).sort((a,b)=>order(a.cl)-order(b.cl)).map(x=>[x.cl+'|'+x.c, `${cls(x.cl).nom} — ${(COURS.find(c=>c.id===x.c)||{titre:x.c}).titre}`]);
 }
 function noPairs(title){ return `<div class="page-head"><div><h1>${title}</h1></div></div><div class="card pad"><h3>Aucun cours ne t’est attribué</h3><p class="muted">${isCoord()?'Attribue-toi tes cours dans Admin › « Qui donne quel cours ».':'Demande au coordinateur de t’attribuer tes cours : ils apparaîtront ici.'}</p></div>`; }
 function liveTest(){ const sc=testScore(); if(!sc) return null; return sc.pending? 'wait' : sc.total; }
@@ -166,11 +166,12 @@ function pageAcces(){
       <td class="small muted">${AFFECT.filter(x=>x.profs.includes(p.nom)).map(x=>`${cls(x.cl).nom} ${(COURS.find(c=>c.id===x.c)||{titre:''}).titre}`).join(' · ')||'—'}</td>
       <td>${p.mail===S.me.mail?'':`<button class="btn sm ghost" data-pdel="${i}">Retirer</button>`}</td></tr>`).join('')}
     </table></div></div>
-  <div class="card"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Élèves (${all.length})</h3><p class="small muted" style="margin:4px 0 0">Ils apparaissent à leur première connexion. Tu peux changer leur classe ou bloquer une adresse.</p></div>
-    ${all.length?`<div class="scroll-x"><table class="t"><tr><th>Élève</th><th>Classe</th><th>Dernière connexion</th><th>Statut</th><th></th></tr>
+  <div class="card"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Élèves (${all.length})</h3><p class="small muted" style="margin:4px 0 0">Ils apparaissent à leur première connexion. Tu peux changer leur classe ou bloquer une adresse. En 3QEM, la classe est le groupe de TP ; le groupe de CT se règle dans sa colonne.</p></div>
+    ${all.length?`<div class="scroll-x"><table class="t"><tr><th>Élève</th><th>Classe</th><th>Groupe de CT</th><th>Dernière connexion</th><th>Statut</th><th></th></tr>
     ${all.map(e=>{ const b=S.access.blocked.includes(e.mail);
       return `<tr><td>${esc(e.nom)}<div class="tiny muted mono">${esc(e.mail)}</div></td>
-      <td><select data-ecl="${esc(e.mail)}">${CLASSES.map(c=>`<option value="${c.id}" ${c.id===e.classe?'selected':''}>${c.nom}</option>`).join('')}</select></td>
+      <td><select data-ecl="${esc(e.mail)}">${CLASSES_ELEVE.map(c=>`<option value="${c.id}" ${c.id===e.classe?'selected':''}>${c.nom}</option>`).join('')}</select></td>
+      <td>${/^3qem/.test(e.classe||'')?`<select data-ect="${esc(e.mail)}" ${e.ct?'':'style="border-color:var(--amber)"'}><option value="">— à placer —</option>${CT_GROUPES.map(c=>`<option value="${c.id}" ${c.id===e.ct?'selected':''}>${c.nom.replace('3QEM ','')}</option>`).join('')}</select>`:'<span class="muted small">—</span>'}</td>
       <td class="small muted">${fmtAgo(e.last)}</td><td>${b?'<span class="chip bad">Bloqué</span>':'<span class="chip ok">Actif</span>'}</td><td><button class="btn sm ghost" data-block="${esc(e.mail)}">${b?'Débloquer':'Bloquer'}</button></td></tr>`; }).join('')}
     </table></div>`:'<div class="pad"><p class="small muted" style="margin:0">Aucun élève connecté pour l’instant.</p></div>'}</div>`;
 }
@@ -189,18 +190,20 @@ function bindAcces(m){
   m.querySelectorAll('[data-prole]').forEach(s=>s.onchange=()=>{ S.access.profs[+s.dataset.prole].role=s.value; pushProfs(); });
   m.querySelectorAll('[data-pdel]').forEach(b=>b.onclick=()=>{ if(!confirm('Retirer ce professeur ? Il ne pourra plus se connecter.')) return; S.access.profs.splice(+b.dataset.pdel,1); pushProfs(); });
   m.querySelectorAll('[data-block]').forEach(b=>b.onclick=async()=>{ const k=b.dataset.block, i=S.access.blocked.indexOf(k); if(i>=0) S.access.blocked.splice(i,1); else S.access.blocked.push(k); rer(); await act('setAccess',{blocked:S.access.blocked}, i>=0?'Adresse débloquée':'Adresse bloquée'); });
-  m.querySelectorAll('[data-ecl]').forEach(s=>s.onchange=async()=>{ const mail=s.dataset.ecl, avant=S.eleves[mail].classe; S.eleves[mail].classe=s.value;
-    const r=await act('setEleveClasse',{mail, classe:s.value}); if(!r){ S.eleves[mail].classe=avant; s.value=avant; } });
+  m.querySelectorAll('[data-ecl]').forEach(s=>s.onchange=async()=>{ const mail=s.dataset.ecl, E=S.eleves[mail], avant={classe:E.classe, ct:E.ct}; E.classe=s.value; if(!/^3qem/.test(s.value)) delete E.ct; rer();
+    const r=await act('setEleveClasse',{mail, classe:s.value}); if(!r){ Object.assign(E,avant); rer(); } });
+  m.querySelectorAll('[data-ect]').forEach(s=>s.onchange=async()=>{ const mail=s.dataset.ect, E=S.eleves[mail], avant=E.ct; if(s.value) E.ct=s.value; else delete E.ct; rer();
+    const r=await act('setEleveCt',{mail, ct:s.value}); if(!r){ if(avant) E.ct=avant; else delete E.ct; rer(); } });
 }
 
 /* ---------------- Administration (coordinateur) ---------------- */
 function pageAdmin(){
-  const rows=CLASSES.flatMap(c=>coursFor(c.fil,c.annee).map(co=>({c,co})));
+  const rows=CLASSES.flatMap(c=>coursDe(c).map(co=>({c,co})));
   const noms=S.access.profs.map(p=>p.nom);
   return `<div class="page-head"><div><div class="kicker">Réservé au coordinateur</div><h1>Administration</h1></div><span class="chip elec">Année scolaire 2026-2027</span></div>
   <div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Classes</h3><p class="small muted" style="margin:4px 0 0">Chaque classe est liée à une année et une filière : l'élève choisit sa classe à la première connexion et voit automatiquement ses cours.</p></div>
   <div class="scroll-x"><table class="t"><tr><th>Classe</th><th>Année</th><th>Filière</th><th>Élèves</th><th>Chapitres ouverts (Électricité)</th><th>Profs</th></tr>
-    ${CLASSES.map(c=>`<tr><td><b>${c.nom}</b>${c.fil==='3qem'?'<div class="tiny muted">dernière année : 2027-2028</div>':''}</td><td>${c.annee}e</td><td class="small">${fil(c.fil).nom}</td><td>${elevesOf(c.id).length}</td>
+    ${CLASSES.map(c=>`<tr><td><b>${c.nom}</b>${c.fil==='3qem'?`<div class="tiny muted">${c.ct?'cours techniques · élèves placés dans Accès · ':'TP · '}dernière année : 2027-2028</div>`:''}</td><td>${c.annee}e</td><td class="small">${fil(c.fil).nom}</td><td>${elevesOf(c.id).length}</td>
       <td class="small">${c.annee===4?chapsOuverts(c.id).join(', ')+'<div class="tiny muted">ouverts par le prof dans Suivi</div>':'—'}</td>
       <td class="small muted">${[...new Set(AFFECT.filter(x=>x.cl===c.id).flatMap(x=>x.profs))].join(', ')||'—'}</td></tr>`).join('')}
   </table></div></div>

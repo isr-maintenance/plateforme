@@ -79,7 +79,7 @@ function syncHTML(){ const {st,msg}=SYNC_ST;
 function setSync(st,msg){ SYNC_ST={ st, msg:msg||'' }; const el=$('#sync'); if(el) el.outerHTML=syncHTML(); }
 
 /* ---------- élèves (vue prof) ---------- */
-function elevesOf(cl){ return Object.keys(S.eleves).map(m=>Object.assign({mail:m},S.eleves[m])).filter(e=>e.classe===cl).sort((a,b)=>a.nom.localeCompare(b.nom,'fr')); }
+function elevesOf(cl){ const ct=!!(CLASSES.find(x=>x.id===cl)||{}).ct; return Object.keys(S.eleves).map(m=>Object.assign({mail:m},S.eleves[m])).filter(e=>ct? e.ct===cl : e.classe===cl).sort((a,b)=>a.nom.localeCompare(b.nom,'fr')); }
 function nomEl(mail){ return (S.eleves[mail]||{}).nom || (S.me && S.me.mail===mail ? S.me.nom : String(mail).split('@')[0]); }
 function progOf(mail){ return normProg(S.progs[mail]); }
 function withProg(prog, fn){ const k=S.prog; S.prog=prog; try { return fn(); } finally { S.prog=k; } }
@@ -208,7 +208,7 @@ function render(){
   if(S.view.page==='journal') S.tab = S.role==='prof'?'stages':'monstage';
   if(!tabs.some(t=>t[0]===S.tab)) S.tab='presentation';
   const ini = S.me.nom.split(/[\s.]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const sub = S.me.role==='eleve' ? cls(S.me.classe).nom : (isCoord()?'coordinateur':'professeur');
+  const sub = S.me.role==='eleve' ? cls(S.me.classe).nom+(S.me.ct?' · '+cls(S.me.ct).nom.replace('3QEM ',''):'') : (isCoord()?'coordinateur':'professeur');
   $('#top').innerHTML = `<div class="topbar-in">
     <div class="brand"><div class="brand-mark"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#fff"/></svg></div><div>Plateforme technique<small>${esc(CONFIG.ECOLE)}</small></div></div>
     ${LOCAL?'<span class="demo-badge" title="Les données restent dans ce navigateur">test local</span>':''}
@@ -280,7 +280,7 @@ function renderChooseClass(){
   $('#main').innerHTML=`<div style="max-width:460px;margin:8vh auto 0" class="card pad">
     <div class="kicker">Première connexion</div><h2 style="margin:4px 0 8px">Bienvenue, ${esc(S.me.nom)}</h2>
     <p class="small">Choisis ta classe. Tu verras ensuite les cours de cette classe. Si tu te trompes, demande à ton professeur de la changer.</p>
-    <select id="lclass" style="width:100%;margin:8px 0 14px"><option value="">— ta classe —</option>${CLASSES.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('')}</select>
+    <select id="lclass" style="width:100%;margin:8px 0 14px"><option value="">— ta classe —</option>${CLASSES_ELEVE.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('')}</select>
     <button class="btn primary" id="lok" style="width:100%;justify-content:center">Valider</button></div>`;
   $('#lok').onclick=async()=>{ const v=$('#lclass').value; if(!v){ toast('Choisis ta classe'); return; }
     const r=await act('setClasse',{classe:v}); if(r){ S.me.classe=v; boot(); } };

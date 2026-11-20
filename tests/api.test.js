@@ -198,3 +198,19 @@ console.log(`✓ ${n} vérifications réussies`);
   const tp = H(co, 'ssoTicket', { app: 'banc' }).ticket; ok(a7.handle({ a: 'ssoCheck', p: { ticket: tp, app: 'banc' } }).role === 'prof', 'prof : rôle prof');
   H(co, 'setAccess', { blocked: [e7] }); ok(!a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'dossier' } }).ok, 'élève bloqué entre-temps : refusé');
   console.log(`✓ ${n} vérifications réussies (avec connexion unique)`); }
+
+// 3QEM : groupe de TP (classe) + groupe de CT (placé par un prof)
+{ const st8 = memStore(), a8 = ctx.makeApi(st8, deps); a8.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a8.handle({ t: a8.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', e8 = 'nina.r.student@elmarche.be', e9 = 'paul.z.student@elmarche.be';
+  H(e8, 'setClasse', { classe: '3qem2' }); H(e9, 'setClasse', { classe: '4eqem' });
+  ok(H(e8, 'setClasse', { classe: '3qemct1' }).ok === false, 'un élève ne choisit pas un groupe de CT comme classe');
+  ok(H(e8, 'setEleveCt', { mail: e8, ct: '3qemct1' }).ok === false, 'l’élève ne se place pas lui-même en CT');
+  ok(H(co, 'setEleveCt', { mail: e8, ct: '3qemct1' }).ok, 'le prof place l’élève en CT groupe 1');
+  ok(st8.get('eleve:' + e8).classe === '3qem2' && st8.get('eleve:' + e8).ct === '3qemct1', 'groupe de TP et groupe de CT gardés tous les deux');
+  ok(H(e8, 'boot').data.me.ct === '3qemct1', 'l’élève connaît son groupe de CT');
+  ok(H(co, 'setEleveCt', { mail: e9, ct: '3qemct2' }).ok === false, 'pas de groupe de CT hors 3QEM');
+  ok(H(co, 'setEleveCt', { mail: e8, ct: '3qemct9' }).ok === false, 'groupe inconnu refusé');
+  H(co, 'setEleveClasse', { mail: e8, classe: '4eqmm' }); ok(st8.get('eleve:' + e8).ct === undefined, 'changement vers une autre classe : groupe de CT effacé');
+  H(co, 'setAffect', { affect: [{ cl: '3qemct1', c: '3em-elec', profs: ['O. Lesenfants'] }] });
+  ok(H(co, 'setOuv', { key: '3qemct1|3em-elec', chaps: ['1.1'] }).ok, 'un groupe de CT est une classe reconnue');
+  console.log(`✓ ${n} vérifications réussies (avec groupes TP et CT)`); }

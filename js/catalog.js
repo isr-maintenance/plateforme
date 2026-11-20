@@ -39,9 +39,12 @@ const PROFS_DEF = [
 ];
 
 const CLASSES = [
-  { id:'3qem1', nom:'3QEM groupe 1', fil:'3qem', annee:3, mode:'souple' },
-  { id:'3qem2', nom:'3QEM groupe 2', fil:'3qem', annee:3, mode:'souple' },
-  { id:'3qem3', nom:'3QEM groupe 3', fil:'3qem', annee:3, mode:'souple' },
+  // 3QEM : la classe de l'élève est son groupe de TP (cours de TP) ; son groupe de CT (cours techniques) est réglé par un prof
+  { id:'3qem1', nom:'3QEM TP groupe 1', fil:'3qem', annee:3, mode:'souple' },
+  { id:'3qem2', nom:'3QEM TP groupe 2', fil:'3qem', annee:3, mode:'souple' },
+  { id:'3qem3', nom:'3QEM TP groupe 3', fil:'3qem', annee:3, mode:'souple' },
+  { id:'3qemct1', nom:'3QEM CT groupe 1', fil:'3qem', annee:3, mode:'souple', ct:true },
+  { id:'3qemct2', nom:'3QEM CT groupe 2', fil:'3qem', annee:3, mode:'souple', ct:true },
   { id:'4eqem', nom:'4EQEM', fil:'eqem', annee:4, mode:'strict' },
   { id:'4eqmm', nom:'4EQMM', fil:'eqmm', annee:4, mode:'strict' },
   { id:'5eqem', nom:'5EQEM', fil:'eqem', annee:5, mode:'souple' },
@@ -49,6 +52,10 @@ const CLASSES = [
   { id:'6eqem', nom:'6EQEM', fil:'eqem', annee:6, mode:'souple' },
   { id:'6eqmm', nom:'6EQMM', fil:'eqmm', annee:6, mode:'souple' },
 ];
+const CLASSES_ELEVE = CLASSES.filter(c=>!c.ct);   // ce qu'on choisit comme classe (en 3QEM : le groupe de TP)
+const CT_GROUPES = CLASSES.filter(c=>c.ct);
+/* cours donnés à un groupe : en 3QEM, les TP vont aux groupes de TP et les cours techniques aux groupes de CT */
+function coursDe(c){ const L=coursFor(c.fil,c.annee); if(c.fil!=='3qem') return L; return L.filter(co=> c.ct ? co.type!=='tp' : co.type==='tp'); }
 /* exemple d'attributions, utilisé seulement en mode test local */
 const AFFECT_DEF = [
   { cl:'3qem1', c:'3em-tpe', profs:['O. Lesenfants'] },
