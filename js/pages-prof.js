@@ -239,3 +239,18 @@ function bindAdmin(m){
     a.profs=a.profs.filter(Boolean); if(!a.profs.length) AFFECT.splice(AFFECT.indexOf(a),1);
     const y=window.scrollY; render(); window.scrollTo(0,y); await act('setAffect',{affect:AFFECT},'Attribution enregistrée'); });
 }
+
+/* ---------------- Agenda de l'école (profs) ----------------
+   Google Agenda intégré : Google n'affiche les événements qu'à un compte qui a accès à l'agenda. */
+function agendaSrc(mode){ const id=encodeURIComponent(CONFIG.AGENDA||'');
+  return `https://calendar.google.com/calendar/embed?src=${id}&ctz=Europe%2FBrussels&hl=fr&wkst=2&mode=${mode}&showTitle=0&showPrint=0&showTz=0`; }
+function pageAgenda(){
+  if(!CONFIG.AGENDA) return `<div class="page-head"><div><h1>Agenda</h1></div></div><div class="card pad"><p class="muted" style="margin:0">L'agenda de l'école n'est pas encore relié (CONFIG.AGENDA).</p></div>`;
+  const mode=S.agendaMode||'MONTH', ouvrir='https://calendar.google.com/calendar/u/0/r?cid='+encodeURIComponent(CONFIG.AGENDA);
+  return `<div class="page-head"><div><div class="kicker">Réservé aux profs</div><h1>Agenda de l'école</h1>
+      <p class="muted small" style="margin-top:4px">Les événements s'affichent si ton navigateur est connecté au compte Google de l'école (…@${PLAT.DOMAIN}).</p></div>
+    <div class="row wrap"><div class="seg">${[['WEEK','Semaine'],['MONTH','Mois'],['AGENDA','Liste']].map(([k,l])=>`<button class="${k===mode?'on':''}" data-agm="${k}">${l}</button>`).join('')}</div>
+      <a class="btn" href="${ouvrir}" target="_blank" rel="noopener">Ouvrir dans Google Agenda ↗</a></div></div>
+  <div class="card agenda"><iframe title="Agenda de l'école" src="${agendaSrc(mode)}" loading="lazy"></iframe></div>`;
+}
+function bindAgenda(m){ m.querySelectorAll('[data-agm]').forEach(b=>b.onclick=()=>{ S.agendaMode=b.dataset.agm; render(); }); }

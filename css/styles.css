@@ -463,3 +463,8 @@ details.vx summary{cursor:pointer}
 .tri-row .formula{flex:1 1 260px}
 .linkbtn{border:0;background:none;color:var(--elec);font-weight:700;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .player>*{min-width:0}.cap-body{min-width:0}.cap-body .scroll-x{max-width:100%}
+.card.agenda{overflow:hidden;padding:0}
+.card.agenda iframe{display:block;width:100%;height:min(76vh,760px);border:0;background:#fff}
+@media (max-width:640px){ .card.agenda iframe{height:70vh} }
+.topbar-in.wrapnav{flex-wrap:wrap;gap:8px 12px}
+.topbar-in.wrapnav .tabs{order:3;width:100%;margin-left:0}
