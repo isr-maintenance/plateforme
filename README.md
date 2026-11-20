@@ -9,6 +9,10 @@ Cours animés, suivi des élèves, carnet de cotes, stages et journal de stage p
 
 Tant que `js/config.js` n'est pas rempli, l'app tourne en **mode test local** : tout reste dans le navigateur, on peut l'essayer avec n'importe quelle adresse @elmarche.be.
 
+## Ajouter du contenu
+
+Les profs qui ajoutent des chapitres avec Claude travaillent sur une branche et ouvrent une *pull request*. Le fichier [`CLAUDE.md`](CLAUDE.md) explique à Claude comment construire un chapitre (capsules, quiz, exercices), les règles de rédaction et les vérifications : il le lit automatiquement.
+
 ## Structure
 
 | Dossier | Contenu |
