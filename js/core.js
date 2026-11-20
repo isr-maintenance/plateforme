@@ -114,6 +114,8 @@ async function refresh(){ await boot(); toast('Données mises à jour'); }
 
 /* ---------- petits outils d'interface ---------- */
 const fil = id => FILIERES.find(f=>f.id===id);
+/* « 4EQEM », mais « 3QEM » (le code de la 3QEM contient déjà l'année) */
+const clsCode = (filId, annee) => { const c=(fil(filId)||{code:filId}).code; return /^\d/.test(c)?c:annee+c; };
 const cls = id => CLASSES.find(c=>c.id===id) || { id, nom:id, annee:0, fil:'' };
 const coursFor = (filId, annee) => COURS.filter(c=>c.pour.some(([f,a])=>f===filId && a===annee));
 const TYPE = { elec:{l:'Électricité',c:'var(--elec)',chip:'elec'}, meca:{l:'Mécanique',c:'var(--meca)',chip:'meca'}, tp:{l:'Pratique',c:'var(--tp)',chip:'tp'} };
@@ -190,7 +192,7 @@ function openCourse(id){
   const viewTab = S.role==='prof'?'contenus':'cours';
   if(c.statut==='demo'){ S.tab=viewTab; S.view={page:'course',course:id}; render(); window.scrollTo(0,0); return; }
   if(c.statut==='demo-tp'){ S.tab=viewTab; S.view={page:'tp',course:id}; render(); window.scrollTo(0,0); return; }
-  const filtxt = c.pour.map(([f,a])=>`${a}${fil(f).code}`).join(' · ');
+  const filtxt = c.pour.map(([f,a])=>clsCode(f,a)).join(' · ');
   modal(esc(c.titre), `<p class="muted small">${filtxt}${c.per?` · ${c.per} périodes/semaine`:''}</p>
     <p>Ce cours fait partie de la plateforme : son contenu arrivera chapitre par chapitre.${S.pdfs[c.id]?' Le PDF est déjà disponible dans la Bibliothèque.':''}</p>`);
 }

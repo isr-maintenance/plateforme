@@ -8,7 +8,7 @@ function pill(c){
 }
 function lane(filId, annee, title, note){
   const f=fil(filId);
-  return `<div class="lane"><h4><span class="chip ${TYPE[f.type].chip}">${annee}${f.code}</span>${title||f.nom}${note?` <span class="chip warn">${note}</span>`:''}</h4><div class="courses">${coursFor(filId,annee).map(pill).join('')}</div></div>`;
+  return `<div class="lane"><h4><span class="chip ${TYPE[f.type].chip}">${clsCode(filId,annee)}</span>${title||f.nom}${note?` <span class="chip warn">${note}</span>`:''}</h4><div class="courses">${coursFor(filId,annee).map(pill).join('')}</div></div>`;
 }
 /* ---------- évaluation formative du chapitre ---------- */
 function calcPts(a){
@@ -92,7 +92,7 @@ function pageBiblio(){
   <div class="lib">
     <aside class="card tree" style="padding:8px">${libGroups().map(([y,items])=>`<div class="grp">${y} année</div>${items.map(([fi,a,l])=>`<button class="${an==a&&fl===fi?'on':''}" data-lib="${a}|${fi}">${l}</button>`).join('')}`).join('')}</aside>
     <section class="card">
-      <div class="pad" style="border-bottom:1px solid var(--line)"><div class="kicker">${an}${f.code}</div><h2>${f.nom}</h2></div>
+      <div class="pad" style="border-bottom:1px solid var(--line)"><div class="kicker">${clsCode(fl,an)}</div><h2>${f.nom}</h2></div>
       ${list.map(c=>{
         const has = S.pdfs[c.id] || (c.pdf && (CONFIG.PDF_ELEC4 || typeof PDF_B64!=='undefined'));
         return `<div class="doc"><div class="ic ${has?'':'empty'}">PDF</div><div class="meta"><b>${esc(c.titre)}</b>${c.sous?` <span class="small muted">— ${esc(c.sous)}</span>`:''}
@@ -650,8 +650,8 @@ function pageContenus(){
   return `<div class="page-head"><div><div class="kicker">Suivi de la transformation des cours</div><h1>Contenus</h1><p class="muted small">Où en est chaque cours : ressources reçues, chapitres transformés, relecture.</p></div></div>
   <div class="card"><div class="scroll-x"><table class="t"><tr><th>Année</th><th>Cours</th><th>Classe(s)</th><th>Périodes</th><th>Chapitres animés</th><th>Statut</th><th></th></tr>
   ${order.flatMap(([f,a])=>coursFor(f,a)).filter(c=>{ if(seen.has(c.id)) return false; seen.add(c.id); return true; }).map(c=>{
-    const cl=c.pour.map(([f,a])=>a+fil(f).code).join(' + ');
-    const nCh=chapNums(c.id).length, anim = c.statut==='demo'? (c.id==='4-elec'?`${nCh} / 20`:`${nCh} / ${(COURSE_PLANS[c.id]||{chaps:[]}).chaps.length}`) : c.statut==='demo-tp'? `feu vert É03` : '—';
+    const cl=c.pour.map(([f,a])=>clsCode(f,a)).join(' + ');
+    const nCh=chapNums(c.id).length, anim = c.statut==='demo'? (c.id==='4-elec'?`${nCh} / 20`:`${nCh} / ${((COURSE_PLANS[c.id]||{}).parts||[]).reduce((n,u)=>n+u.chaps.length,0)}`) : c.statut==='demo-tp'? `feu vert É03` : '—';
     return `<tr><td><b>${c.pour[0][1]}e</b></td><td><b>${esc(c.titre)}</b>${c.pour[0][0]==='3qem'?' <span class="chip warn">jusqu’en 2028</span>':''}</td><td class="small">${esc(cl)}</td><td>${c.per||'—'}</td><td class="small">${anim}</td><td>${statutChip(c)}</td><td>${c.statut.startsWith('demo')?`<button class="btn sm" data-open-course="${c.id}">Ouvrir</button>`:''}</td></tr>`; }).join('')}
   </table></div></div>
   <div class="grid g3" style="margin-top:16px">
