@@ -17,7 +17,9 @@ Lis ce fichier en entier avant de toucher au dépôt. Il remplace les longues ex
 | Corriger un texte, une coquille, une page PDF | Ajouter un nouveau cours interactif (voir « Les cours interactifs ») |
 | Ajouter un outil autonome dans `outils/` | Changer la connexion, les droits, le carnet de cotes, les stages |
 
-**Toujours** : travailler sur une branche, puis ouvrir une *pull request* vers `main`. Olivier relit et fusionne. Ne pousse jamais directement sur `main`.
+**Publier** : regarde d'abord avec quel compte GitHub la session travaille : `gh api user --jq .login`.
+- **`isr-maintenance`** (le compte d'Olivier, administrateur du dépôt) : fais les vérifications ci-dessous, puis pousse directement sur `main`. Pas de *pull request* : Olivier ne veut pas valider ses propres demandes.
+- **Tout autre compte** (un collègue) : travaille sur une branche, puis ouvre une *pull request* vers `main`. Olivier relit et fusionne. GitHub refuse de toute façon un envoi direct sur `main` depuis ces comptes (règle « Protection main », validation par `@olivier7887`).
 
 ## Ajouter un chapitre (cours d'Électricité 4e)
 
