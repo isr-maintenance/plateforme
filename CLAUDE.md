@@ -71,7 +71,7 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
 - **Formules** (`js/formules.js`) : l'élève écrit en ligne, la plateforme affiche en vrai. `/` fait une fraction (`(ρ . L) / S`), `^` un exposant, `_` un indice (`R1` devient R₁ tout seul), `√(…)` une racine, `.` le point de multiplication. Dans le contenu : `fm('R = ρ . L / S')` (dans le texte), `fbox(formule, légende)` (encadré), `triangle(haut, gauche, droite)` (triangle mnémotechnique cliquable, haut = gauche × droite).
 - **Le formulaire** (bouton 📐) : `FORMULAIRES['3em-elec']` dans `js/af3.js`. Il est en lecture seule, volontairement : l'élève recopie la formule lui-même. Toute nouvelle loi du cours s'y ajoute.
 - **Les points « à l'atelier »** : un élément de `prereq` sans capsule (`cap:null`) reçoit une clé `atel` (par exemple `A1mont`). Le prof le coche dans Suivi (« À l'atelier — validé par toi », action serveur `setAtelier`) ; l'élève ne peut pas le cocher lui-même.
-- Les devoirs du cours papier ne sont pas dans la plateforme.
+- **Les séries d'exercices (devoirs)** : `js/af3-series.js`, une capsule `A{n}s` « Série d'exercices » ajoutée à la fin des chapitres 6 à 16 et 20, avec `serieAF(n, [[énoncé, résultats, options]])`. Clés `A{n}s1`, `A{n}s2`… Options en plus de `AX` : `texte:true` (question à justifier : une seule case « Ta réponse », lue par le prof), `alt:[…]` dans un résultat (autre réponse admise quand l'énoncé permet deux lectures). Les en-têtes Nom / Classe / Date du devoir papier ne sont pas repris.
 
 ## Règles de rédaction
 

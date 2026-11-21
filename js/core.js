@@ -64,6 +64,8 @@ function save(){
 async function pushProg(){
   clearTimeout(saveTimer); saveTimer=null;
   PENDING++; setSync('cours');
+  const taille=JSON.stringify(isProf()?(previewProg||S.prog):S.prog).length;   // le serveur refuse au-delà de 45 000 caractères
+  if(taille>40000 && !pushProg.averti){ pushProg.averti=true; toast('Ta progression est presque pleine : préviens ton prof.'); }
   let r;
   if(isProf()) r = await API.call('saveMyProg', { prog: previewProg||S.prog });
   else { r = await API.call('saveProg', { prog: S.prog }); if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; S.prog.atel = r.atel || {}; } }

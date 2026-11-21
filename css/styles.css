@@ -427,6 +427,7 @@ table.t tr.verif td{background:var(--amber-soft)}
 .mcell.edit .mview{margin-top:6px;padding-top:4px;border-top:1px dashed var(--line);font-size:14px}
 .mcell.ro{cursor:default}
 .mview{overflow-x:auto;word-break:break-word}
+.difs.one{grid-template-columns:1fr!important}.difs.one .difs-col{border-left:0!important;border-top:0!important}
 .difs.done{border-color:var(--ok)}
 .difs.done .difs-h{background:var(--ok-soft);color:var(--ok)}
 .difs-res{margin-top:12px}

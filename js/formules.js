@@ -143,7 +143,7 @@ function parseVal(v){
   if(/^-?[0-9]+(?:[.,][0-9]+)?$/.test(s)) return parseFloat(s.replace(',','.'));
   return NaN;
 }
-const okVal = (r, v) => { const x=parseVal(v); if(isNaN(x)) return false; const tol=r.tol!=null?r.tol:0.02; return Math.abs(x-r.ans) <= Math.max(Math.abs(r.ans)*tol, r.abs||1e-12); };
+const okVal = (r, v) => { const x=parseVal(v); if(isNaN(x)) return false; const tol=r.tol!=null?r.tol:0.02; return [r.ans].concat(r.alt||[]).some(a=>Math.abs(x-a) <= Math.max(Math.abs(a)*tol, r.abs||1e-12)); };   // alt : autre réponse admise (énoncé qui permet deux lectures)
 /* affichage d'un nombre : 0,0525 · 28 800 · 2,4 · 10⁹ */
 function frN(x, d=4){
   if(!isFinite(x)) return '—';
@@ -196,6 +196,11 @@ const DIFS_MAX = 250;   // par case : la progression d'un élève doit rester so
 function DX(key, cfg){ DIFS_REG[key]=cfg; return `<div class="figure exw difs-wrap" data-difs="${key}"></div>`; }
 function difsData(key){ const dr=DR(); let d=dr[key]; if(!d||typeof d!=='object'||Array.isArray(d)) d=dr[key]={d:'',i:'',f:'',s:'',r:[]}; if(!Array.isArray(d.r)) d.r=[]; return d; }
 const difsFilled = d => DIFS_COLS.every(([k])=>String(d[k]||'').trim().length>0);
+/* colonnes d'un exercice : les quatre colonnes, ou une seule case « Ta réponse » pour une question à justifier (texte:true) */
+const DIFS_TXT = [['s','Ta réponse','explique avec tes mots, en phrases complètes']];
+const difsCols = cfg => cfg && cfg.texte ? DIFS_TXT : DIFS_COLS;
+/* le registre se remplit quand une capsule s'affiche : la vue prof le remplit d'un coup pour tout le cours */
+function fillDIFS(course){ Object.values(CHAPTERS).filter(ch=>ch.course===course).forEach(ch=>ch.caps.forEach(c=>{ try{ if(c.body) c.body(); }catch(e){} })); }
 function mountAllDIFS(root){ root.querySelectorAll('[data-difs]').forEach(b=>mountDIFS(b, b.dataset.difs)); }
 function mountDIFS(box, key){
   const cfg=DIFS_REG[key]; if(!cfg){ box.textContent='Exercice introuvable'; return; }
@@ -203,21 +208,22 @@ function mountDIFS(box, key){
   const done=()=>!!P().ex[key];
   const draw=()=>{
     const d=difsData(key), ok=done(), auto=(cfg.res||[]).length>0;
-    const cells=DIFS_COLS.map(([k,l,ph])=>`<div class="difs-col"><div class="difs-h">${l}</div>
-        <div class="mcell ${ok?'ro':''}" data-mc="${k}">${ok?'':`<textarea data-mta="${k}" maxlength="${DIFS_MAX}" rows="4" placeholder="${esc(ph)}" spellcheck="false" aria-label="${l}">${esc(d[k]||'')}</textarea>`}
+    const cols=difsCols(cfg);
+    const cells=cols.map(([k,l,ph])=>`<div class="difs-col"><div class="difs-h">${l}</div>
+        <div class="mcell ${ok?'ro':''}" data-mc="${k}">${ok?'':`<textarea data-mta="${k}" maxlength="${DIFS_MAX}" rows="${cfg.texte?6:4}" placeholder="${esc(ph)}" spellcheck="false" aria-label="${l}">${esc(d[k]||'')}</textarea>`}
         <div class="mview" data-mv="${k}">${String(d[k]||'').trim()?fmath(d[k]):`<span class="muted tiny">${ok?'—':'Clique pour écrire'}</span>`}</div></div></div>`).join('');
     const res=(cfg.res||[]).map((r,i)=>{ const v=d.r[i]||'', good=ok||okVal(r,v), show=ok||st.checked&&v!=='';
       return `<div class="drow ${show?(good?'good':'wrong'):''}"><span class="dn">${r.lbl?'':i+1}</span><span class="dq">${r.lbl||'Résultat'}</span>
         <span class="din"><input type="text" inputmode="decimal" data-rv="${i}" value="${esc(ok&&!okVal(r,v)?frN(r.ans):v)}" ${ok?'disabled':''} aria-label="${esc(r.lbl||'Résultat '+(i+1))}"><span class="u">${r.unit||''}</span></span>
         ${show&&!good&&r.hint?`<span class="dh">${r.hint}</span>`:''}</div>`; }).join('');
-    box.innerHTML=`<div class="row between wrap" style="gap:8px"><div class="row" style="gap:8px"><span class="exn">${cfg.n}</span><b>Exercice ${cfg.n}</b></div>
+    box.innerHTML=`<div class="row between wrap" style="gap:8px"><div class="row" style="gap:8px"><span class="exn">${cfg.n}</span><b>${cfg.nom||'Exercice'} ${cfg.n}</b></div>
         <div class="row" style="gap:6px">${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip amber">exercice</span>'}<button class="btn sm" data-formulaire="${cfg.course}" type="button">📐 Formulaire</button></div></div>
       <div class="difs-en">${cfg.enonce}</div>
-      ${ok?'':fmToolbar()}
-      <div class="difs ${ok?'done':''}">${cells}</div>
+      ${ok||cfg.texte?'':fmToolbar()}
+      <div class="difs ${cfg.texte?'one':''} ${ok?'done':''}">${cells}</div>
       ${auto?`<div class="difs-res"><div class="tiny muted" style="margin:2px 0 6px">${ok?'Tes résultats':'Recopie ici ton résultat final : il est vérifié tout de suite.'}${!ok&&cfg.tip?' '+cfg.tip:''}</div><div class="drill">${res}</div></div>`
-        :`<div class="note warn" style="margin-top:10px"><b>Pas de correction automatique pour cet exercice.</b>${cfg.sans||'Ton prof vérifiera ton tableau.'}</div>`}
-      ${ok?`<div class="fb good"><b>${auto?'Bravo, c’est juste.':'Tableau complété.'}</b> ${cfg.ok||''}</div>`
+        :`<div class="note warn" style="margin-top:10px"><b>Pas de correction automatique pour ${cfg.texte?'cette question':'cet exercice'}.</b>${cfg.sans||'Ton prof vérifiera ton tableau.'}</div>`}
+      ${ok?`<div class="fb good"><b>${auto?'Bravo, c’est juste.':cfg.texte?'Réponse enregistrée.':'Tableau complété.'}</b> ${cfg.ok||''}</div>`
         :`<div class="row" style="margin-top:10px"><button class="btn sm primary" data-dck type="button">${auto?'Vérifier':'J’ai terminé'}</button><span class="small" data-dfb></span></div>`}`;
     box.querySelectorAll('[data-formulaire]').forEach(b=>b.onclick=()=>openFormulaire(b.dataset.formulaire));
     if(ok) return;
@@ -233,9 +239,9 @@ function mountDIFS(box, key){
     bindToolbar(box, ()=> box.querySelector(`[data-mta="${st.act}"]`) || null);
     box.querySelectorAll('[data-rv]').forEach(inp=>inp.oninput=()=>{ d.r[+inp.dataset.rv]=inp.value; st.checked=false; inp.closest('.drow').className='drow'; save(); });
     box.querySelector('[data-dck]').onclick=()=>{
-      const fb=box.querySelector('[data-dfb]'), miss=DIFS_COLS.filter(([k])=>!String(d[k]||'').trim()).map(c=>c[1]);
+      const fb=box.querySelector('[data-dfb]'), miss=cols.filter(([k])=>!String(d[k]||'').trim()).map(c=>c[1]);
       if(miss.length){ fb.innerHTML=`<span style="color:var(--bad)">Complète d'abord : ${miss.join(', ')}.</span> Le tableau entier compte, pas seulement le résultat.`; return; }
-      if(!/=/.test(d.f)){ fb.innerHTML=`<span style="color:var(--bad)">Dans « Formule(s) », écris la formule avec son signe = (par exemple <b>I = P / U</b>).</span>`; return; }
+      if(!cfg.texte && !/=/.test(d.f)){ fb.innerHTML=`<span style="color:var(--bad)">Dans « Formule(s) », écris la formule avec son signe = (par exemple <b>I = P / U</b>).</span>`; return; }
       if(!auto){ exSet(key); save(); draw(); return; }
       const n=cfg.res.filter((r,i)=>okVal(r,d.r[i])).length; save();
       if(n===cfg.res.length){ exSet(key); draw(); return; }
@@ -279,17 +285,18 @@ function mountTriangles(root){
 }
 
 /* ---------- 7. Vue prof : les tableaux d'un élève ---------- */
-function exDoneOf(mail, course){ const p=progOf(mail); return Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course && p.ex[k]).length; }
+function exDoneOf(mail, course){ fillDIFS(course); const p=progOf(mail); return Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course && p.ex[k]).length; }
 function voirExercices(mail, course){
+  fillDIFS(course);
   const p=progOf(mail), dr=(p.dr&&typeof p.dr==='object')?p.dr:{};
   const keys=Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course);
   const byCh={}; keys.forEach(k=>{ const c=DIFS_REG[k].chap; (byCh[c]=byCh[c]||[]).push(k); });
   const body=Object.keys(byCh).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).map(ch=>{
-    const rows=byCh[ch].map(k=>{ const cfg=DIFS_REG[k], d=dr[k]||{}, ok=!!p.ex[k], any=DIFS_COLS.some(([c])=>String(d[c]||'').trim());
-      if(!any && !ok) return `<div class="small muted" style="padding:4px 0">Exercice ${cfg.n} — pas commencé</div>`;
-      return `<details class="vx" ${ok?'':'open'}><summary><b>Exercice ${cfg.n}</b> ${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip warn">en cours</span>'}</summary>
+    const rows=byCh[ch].map(k=>{ const cfg=DIFS_REG[k], d=dr[k]||{}, ok=!!p.ex[k], any=difsCols(cfg).some(([c])=>String(d[c]||'').trim());
+      if(!any && !ok) return `<div class="small muted" style="padding:4px 0">${cfg.nom||'Exercice'} ${cfg.n} — pas commencé</div>`;
+      return `<details class="vx" ${ok?'':'open'}><summary><b>${cfg.nom||'Exercice'} ${cfg.n}</b> ${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip warn">en cours</span>'}</summary>
         <div class="small muted" style="margin:6px 0">${cfg.enonce}</div>
-        <div class="difs done">${DIFS_COLS.map(([c,l])=>`<div class="difs-col"><div class="difs-h">${l}</div><div class="mcell ro"><div class="mview">${String(d[c]||'').trim()?fmath(d[c]):'<span class="muted tiny">vide</span>'}</div></div></div>`).join('')}</div>
+        <div class="difs done ${cfg.texte?'one':''}">${difsCols(cfg).map(([c,l])=>`<div class="difs-col"><div class="difs-h">${l}</div><div class="mcell ro"><div class="mview">${String(d[c]||'').trim()?fmath(d[c]):'<span class="muted tiny">vide</span>'}</div></div></div>`).join('')}</div>
         ${(cfg.res||[]).length?`<div class="small" style="margin-top:6px">${cfg.res.map((r,i)=>{ const v=(d.r||[])[i]||''; return `${r.lbl||'Résultat'} : <b style="color:${v===''?'var(--muted)':okVal(r,v)?'var(--ok)':'var(--bad)'}">${v===''?'—':esc(v)} ${r.unit||''}</b> <span class="tiny muted">(attendu ${frN(r.ans)} ${r.unit||''})</span>`; }).join(' · ')}</div>`:''}</details>`; }).join('');
     return `<h3 style="margin:14px 0 4px">Chapitre ${chapLbl(ch)} — ${esc(CHAPTERS[ch]?CHAPTERS[ch].titre:'')}</h3>${rows}`; }).join('');
   modal(`Exercices — ${esc(nomEl(mail))}`, `<div class="vx-sheet">${body||'<p class="muted">Aucun exercice dans ce cours.</p>'}</div>`, {wide:true});
