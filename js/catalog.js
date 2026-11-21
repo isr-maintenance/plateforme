@@ -14,7 +14,7 @@ const COURS = [
   // --- 3QEM (grille de la brochure) — disparaît à la rentrée 2028
   { id:'3em-elec', titre:'Électricité', sous:'Ampère & Fils — électricité fondamentale', type:'elec', per:3, pour:[['3qem',3]], statut:'demo', chip:'20 chapitres en ligne' },
   { id:'3em-meca', titre:'Mécanique', sous:'mécanique, dessin', type:'meca', per:3, pour:[['3qem',3]], statut:'attente' },
-  { id:'3em-tpe',  titre:'TP électricité', type:'tp', per:4, pour:[['3qem',3]], statut:'attente', module:'dossier' },
+  { id:'3em-tpe',  titre:'TP électricité', sous:'énoncés, exercices et rapports de TP', type:'tp', per:4, pour:[['3qem',3]], statut:'app', module:'dossier' },   // statut 'app' : le cours se fait dans une app séparée (MODULES), ouverte en un clic
   { id:'3em-tpm',  titre:'TP mécanique', type:'tp', per:4, pour:[['3qem',3]], statut:'attente' },
   // --- 4e : Électricité et Mécanique communes aux deux filières
   { id:'4-elec', titre:'Électricité', sous:'UAA1 · début UAA2 · début UAA3', type:'elec', per:3, pour:[['eqem',4],['eqmm',4]], statut:'demo', pdf:'elec4', commun:true },

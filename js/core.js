@@ -127,6 +127,7 @@ const TYPE = { elec:{l:'Électricité',c:'var(--elec)',chip:'elec'}, meca:{l:'M�
 function statutChip(c){
   if(c.statut==='demo') return `<span class="chip ok"><span class="dot"></span>${c.chip||'Chapitre 2.3 en ligne + PDF'}</span>`;
   if(c.statut==='demo-tp') return `<span class="chip ok"><span class="dot"></span>Feu vert TP É03</span>`;
+  if(c.statut==='app') return `<span class="chip ok"><span class="dot"></span>${esc((MODULES[c.module]||{}).t||'App')} ↗</span>`;
   if(S.pdfs[c.id]) return `<span class="chip elec"><span class="dot"></span>PDF disponible</span>`;
   return `<span class="chip"><span class="dot"></span>Contenu en préparation</span>`;
 }
@@ -197,6 +198,7 @@ function openCourse(id){
   const viewTab = S.role==='prof'?'contenus':'cours';
   if(c.statut==='demo'){ S.tab=viewTab; S.view={page:'course',course:id}; render(); window.scrollTo(0,0); return; }
   if(c.statut==='demo-tp'){ S.tab=viewTab; S.view={page:'tp',course:id}; render(); window.scrollTo(0,0); return; }
+  if(c.statut==='app'){ openApp(c.module); return; }   // ouvre l'app (connexion automatique), dans un nouvel onglet
   const filtxt = c.pour.map(([f,a])=>clsCode(f,a)).join(' · ');
   modal(esc(c.titre), `<p class="muted small">${filtxt}${c.per?` · ${c.per} périodes/semaine`:''}</p>
     <p>Ce cours fait partie de la plateforme : son contenu arrivera chapitre par chapitre.${S.pdfs[c.id]?' Le PDF est déjà disponible dans la Bibliothèque.':''}</p>`);

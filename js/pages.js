@@ -3,7 +3,7 @@
    ========================================================= */
 /* ---------------- Présentation ---------------- */
 function pill(c){
-  const t=TYPE[c.type]; const live = c.statut==='demo'||c.statut==='demo-tp';
+  const t=TYPE[c.type]; const live = c.statut==='demo'||c.statut==='demo-tp'||c.statut==='app';
   return `<button class="cpill ${live?'live':''}" data-open-course="${c.id}"><span class="bullet" style="background:${t.c}"></span><span>${esc(c.titre)}${c.per?` <span class="st">${c.per}p</span>`:''}${c.commun?` <span class="st">· commun</span>`:''}</span>${live?'<span class="chip ok" style="padding:0 6px">en ligne</span>':''}</button>`;
 }
 function lane(filId, annee, title, note){
@@ -123,12 +123,13 @@ function pageCours(){
   return `<div class="page-head"><div><div class="kicker">${c.nom} · ${f.nom}</div><h1>Mes cours</h1></div>
     ${isProf()?`<label class="small row" style="gap:8px"><span class="muted">Aperçu comme un élève de</span><select data-eclass>${CLASSES.map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${x.nom}</option>`).join('')}</select></label>`:''}</div>
   <div class="grid g3">${list.map(courseCard).join('')}</div>
-  ${list.every(x=>!x.statut.startsWith('demo'))?`<div class="note" style="margin-top:18px"><b>Le contenu arrive bientôt.</b>Tes cours sont en place : les chapitres seront ajoutés au fil de l'année. En attendant, les PDF sont dans la Bibliothèque.</div>`:''}`;
+  ${list.every(x=>!x.statut.startsWith('demo')&&x.statut!=='app')?`<div class="note" style="margin-top:18px"><b>Le contenu arrive bientôt.</b>Tes cours sont en place : les chapitres seront ajoutés au fil de l'année. En attendant, les PDF sont dans la Bibliothèque.</div>`:''}`;
 }
 function courseCard(c){
   const t=TYPE[c.type]; let prog='';
   if(c.statut==='demo'){ const ON=chapNums(c.id).filter(chapOpen), ALL=ON.flatMap(k=>CHAPTERS[k].caps), n=ALL.filter(capDone).length; prog=`<div class="small muted">${ON.length>1?`Chapitres ${chapLbl(ON[0])} à ${chapLbl(ON[ON.length-1])}`:`Chapitre ${ON[0]?chapLbl(ON[0]):'—'}`} · ${n}/${ALL.length} capsules</div><div class="bar ${ALL.length&&n===ALL.length?'ok':''}"><i style="width:${ALL.length?n/ALL.length*100:0}%"></i></div>`; }
   if(c.statut==='demo-tp'){ const n=FEUVERT.filter(x=>feuVert(x.k)).length; prog=`<div class="small muted">Feu vert É03 · ${n}/${FEUVERT.length} prérequis</div><div class="bar ${n===6?'ok':''}"><i style="width:${n/6*100}%"></i></div>`; }
+  if(c.statut==='app') prog=`<span class="small muted">S’ouvre dans l’app ${esc((MODULES[c.module]||{}).t||'')}, avec ton compte de la plateforme.</span>`;
   return `<button class="ccard ${c.type}" data-open-course="${c.id}"><div class="row between"><span class="chip ${t.chip}">${t.l}</span>${c.per?`<span class="tiny muted">${c.per} p./sem.</span>`:''}</div>
     <span class="t1">${esc(c.titre)}</span>${c.sous?`<span class="small muted">${esc(c.sous)}</span>`:''}
     ${prog || `<span class="small muted">${c.confirmer?'Intitulé à confirmer · ':''}Contenu en préparation</span>`}
@@ -660,8 +661,8 @@ function pageContenus(){
   <div class="card"><div class="scroll-x"><table class="t"><tr><th>Année</th><th>Cours</th><th>Classe(s)</th><th>Périodes</th><th>Chapitres animés</th><th>Statut</th><th></th></tr>
   ${order.flatMap(([f,a])=>coursFor(f,a)).filter(c=>{ if(seen.has(c.id)) return false; seen.add(c.id); return true; }).map(c=>{
     const cl=c.pour.map(([f,a])=>clsCode(f,a)).join(' + ');
-    const nCh=chapNums(c.id).length, anim = c.statut==='demo'? (c.id==='4-elec'?`${nCh} / 20`:`${nCh} / ${((COURSE_PLANS[c.id]||{}).parts||[]).reduce((n,u)=>n+u.chaps.length,0)}`) : c.statut==='demo-tp'? `feu vert É03` : '—';
-    return `<tr><td><b>${c.pour[0][1]}e</b></td><td><b>${esc(c.titre)}</b>${c.pour[0][0]==='3qem'?' <span class="chip warn">jusqu’en 2028</span>':''}</td><td class="small">${esc(cl)}</td><td>${c.per||'—'}</td><td class="small">${anim}</td><td>${statutChip(c)}</td><td>${c.statut.startsWith('demo')?`<button class="btn sm" data-open-course="${c.id}">Ouvrir</button>`:''}</td></tr>`; }).join('')}
+    const nCh=chapNums(c.id).length, anim = c.statut==='demo'? (c.id==='4-elec'?`${nCh} / 20`:`${nCh} / ${((COURSE_PLANS[c.id]||{}).parts||[]).reduce((n,u)=>n+u.chaps.length,0)}`) : c.statut==='demo-tp'? `feu vert É03` : c.statut==='app'? `dans l’app ${esc((MODULES[c.module]||{}).t||'')}` : '—';
+    return `<tr><td><b>${c.pour[0][1]}e</b></td><td><b>${esc(c.titre)}</b>${c.pour[0][0]==='3qem'?' <span class="chip warn">jusqu’en 2028</span>':''}</td><td class="small">${esc(cl)}</td><td>${c.per||'—'}</td><td class="small">${anim}</td><td>${statutChip(c)}</td><td>${c.statut.startsWith('demo')||c.statut==='app'?`<button class="btn sm" data-open-course="${c.id}">Ouvrir</button>`:''}</td></tr>`; }).join('')}
   </table></div></div>
   <div class="grid g3" style="margin-top:16px">
     <div class="card pad"><div class="kicker">Étape 1</div><h3 style="margin:4px 0">Les ressources</h3><p class="small">Chaque prof transmet ses notes, évaluations, corrigés et photos de l'atelier au coordinateur.</p></div>

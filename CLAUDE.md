@@ -57,6 +57,7 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
 - Le plan d'un cours (titre, parties, chapitres) est dans `COURSE_PLANS` (`js/catalog.js`) ; le cours y a `statut:'demo'` et un `chip`.
 - **Numéro de chapitre** : le serveur n'accepte que des clés du type `2.3`. Un cours qui numérote 1, 2, 3… utilise une clé interne `0.N` et `lbl:'N'` pour l'affichage (c'est le cas du 3QEM).
 - Chapitres ouverts par défaut : `OUV_DEF` dans `js/chapitres.js`. En 3QEM, c'est le **groupe de CT** de l'élève qui compte pour les cours techniques.
+- **Un cours qui se fait dans une app séparée** (TP électricité 3QEM → Dossier TP) : `statut:'app'` et `module:'dossier'` dans `COURS`. La carte du cours ouvre l'app en un clic, avec la connexion automatique (`MODULES`, `openApp`).
 - Ajouter un troisième cours : une entrée dans `COURSE_PLANS`, `statut:'demo'` dans `COURS`, ses chapitres avec `course`, son `OUV_DEF`. Le suivi prof, la page du cours et le lecteur s'adaptent seuls.
 
 ## Le cours d'Électricité 3QEM (Ampère & Fils)
