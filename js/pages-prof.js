@@ -53,19 +53,63 @@ function scoreCell(v,total,seuil){
 }
 function capsCell(v){ if(!v) return `<span class="cell none">Pas commencé</span>`; if(v>=CAPS.length) return `<span class="cell ok">${CAPS.length}/${CAPS.length} capsules</span>`; return `<span class="cell run">${v}/${CAPS.length} capsules</span>`; }
 const fmtAgo = t => { if(!t) return '—'; const d=Math.floor((Date.now()-t)/864e5); return d<=0?'aujourd’hui':d===1?'hier':`il y a ${d} jours`; };
+/* coordinateur : toutes les classes et tous les cours qui ont du contenu sur la plateforme (ses cours d'abord) */
+const coursSuivi = co => co.statut==='demo' || co.statut==='demo-tp' || co.statut==='app';
+function allPairs(){
+  const mine=new Set(myPairs().map(p=>p[0]));
+  const L=CLASSES.flatMap(c=>coursDe(c).filter(coursSuivi).map(co=>({ k:c.id+'|'+co.id, cl:c.id, co:co.id, l:`${c.nom} — ${co.titre}`, profs:profsOf(c.id,co.id), mine:mine.has(c.id+'|'+co.id) })));
+  return L.filter(x=>x.mine).concat(L.filter(x=>!x.mine));
+}
+/* chiffres d'un couple classe × cours, pour la vue d'ensemble */
+function statsPair(cl, co){
+  const studs=elevesOf(cl), sem=Date.now()-7*864e5;
+  const o={ n:studs.length, actifs:studs.filter(s=>s.last&&s.last>=sem).length, last:Math.max(0,...studs.map(s=>s.last||0)) };
+  const C=COURS.find(x=>x.id===co)||{};
+  if(C.statut==='app'){ o.txt=`dans l’app ${esc((MODULES[C.module]||{}).t||'')}`; return o; }
+  if(co==='4eqem-tpe'){ const r=studs.map(s=>rowOf(s.mail)); o.ok=r.filter(x=>x.fv.every(Boolean)).length; o.txt=`feu vert É03 : ${o.ok}/${o.n}`; o.pct=o.n?Math.round(o.ok/o.n*100):0; return o; }
+  const ON=chapsOuverts(cl,co), OPEN=chapNums(co).filter(k=>ON.includes(k)), tot=OPEN.reduce((a,k)=>a+CHAPTERS[k].caps.length,0);
+  const pct=m=>{ const r=chapRow(m,co); return tot?Math.round(OPEN.reduce((a,k)=>a+r.chaps[k],0)/tot*100):0; };
+  const P=studs.map(s=>pct(s.mail));
+  o.pct=P.length?Math.round(P.reduce((a,b)=>a+b,0)/P.length):0; o.ok=P.filter(x=>tot&&x===100).length; o.ouverts=OPEN.length; o.chaps=chapNums(co).length;
+  if(co!=='4-elec') o.ex=studs.reduce((a,s)=>a+exDoneOf(s.mail,co),0);
+  return o;
+}
+function dashTabs(){
+  if(!isCoord()) return '';
+  const m=S.dashMode||'mine';
+  return `<div class="seg" style="margin-bottom:16px">${[['mine','Mes cours'],['all','Toutes les classes']].map(([k,l])=>`<button class="${m===k?'on':''}" data-dmode="${k}" type="button">${l}</button>`).join('')}</div>`;
+}
+function dashOverview(){
+  const L=allPairs(), bar=v=>`<div class="bar ${v>=100?'ok':''}" style="min-width:90px"><i style="width:${v}%"></i></div>`;
+  const rows=L.map(x=>{ const st=statsPair(x.cl,x.co);
+    return `<tr class="${x.mine?'mine':''}"><td><b>${esc(cls(x.cl).nom)}</b>${x.mine?' <span class="chip ok" style="padding:0 6px">toi</span>':''}</td><td>${esc((COURS.find(c=>c.id===x.co)||{}).titre||x.co)}</td><td class="small">${x.profs.length?esc(x.profs.join(', ')):'<span class="muted">pas attribué</span>'}</td>
+      <td>${st.n}</td><td>${st.n?`${st.actifs}/${st.n}`:'—'}</td>
+      <td>${st.txt?`<span class="small muted">${st.txt}</span>`:st.n?`<div class="row" style="gap:8px">${bar(st.pct)}<b>${st.pct}%</b></div><div class="tiny muted">${st.ok}/${st.n} à jour · ${st.ouverts}/${st.chaps} chap. ouverts${st.ex!=null?` · ${st.ex} exercices réussis`:''}</div>`:'—'}</td>
+      <td class="small">${fmtAgo(st.last)}</td>
+      <td>${(COURS.find(c=>c.id===x.co)||{}).statut!=='app'?`<button class="btn sm" data-dopen="${x.k}" type="button">Voir</button>`:''}</td></tr>`; }).join('');
+  return `<div class="page-head"><div><div class="kicker">Suivi · coordination</div><h1>Toutes les classes</h1><p class="small muted" style="margin-top:4px">Qui utilise la plateforme et qui y arrive. Tes cours sont en tête, sur fond coloré.</p></div></div>
+    ${dashTabs()}
+    <div class="card"><div class="scroll-x"><table class="t"><tr><th>Classe</th><th>Cours</th><th>Prof(s)</th><th>Élèves</th><th>Actifs 7 j</th><th>Progression</th><th>Dernière activité</th><th></th></tr>${rows}</table></div>
+    <p class="tiny muted" style="padding:0 16px 12px;margin:0">Élèves : inscrits sur la plateforme dans ce groupe · Actifs 7 j : connectés ces 7 derniers jours · Progression : capsules validées dans les chapitres ouverts, en moyenne.</p></div>`;
+}
 function pageDash(){
-  const pairs=myPairs(); if(!pairs.length) return noPairs('Suivi');
+  if(isCoord() && S.dashMode==='all') return dashOverview();
+  const mine=myPairs(), others=isCoord()?allPairs().filter(x=>!x.mine && (COURS.find(c=>c.id===x.co)||{}).statut!=='app').map(x=>[x.k, x.l+(x.profs.length?' ('+x.profs.join(', ')+')':'')]):[];
+  const pairs=mine.concat(others); if(!pairs.length) return noPairs('Suivi');
   if(!pairs.some(p=>p[0]===S.dashKey)) S.dashKey=pairs[0][0];
-  const [cl,co]=S.dashKey.split('|'); const c=cls(cl);
-  const sel=`<select data-dkey>${pairs.map(([k,l])=>`<option value="${k}" ${k===S.dashKey?'selected':''}>${l}</option>`).join('')}</select>`;
+  const [cl,co]=S.dashKey.split('|'); const c=cls(cl), estMien=mine.some(p=>p[0]===S.dashKey);
+  const opt=([k,l])=>`<option value="${k}" ${k===S.dashKey?'selected':''}>${esc(l)}</option>`;
+  const sel=`<select data-dkey>${others.length?`<optgroup label="Mes cours">${mine.map(opt).join('')}</optgroup><optgroup label="Autres classes (consultation)">${others.map(opt).join('')}</optgroup>`:pairs.map(opt).join('')}</select>`;
   const studs=elevesOf(cl);
   let body;
   if(!studs.length) body=`<div class="card pad"><h3>Aucun élève inscrit en ${c.nom}</h3><p class="muted">Les élèves apparaissent ici dès leur première connexion, quand ils choisissent leur classe.</p></div>`;
   else if(co==='4-elec' || courseHasChaps(co)) body=dashChap(cl, studs, co);
   else if(co==='4eqem-tpe') body=dashTP(cl, studs);
+  else if((COURS.find(x=>x.id===co)||{}).statut==='app'){ const M=MODULES[(COURS.find(x=>x.id===co)||{}).module]||{}; body=`<div class="card pad"><h3>${studs.length} élève(s) en ${c.nom}</h3><p class="muted">Ce cours se fait dans l’app ${esc(M.t||'')} : les énoncés, les rapports et leur suivi sont là-bas.</p><button class="btn primary" data-app="${M.app||''}" type="button">Ouvrir ${esc(M.t||'l’app')} ↗</button></div>`; }
   else body=`<div class="card pad"><h3>${studs.length} élève(s) en ${c.nom}</h3><p class="muted">Le contenu de ce cours n'est pas encore sur la plateforme : le suivi détaillé apparaîtra avec les premiers chapitres. En attendant, encode tes évaluations dans le carnet de cotes.</p></div>`;
   return `<div class="page-head"><div><div class="kicker">Suivi</div><h1>${c.nom}${co?' — '+(COURS.find(x=>x.id===co)||{titre:co}).titre:''}</h1>${co&&profsOf(cl,co).length>1?`<p class="small muted" style="margin-top:4px">Cours partagé : ${profsOf(cl,co).join(' et ')} voient le même suivi.</p>`:''}</div>
-    <div class="row wrap">${sel}<button class="btn" data-go="carnet">Carnet de cotes →</button></div></div>${body}`;
+    <div class="row wrap">${sel}${estMien?'<button class="btn" data-go="carnet">Carnet de cotes →</button>':''}</div></div>${dashTabs()}
+    ${estMien?'':`<div class="note warn" style="margin:0 0 16px"><b>Consultation : ce n’est pas ton cours${profsOf(cl,co).length?` (${esc(profsOf(cl,co).join(', '))})`:''}.</b>Comme coordinateur, tu peux aussi ouvrir des chapitres ou cocher : fais-le seulement en accord avec le collègue.</div>`}${body}`;
 }
 function rowOf(mail){ const pr=progOf(mail); return withProg(pr, ()=>({ mail, caps:capsDoneCount(), test:liveTest(), min:Math.round((pr.sec||0)/60), fv:FEUVERT.map(x=>feuVert(x.k)?1:0) })); }
 function chapRow(mail, co='4-elec'){ const pr=progOf(mail); return withProg(pr, ()=>{ const o={}; chapNums(co).forEach(k=>o[k]=chapCapsDone(k)); return { chaps:o, test:co==='4-elec'?liveTest():null, min:Math.round((pr.sec||0)/60) }; }); }
@@ -140,6 +184,8 @@ function bindDash(m){
     const r=await act('setAtelier',{mail,k,v}); if(!r){ if(v) delete pr.atel[k]; else pr.atel[k]=Date.now(); const y=window.scrollY; render(); window.scrollTo(0,y); } });
   m.querySelectorAll('[data-voirex]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.voirex.split('|'); voirExercices(mail,co); });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };
+  m.querySelectorAll('[data-dmode]').forEach(b=>b.onclick=()=>{ S.dashMode=b.dataset.dmode; savePrefs(); render(); window.scrollTo(0,0); });
+  m.querySelectorAll('[data-dopen]').forEach(b=>b.onclick=()=>{ S.dashKey=b.dataset.dopen; S.dashMode='mine'; savePrefs(); render(); window.scrollTo(0,0); });
   m.querySelectorAll('[data-grade]').forEach(b=>b.onclick=async()=>{ const [mail,q,v]=b.dataset.grade.split('|');
     const p=S.progs[mail]; p.test.open=p.test.open||{}; const avant=p.test.open[q]; p.test.open[q]=+v; const y=window.scrollY; render(); window.scrollTo(0,y);
     const r=await act('grade',{mail,q,v:+v});

@@ -22,8 +22,8 @@ const isCoord = () => S.me && S.me.coord;
 
 /* ---------- préférences d'affichage (propres à ce navigateur) ---------- */
 const PREF_KEY='plateforme-prefs';
-function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify({ dashKey:S.dashKey, ckey:S.carnet.key, cper:S.carnet.per, ech:S.carnet.echelle, arr:S.carnet.arrondi, scl:S.stage.cl, sper:S.stage.per, colors:S.stage.colors, onlyMine:S.stage.onlyMine, lib:S.lib.sel })); }catch(e){} }
-function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); if(p.dashKey) S.dashKey=p.dashKey; if(p.ckey) S.carnet.key=p.ckey; if(p.cper) S.carnet.per=p.cper; if(p.ech) S.carnet.echelle=p.ech; if(p.arr) S.carnet.arrondi=p.arr; if(p.scl) S.stage.cl=p.scl; if(p.sper) S.stage.per=p.sper; if(p.colors) S.stage.colors=p.colors; S.stage.onlyMine=!!p.onlyMine; if(p.lib) S.lib.sel=p.lib; }catch(e){} }
+function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify({ dashKey:S.dashKey, dashMode:S.dashMode, ckey:S.carnet.key, cper:S.carnet.per, ech:S.carnet.echelle, arr:S.carnet.arrondi, scl:S.stage.cl, sper:S.stage.per, colors:S.stage.colors, onlyMine:S.stage.onlyMine, lib:S.lib.sel })); }catch(e){} }
+function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); if(p.dashKey) S.dashKey=p.dashKey; if(p.dashMode) S.dashMode=p.dashMode; if(p.ckey) S.carnet.key=p.ckey; if(p.cper) S.carnet.per=p.cper; if(p.ech) S.carnet.echelle=p.ech; if(p.arr) S.carnet.arrondi=p.arr; if(p.scl) S.stage.cl=p.scl; if(p.sper) S.stage.per=p.sper; if(p.colors) S.stage.colors=p.colors; S.stage.onlyMine=!!p.onlyMine; if(p.lib) S.lib.sel=p.lib; }catch(e){} }
 
 /* ---------- envoi au serveur ---------- */
 /* Les enregistrements partent en arrière-plan : l'écran est déjà à jour, l'indicateur en haut
