@@ -299,7 +299,7 @@ const num = el => { const v = parseFloat(String(el.value).replace(",", ".")); re
 
 /* Tabs */
 /* ouvert depuis la plateforme dans un nouvel onglet : on referme cet onglet pour retrouver la capsule où on était */
-document.querySelectorAll('a[href="../"]').forEach(a => a.onclick = e => { if (window.opener && !window.opener.closed){ e.preventDefault(); try { window.opener.focus(); } catch(x){} window.close(); setTimeout(() => { location.href = "../"; }, 300); } });
+document.querySelectorAll('a[href="../"]').forEach(a => a.onclick = e => { if (window.parent !== window){ e.preventDefault(); try { window.parent.closePanel(); } catch(x){ location.href = "../"; } return; } if (window.opener && !window.opener.closed){ e.preventDefault(); try { window.opener.focus(); } catch(x){} window.close(); setTimeout(() => { location.href = "../"; }, 300); } });
 function showTab(t){
   if (!document.getElementById(t)) return;
   document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x.dataset.t === t));

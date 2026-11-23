@@ -44,6 +44,7 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
    - `mountSortW(box, key, { cats: [[code, libellé]], items: [[texte, codeJuste, explication]], ok, hint, intro })` : classer.
    - `mountDrillW(box, key, { rows: [{ q, unit, ans, tol, hint }], ok, hint, intro })` : calculs corrigés. `ans` est **calculé dans le code** (par exemple `ans: 230/16`), jamais recopié à la main ; la tolérance par défaut est de 2 %.
    - Pour la mise en page : `exbox(id, titre, sous-titre)` (cadre d'exercice), `tbl(entêtes, lignes)`, `formula(f, légende)`, `terrain(texte)` (encadré « sur le terrain »).
+   - `mountDefiW(box, { app:'banc', defi, lvl, titre, consigne })` : un défi à réussir dans le Banc de câblage. Le Banc s'ouvre dans la plateforme, directement sur ce défi ; quand l'élève le réussit, le Banc le signale et la clé est enregistrée. Clé à mettre dans `ex.keys` : `defiKey('banc', defi, lvl)` (par exemple `banc:r5:1`). Un niveau supérieur réussi compte aussi. `defi` est la clé du défi dans le Banc (`EX` dans son `index.html` : `r5` = Relais 5 · marche-arrêt avec maintien, `simple`, `vav`, `tl`, `direct`…). Pour une fiche (identification, principe, câblage), c'est la fin du câblage qui compte.
 6. **Brancher le fichier** :
    - ajouter `<script src="js/chapXYZ.js?v=1"></script>` dans `index.html`, avant `js/core.js`, dans l'ordre des chapitres ;
    - ajouter le fichier à la liste `FILES` de `sw.js` et incrémenter `CACHE` (`plateforme-vN` → `plateforme-vN+1`).
@@ -95,7 +96,8 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
 - **Taille de la progression** : tout ce qu'un élève fait est enregistré dans un seul document, limité à 45 000 caractères par le serveur. Les cases du tableau en quatre colonnes sont limitées à 250 caractères pour cette raison.
 - **Les PDF des cours** sont sur Google Drive (liens dans `js/config.js` ou réglés dans Bibliothèque) ; ils ne vont pas dans le dépôt.
 - **3QEM** : la classe de l'élève est son groupe de TP (`3qem1` à `3qem3`). Les cours techniques sont donnés aux groupes de CT (`3qemct1`, `3qemct2`), dans lesquels un prof place les élèves.
-- **Les apps séparées** (Banc de câblage, Dossier TP, Labo Arduino) ont leurs propres dépôts. On ne les modifie pas depuis ici.
+- **Les apps séparées** (Banc de câblage, Dossier TP, Labo Arduino) ont leurs propres dépôts, sur le compte `olivier7887`. On ne les modifie pas depuis ici.
+- **Ouverture dans la plateforme** : `APPS` (`js/pages.js`). Avec `panel:true`, l'app s'ouvre dans un panneau plein écran (`openPanel`), sinon dans un nouvel onglet. Seul le Banc a `panel:true` pour l'instant : une app doit d'abord savoir qu'elle est dans la plateforme (`#plateforme&embed` : pas de bouton « ← Plateforme ») et signaler ses défis réussis (`postMessage` `{src, type:'reussi', k, complet, titre}` vers `https://isr-maintenance.github.io`). Les outils de la plateforme (`outils/…`) s'ouvrent aussi dans le panneau.
 
 
 ## Déposer le PDF d'un cours (profs)

@@ -292,25 +292,81 @@ const MODULES = {
   arduino:{t:'Labo Arduino',k:'App · ouverte à tous',d:'Simulateur d’électronique et d’Arduino : montages sur platine, programmation en blocs ou en code, défis par niveaux.',c:'var(--meca)',app:'arduino'},
 };
 /* les apps séparées : chacune garde son adresse et son propre serveur. Pour Dossier TP et le Banc,
-   la plateforme remet un ticket de 2 minutes que l'app échange contre sa propre connexion. */
+   la plateforme remet un ticket de 2 minutes que l'app échange contre sa propre connexion.
+   panel:true → l'app s'ouvre DANS la plateforme (panneau plein écran), sinon dans un nouvel onglet.
+   Seules les apps qui savent parler à la plateforme (bouton retour, défis réussis) ont panel:true. */
 const APPS = {
-  banc:{url:'https://olivier7887.github.io/banc-de-cablage/', sso:true},
+  banc:{url:'https://olivier7887.github.io/banc-de-cablage/', sso:true, panel:true},
   dossier:{url:'https://olivier7887.github.io/dossier-tp/', sso:true},
   arduino:{url:'https://olivier7887.github.io/Labo-Arduino/', sso:false},
 };
-async function openApp(k){
+const appOrigin = k => { try{ return new URL(APPS[k].url, location.href).origin; }catch(e){ return ''; } };
+/* opts.defi : 'clé:niveau' d'un défi à ouvrir directement (Banc) */
+async function openApp(k, opts={}){
   const A=APPS[k]; if(!A) return;
+  const extra = opts.defi ? '&defi='+encodeURIComponent(opts.defi) : '';
+  if(A.panel){
+    const pan=openPanel((MODULES[k]||{}).t||'App', null, k);
+    let u=A.url+'#plateforme&embed'+extra;
+    if(A.sso && !LOCAL){
+      const r=await API.call('ssoTicket',{app:k});
+      if(!r.ok){ closePanel(); toast(r.msg||'Ouverture impossible'); return; }
+      u+='&pt='+r.ticket;
+    }
+    if(pan.isConnected) pan.querySelector('iframe').src=u;
+    return;
+  }
   const w=window.open('about:blank','_blank');            // ouvert tout de suite (sinon bloqué), gardé lié à la plateforme pour le bouton retour
   const to=u=>{ if(w) w.location.href=u; else location.href=u; };
-  if(!A.sso || LOCAL){ to(A.url+'#plateforme'); return; }
+  if(!A.sso || LOCAL){ to(A.url+'#plateforme'+extra); return; }
   const r=await API.call('ssoTicket',{app:k});
   if(!r.ok){ if(w) w.close(); toast(r.msg||'Ouverture impossible'); return; }
-  to(A.url+'#plateforme&pt='+r.ticket);
+  to(A.url+'#plateforme&pt='+r.ticket+extra);
 }
+/* panneau plein écran : l'outil s'ouvre dans la plateforme, sans nouvel onglet ni nouvelle connexion */
+function openPanel(title, url, appKey){
+  closePanel();
+  const p=document.createElement('div'); p.className='app-panel'; p.id='appPanel'; if(appKey) p.dataset.app=appKey;
+  p.innerHTML=`<div class="app-panel-h"><button class="btn sm" data-pclose type="button">← Retour</button><b>${esc(title)}</b><span class="grow"></span><button class="btn sm ghost" data-ptab type="button" title="Ouvrir dans un nouvel onglet">Onglet ↗</button></div><div class="app-panel-load">Ouverture…</div><iframe title="${esc(title)}" allow="clipboard-read; clipboard-write; fullscreen" referrerpolicy="origin"></iframe>`;
+  const fr=p.querySelector('iframe');
+  fr.addEventListener('load',()=>{ if(fr.src) p.classList.add('ready'); });
+  p.querySelector('[data-pclose]').onclick=closePanel;
+  p.querySelector('[data-ptab]').onclick=()=>{ if(appKey){ closePanel(); APPS[appKey].panel=false; openApp(appKey).finally(()=>{ APPS[appKey].panel=true; }); } else { window.open(fr.src,'_blank','noopener'); } };
+  document.body.appendChild(p); document.body.classList.add('panel-open');
+  if(url) fr.src=url;
+  return p;
+}
+function closePanel(){ const p=$('#appPanel'); if(!p) return; const dirty=p.dataset.dirty==='1'; p.remove(); document.body.classList.remove('panel-open'); if(dirty){ const y=window.scrollY; try{ render(); }catch(e){} window.scrollTo(0,y); } }
+/* les outils de la plateforme (outils/…) et les boutons data-panel s'ouvrent aussi dans le panneau */
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented || e.button!==0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  const b=e.target.closest('[data-panel], a[href^="outils/"]'); if(!b) return;
+  e.preventDefault();
+  const url=b.dataset.panel||b.getAttribute('href');
+  openPanel(b.dataset.ptitle||b.textContent.trim().replace(/\s*↗$/,'')||'Outil', url);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('#appPanel') && !$('#modal')) closePanel(); });
+/* messages des apps ouvertes dans le panneau : « fermer » (leur bouton retour) et « réussi » (un défi).
+   Un défi réussi est enregistré dans la progression de l'élève sous la clé « app:clé:niveau » (ex. banc:tl1:2),
+   et compte aussi pour les niveaux inférieurs : c'est cette clé que les capsules demandent (defiApp). */
+window.addEventListener('message',e=>{
+  const k=Object.keys(APPS).find(x=>appOrigin(x)===e.origin); const d=e.data;
+  if(!k || !d || typeof d!=='object' || d.src!==k) return;
+  if(d.type==='fermer'){ closePanel(); return; }
+  if(d.type==='reussi' && typeof d.k==='string' && /^[\w.\-:]{1,80}$/.test(d.k)){
+    if(d.complet===false) return;                      // une étape d'une fiche (identification, principe) : on attend la fin
+    if(!S.me || S.role!=='eleve'){ toast('Défi réussi ✓ (aperçu prof : rien n’est enregistré)'); return; }
+    const [key, lvl]=d.k.split(':'); const n=Math.min(3, Math.max(1, +lvl||1));
+    const keys = Array.from({length:n},(_,i)=>`${k}:${key}:${i+1}`);
+    const neuf=keys.filter(x=>!P().ex[x]);
+    if(neuf.length){ neuf.forEach(x=>{ P().ex[x]=true; }); save(); updateTocChecks(); const pan=$('#appPanel'); if(pan) pan.dataset.dirty='1'; }
+    toast(`Défi réussi : ${String(d.titre||key).slice(0,60)} ✓`);
+  }
+});
 function modulesVisibles(){ return Object.entries(MODULES).filter(([k,m])=>!m.pour || isProf() || m.pour(S.eleveClass||'')); }
 function pageOutils(){
-  return `<div class="page-head"><div><div class="kicker">Une seule connexion</div><h1>Outils</h1><p class="muted small">Chaque app reste un projet séparé, avec sa propre adresse : elle s'ouvre dans un nouvel onglet, déjà connectée avec ton compte de la plateforme. Son bouton « ← Plateforme » te ramène ici.</p></div></div>
-  <div class="grid g2">${modulesVisibles().map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<a class="btn sm primary" href="${m.url}" target="_blank" rel="opener">Ouvrir ↗</a>`:m.app?`<button class="btn sm primary" data-app="${m.app}">Ouvrir ↗</button>${m.pour&&isProf()?' <span class="tiny muted">visible par les 3QEM et les profs</span>':''}`:''}</div>`).join('')}</div>`;
+  return `<div class="page-head"><div><div class="kicker">Une seule connexion</div><h1>Outils</h1><p class="muted small">Chaque app reste un projet séparé, avec sa propre adresse. Elle s'ouvre ici même, déjà connectée avec ton compte de la plateforme : « ← Retour » te ramène où tu étais. Celles marquées ↗ s'ouvrent encore dans un nouvel onglet.</p></div></div>
+  <div class="grid g2">${modulesVisibles().map(([k,m])=>`<div class="card pad" style="border-top:4px solid ${m.c}"><div class="kicker">${m.k}</div><h2 style="margin:4px 0 8px">${m.t}</h2><p class="small">${m.d}</p>${k==='cours'?'':m.url?`<button class="btn sm primary" data-panel="${m.url}" data-ptitle="${esc(m.t)}" type="button">Ouvrir</button>`:m.app?`<button class="btn sm primary" data-app="${m.app}">Ouvrir${APPS[m.app]&&APPS[m.app].panel?'':' ↗'}</button>${m.pour&&isProf()?' <span class="tiny muted">visible par les 3QEM et les profs</span>':''}`:''}</div>`).join('')}</div>`;
 }
 function moduleInfo(k){
   const m=MODULES[k];

@@ -47,6 +47,24 @@ const fr = (x,d=2) => (Math.round(x*10**d)/10**d).toLocaleString('fr-BE',{maximu
 const WS = {};  // état d'écran des exercices (non enregistré)
 function wDone(box, html){ box.innerHTML = `<div class="fb good">${html}</div>`; }
 
+/* ---------- exercice : un défi à réussir dans une app (Banc de câblage) ----------
+   mountDefiW(box, { app:'banc', defi:'clé du défi dans l’app', lvl:1, titre, consigne })
+   Clé d'exercice à mettre dans ex.keys de la capsule : defiKey('banc','clé',1) → « banc:clé:1 ».
+   L'app s'ouvre dans la plateforme, directement sur le défi ; quand l'élève le réussit, l'app le signale
+   et la clé est enregistrée (un niveau supérieur réussi compte aussi). */
+const defiKey = (app, defi, lvl=1) => `${app}:${defi}:${lvl}`;
+function mountDefiW(box, cfg){
+  const lvl=cfg.lvl||1, key=defiKey(cfg.app, cfg.defi, lvl), M=(typeof MODULES!=='undefined' && MODULES[cfg.app])||{t:'l’app'};
+  const paint=()=>{
+    if(P().ex[key]){ wDone(box, `<b>Défi réussi dans ${esc(M.t)} ✓</b>${cfg.titre?` — ${esc(cfg.titre)}`:''}`); return; }
+    box.innerHTML=`<p style="margin:0 0 10px">${cfg.consigne||`Réussis ce défi dans ${esc(M.t)}${lvl>1?`, au niveau ${lvl}`:''}.`}</p>
+      <button class="btn primary" type="button" data-defigo>Faire le défi dans ${esc(M.t)}</button>
+      <p class="tiny muted" style="margin:8px 0 0">Le défi s’ouvre ici. Quand tu l’as réussi, reviens avec « ← Retour » : il sera coché.</p>`;
+    box.querySelector('[data-defigo]').onclick=()=>openApp(cfg.app,{defi:`${cfg.defi}:${lvl}`});
+  };
+  paint();
+}
+
 /* ---------- exercice : remettre dans l'ordre ---------- */
 function mountOrderW(box, key, cfg){
   box._w={key,cfg};
