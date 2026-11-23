@@ -287,7 +287,7 @@ function bindAdmin(m){
 }
 
 /* ---------------- Agenda de l'école (profs) ----------------
-   Un cadre par agenda coché : si Google refuse l'un (agenda privé et cookies bloqués), l'autre s'affiche quand même.
+   Les agendas cochés sont réunis dans un seul calendrier, chacun avec sa couleur. Un agenda privé exige que Google reconnaisse le prof dans la page (cookies) : les deux agendas sont publics.
    Google Agenda intégré : Google n'affiche les événements qu'à un compte qui a accès à l'agenda. */
 const agendas = () => CONFIG.AGENDAS || (CONFIG.AGENDA ? [{ id:CONFIG.AGENDA, nom:'Agenda de l’école', couleur:'#1f5fbf' }] : []);
 function agendaSel(){ const L=agendas(), s=(S.agendaSel||[]).filter(id=>L.some(a=>a.id===id)); return S.agendaSel ? s : L.map(a=>a.id); }   // par défaut : tous cochés
@@ -304,7 +304,7 @@ function pageAgenda(){
     <div class="row wrap"><div class="seg">${[['WEEK','Semaine'],['MONTH','Mois'],['AGENDA','Liste']].map(([k,l])=>`<button class="${k===mode?'on':''}" data-agm="${k}">${l}</button>`).join('')}</div>
       <a class="btn" href="${ouvrir}" target="_blank" rel="noopener">Ouvrir dans Google Agenda ↗</a></div></div>
   ${L.length>1?coches:''}
-  ${sel.length?L.filter(a=>sel.includes(a.id)).map(a=>`<div class="card agenda" style="margin-bottom:14px">${sel.length>1?`<div class="pad" style="padding:8px 14px;border-bottom:1px solid var(--line)"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${a.couleur};margin-right:6px"></span><b>${esc(a.nom)}</b></div>`:''}<iframe title="${esc(a.nom)}" src="${agendaSrc(mode, [a.id])}" loading="lazy"></iframe></div>`).join('')+`
+  ${sel.length?`<div class="card agenda"><iframe title="Agenda" src="${agendaSrc(mode, sel)}" loading="lazy"></iframe></div>
     <p class="small muted" style="margin:8px 2px 0">Tu vois « Impossible d’accéder à votre compte Google » ? Ton navigateur bloque les cookies de Google à l’intérieur de la page (fréquent sur iPhone et en navigation privée). Utilise le bouton « Ouvrir dans Google Agenda », ou connecte-toi d’abord à ton compte de l’école dans Google Agenda, puis recharge cette page.</p>`
     :`<div class="card pad"><p class="muted" style="margin:0">Coche au moins un agenda pour l’afficher.</p></div>`}`;
 }
