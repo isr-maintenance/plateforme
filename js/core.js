@@ -61,8 +61,48 @@ function save(){
   if(isProf()) previewProg=S.prog;   // la progression d'un prof (en vue prof comme en aperçu élève) est gardée à part, hors suivi et carnet
   clearTimeout(saveTimer); saveTimer=setTimeout(pushProg, 1500); setSync('cours');
 }
+/* ---------- plusieurs onglets ou appareils ----------
+   Un onglet resté ouvert (autre ordinateur, téléphone, PC de l'école) a une progression ancienne : s'il enregistrait,
+   il écraserait le travail fait ailleurs. Donc : un onglet inactif n'enregistre rien (pas même le temps passé), et
+   quand on y revient, il relit d'abord la progression du serveur et la fusionne à la sienne (rien ne se perd :
+   ce qui est validé d'un côté ou de l'autre le reste). La fusion se fait dans l'objet existant (les exercices ouverts gardent leurs références). */
+const IDLE_MS = 2*60*1000;
+let lastAct = Date.now(), resyncing = null;
+const actif = () => document.visibilityState==='visible' && Date.now()-lastAct < IDLE_MS;
+function mergeInto(a, b){   // a : progression locale (modifiée sur place), b : progression du serveur
+  if(!b || typeof b!=='object') return false;
+  b = normProg(JSON.parse(JSON.stringify(b))); let ch=false;
+  ['quiz','ex','ohm','atel'].forEach(k=>{ Object.keys(b[k]).forEach(x=>{ if(b[k][x] && !a[k][x]){ a[k][x]=b[k][x]; ch=true; } }); });
+  ['steps','visited'].forEach(k=>{ b[k].forEach(x=>{ if(!a[k].includes(x)){ a[k].push(x); ch=true; } }); });
+  if((b.sec||0) > (a.sec||0)){ a.sec=b.sec; ch=true; }
+  if(b.dr && typeof b.dr==='object'){ if(!a.dr||typeof a.dr!=='object') a.dr={};
+    const plein = d => d && typeof d==='object' && Object.keys(d).some(k=>k!=='r' && String(d[k]||'').trim());
+    Object.keys(b.dr).forEach(x=>{ if(a.dr[x]==null){ a.dr[x]=b.dr[x]; ch=true; } else if(!plein(a.dr[x]) && plein(b.dr[x])){ Object.assign(a.dr[x], b.dr[x]); ch=true; } }); }
+  if(b.test && b.test.submitted && !(a.test && a.test.submitted)){ a.test=b.test; ch=true; }
+  Object.keys(b).forEach(k=>{ if(a[k]===undefined){ a[k]=b[k]; ch=true; } });
+  return ch;
+}
+function resync(){
+  if(resyncing || !S.booted || !S.me) return resyncing;
+  resyncing = (async()=>{
+    try{
+      const r = await API.call('boot'); if(!r.ok) return;
+      const d=r.data, loc = isProf() ? (previewProg||S.prog) : S.prog;
+      const avant = JSON.stringify(loc), ch = mergeInto(loc, isProf() ? d.myProg : d.prog);
+      if(isProf()){ S.eleves=d.eleves||S.eleves; S.progs=d.progs||S.progs; }
+      else if(d.prog){ loc.banc=!!d.prog.banc; loc.atel=d.prog.atel||loc.atel; }
+      if(ch){ const y=window.scrollY; render(); window.scrollTo(0,y); }
+      if(JSON.stringify(loc)!==avant || ch) save();
+    } finally { resyncing=null; }
+  })();
+  return resyncing;
+}
+['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev, ()=>{ const idle=Date.now()-lastAct; lastAct=Date.now(); if(idle>=IDLE_MS) resync(); }, { capture:true, passive:true }));
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && Date.now()-lastAct>=IDLE_MS) resync(); });
+
 async function pushProg(){
   clearTimeout(saveTimer); saveTimer=null;
+  if(resyncing){ PENDING++; setSync('cours'); try{ await resyncing; } finally { PENDING--; } }   // d'abord la progression des autres onglets
   PENDING++; setSync('cours');
   const taille=JSON.stringify(isProf()?(previewProg||S.prog):S.prog).length;   // le serveur refuse au-delà de 45 000 caractères
   if(taille>40000 && !pushProg.averti){ pushProg.averti=true; toast('Ta progression est presque pleine : préviens ton prof.'); }

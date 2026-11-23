@@ -263,7 +263,7 @@ function updateTocChecks(){
     const ch=$('#exchip'); if(ch){ ch.classList.toggle('ok',exOk(cap)); ch.textContent=(exOk(cap)?'✓ ':'')+ch.textContent.replace(/^✓ /,''); } }
 }
 let clock=null;
-function startClock(){ clearInterval(clock); clock=setInterval(()=>{ if(S.view.page==='player'){ S.prog.sec+=10; if(S.prog.sec%60===0) save(); } else clearInterval(clock); },10000); }
+function startClock(){ clearInterval(clock); clock=setInterval(()=>{ if(S.view.page!=='player'){ clearInterval(clock); return; } if(!actif()) return; S.prog.sec+=10; if(S.prog.sec%60===0) save(); },10000); }   // un onglet inactif ne compte ni n'enregistre rien
 
 /* ---------- feu vert ---------- */
 function fvHTML(){
