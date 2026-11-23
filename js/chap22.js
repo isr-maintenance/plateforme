@@ -215,15 +215,15 @@ defChapter({
       <p class="small">C'est l'unité des batteries. Une batterie de 90 Ah alimente un circuit de secours de 1,5 A pendant 60 heures, ou un circuit de 3 A pendant 30 heures. C'est aussi ce qui fixe l'autonomie d'un onduleur ou d'une lampe de chantier.</p>
       ${exbox('b4qbox','Drill — la quantité d’électricité','Attention à l’unité du temps : secondes pour des coulombs, heures pour des ampères-heures.')}`,
      mount:root=>{
-       mountDrillW(root.querySelector('#b4c'),'b4conv',{rows:[
-         {q:'0,25 A en mA',unit:'mA',ans:250},{q:'1 800 mA en A',unit:'A',ans:1.8},{q:'2,2 kΩ en Ω',unit:'Ω',ans:2200},{q:'470 Ω en kΩ',unit:'kΩ',ans:0.47},{q:'0,005 A en mA',unit:'mA',ans:5},
-         {q:'68 kΩ en MΩ',unit:'MΩ',ans:0.068},{q:'1,5 MΩ en kΩ',unit:'kΩ',ans:1500},{q:'24 000 mV en V',unit:'V',ans:24},{q:'0,4 kV en V',unit:'V',ans:400},{q:'35 mA en A',unit:'A',ans:0.035},
-         {q:'Un multimètre affiche 47,0 sur le calibre 200 mA. Le courant en ampères ?',unit:'A',ans:0.047,hint:'47,0 mA ÷ 1 000.'}],
-         hint:'De l’unité vers « milli » : × 1 000. Vers « kilo » : ÷ 1 000.'});
-       mountDrillW(root.querySelector('#b4qbox'),'b4q',{rows:[
-         {q:'I = 2 A · t = 30 s → Q',unit:'C',ans:60},{q:'I = 0,5 A · t = 10 min → Q',unit:'C',ans:300,hint:'10 min = 600 s.'},{q:'I = 3 A · t = 8 h → Q',unit:'Ah',ans:24},
-         {q:'Q = 60 Ah · I = 4 A → t',unit:'h',ans:15,hint:'t = Q ÷ I.'},{q:'Q = 45 Ah · t = 10 h → I',unit:'A',ans:4.5,hint:'I = Q ÷ t.'},{q:'I = 1,5 A · t = 2 h → Q',unit:'Ah',ans:3},{q:'… la même quantité en coulombs',unit:'C',ans:3*3600,hint:'1 Ah = 3 600 C.'},
-         {q:'Batterie 74 Ah, circuit de 5 A : autonomie théorique',unit:'h',ans:74/5}]});
+       (v=>mountDrillW(root.querySelector('#b4c'),'b4conv',{rows:[
+         {q:`${fr(v.a,3)} A en mA`,unit:'mA',ans:v.a*1000},{q:`${v.b.toLocaleString('fr-BE')} mA en A`,unit:'A',ans:v.b/1000},{q:`${fr(v.c)} kΩ en Ω`,unit:'Ω',ans:v.c*1000},{q:`${v.d} Ω en kΩ`,unit:'kΩ',ans:v.d/1000},{q:`${fr(v.e,3)} A en mA`,unit:'mA',ans:v.e*1000},
+         {q:`${v.f} kΩ en MΩ`,unit:'MΩ',ans:v.f/1000},{q:`${fr(v.g)} MΩ en kΩ`,unit:'kΩ',ans:v.g*1000},{q:`${v.h.toLocaleString('fr-BE')} mV en V`,unit:'V',ans:v.h/1000},{q:`${fr(v.i)} kV en V`,unit:'V',ans:v.i*1000},{q:`${v.j} mA en A`,unit:'A',ans:v.j/1000},
+         {q:`Un multimètre affiche ${fr(v.k,1)} sur le calibre 200 mA. Le courant en ampères ?`,unit:'A',ans:v.k/1000,hint:`${fr(v.k,1)} mA ÷ 1 000.`}],
+         hint:'De l’unité vers « milli » : × 1 000. Vers « kilo » : ÷ 1 000.'}))(vx('b4conv',{a:[0.25,0.35,0.15],b:[1800,1200,2500],c:[2.2,4.7,1.5],d:[470,330,680],e:[0.005,0.008,0.002],f:[68,47,82],g:[1.5,2.2,3.3],h:[24000,12000,48000],i:[0.4,0.23,0.69],j:[35,25,45],k:[47,63.5,125]}));
+       (v=>mountDrillW(root.querySelector('#b4qbox'),'b4q',{rows:[
+         {q:`I = ${v.a[0]} A · t = ${v.a[1]} s → Q`,unit:'C',ans:v.a[0]*v.a[1]},{q:`I = ${fr(v.b[0])} A · t = ${v.b[1]} min → Q`,unit:'C',ans:v.b[0]*v.b[1]*60,hint:`${v.b[1]} min = ${v.b[1]*60} s.`},{q:`I = ${v.c[0]} A · t = ${v.c[1]} h → Q`,unit:'Ah',ans:v.c[0]*v.c[1]},
+         {q:`Q = ${v.d[0]} Ah · I = ${v.d[1]} A → t`,unit:'h',ans:v.d[0]/v.d[1],hint:'t = Q ÷ I.'},{q:`Q = ${v.e[0]} Ah · t = ${v.e[1]} h → I`,unit:'A',ans:v.e[0]/v.e[1],hint:'I = Q ÷ t.'},{q:`I = ${fr(v.f[0])} A · t = ${v.f[1]} h → Q`,unit:'Ah',ans:v.f[0]*v.f[1]},{q:'… la même quantité en coulombs',unit:'C',ans:v.f[0]*v.f[1]*3600,hint:'1 Ah = 3 600 C.'},
+         {q:`Batterie ${v.g[0]} Ah, circuit de ${v.g[1]} A : autonomie théorique`,unit:'h',ans:v.g[0]/v.g[1]}]}))(vx('b4q',{a:[[2,30],[3,45],[4,60]],b:[[0.5,10],[0.25,5],[1.5,20]],c:[[3,8],[2,6],[5,4]],d:[[60,4],[48,3],[90,6]],e:[[45,10],[36,8],[72,12]],f:[[1.5,2],[2.5,3],[0.5,4]],g:[[74,5],[60,4],[95,8]]}));
      }},
     {id:'b5', sec:'2.2.4', t:'La loi d’Ohm', pdf:28, quiz:['b5q1','b5q2'], ex:{keys:['b5ohm'], lbl:'Drill de la loi d’Ohm'},
      body:()=>`<p class="lead">Les trois grandeurs sont liées par une relation unique — la formule la plus utilisée du métier.</p>
@@ -236,11 +236,11 @@ defChapter({
       ${labo('ohm','Le triangle de la loi d’Ohm avec n’importe quelles valeurs, l’analogie du barrage et un quiz qui génère des exercices à volonté.')}
       ${exbox('b5d','Drill — la loi d’Ohm','Convertis d’abord en unités de base, écris la forme utilisée, puis calcule.')}`,
      mount:root=>{ mountOhmLab(root);
-       mountDrillW(root.querySelector('#b5d'),'b5ohm',{rows:[
-         {q:'R = 47 Ω · U = 12 V → I',unit:'A',ans:12/47,hint:'I = U ÷ R. Garde trois décimales.'},{q:'R = 1 kΩ · I = 24 mA → U',unit:'V',ans:1000*0.024,hint:'1 kΩ = 1 000 Ω et 24 mA = 0,024 A.'},{q:'U = 230 V · I = 0,5 A → R',unit:'Ω',ans:460},
-         {q:'U = 24 V · I = 40 mA → R',unit:'Ω',ans:24/0.04,hint:'40 mA = 0,040 A.'},{q:'R = 2,2 kΩ · U = 230 V → I',unit:'A',ans:230/2200,hint:'2,2 kΩ = 2 200 Ω. Garde trois décimales.'},{q:'R = 8 Ω · I = 1,5 A → U',unit:'V',ans:12},
-         {q:'U = 400 V · R = 80 Ω → I',unit:'A',ans:5},{q:'U = 5 V · I = 2 mA → R',unit:'Ω',ans:5/0.002,hint:'2 mA = 0,002 A.'},
-         {q:'Bobine de contacteur de 2 400 Ω parcourue par 96 mA → U',unit:'V',ans:2400*0.096},{q:'Corps mains mouillées, 500 Ω sous 230 V → I',unit:'mA',ans:230/500*1000,hint:'Calcule en A, puis convertis en mA.'}]});
+       (v=>mountDrillW(root.querySelector('#b5d'),'b5ohm',{rows:[
+         {q:`R = ${v.a[0]} Ω · U = ${v.a[1]} V → I`,unit:'A',ans:v.a[1]/v.a[0],hint:'I = U ÷ R. Garde trois décimales.'},{q:`R = ${fr(v.b[0])} kΩ · I = ${v.b[1]} mA → U`,unit:'V',ans:v.b[0]*v.b[1],hint:'kΩ en Ω, mA en A.'},{q:`U = 230 V · I = ${fr(v.c)} A → R`,unit:'Ω',ans:230/v.c},
+         {q:`U = ${v.d[0]} V · I = ${v.d[1]} mA → R`,unit:'Ω',ans:v.d[0]/(v.d[1]/1000),hint:`${v.d[1]} mA = ${fr(v.d[1]/1000,3)} A.`},{q:`R = ${fr(v.e)} kΩ · U = 230 V → I`,unit:'A',ans:230/(v.e*1000),hint:'kΩ en Ω. Garde trois décimales.'},{q:`R = ${v.f[0]} Ω · I = ${fr(v.f[1])} A → U`,unit:'V',ans:v.f[0]*v.f[1]},
+         {q:`U = 400 V · R = ${v.g} Ω → I`,unit:'A',ans:400/v.g},{q:`U = ${fr(v.h[0])} V · I = ${v.h[1]} mA → R`,unit:'Ω',ans:v.h[0]/(v.h[1]/1000),hint:`${v.h[1]} mA = ${fr(v.h[1]/1000,3)} A.`},
+         {q:`Bobine de contacteur de ${v.i[0].toLocaleString('fr-BE')} Ω parcourue par ${v.i[1]} mA → U`,unit:'V',ans:v.i[0]*v.i[1]/1000},{q:`Corps mains mouillées, ${v.j} Ω sous 230 V → I`,unit:'mA',ans:230/v.j*1000,hint:'Calcule en A, puis convertis en mA.'}]}))(vx('b5ohm',{a:[[47,12],[33,9],[68,24]],b:[[1,24],[2.2,10],[4.7,5]],c:[0.5,2,4],d:[[24,40],[12,20],[24,60]],e:[2.2,1,4.7],f:[[8,1.5],[6,2.5],[12,3]],g:[80,50,100],h:[[5,2],[3.3,5],[12,4]],i:[[2400,96],[1800,80],[3000,100]],j:[500,400,1000]}));
      }},
     {id:'b6', sec:'2.2.5', t:'Série et parallèle', pdf:31, quiz:['b6q1','b6q2','b6q3'], ex:{keys:['b6sp'], lbl:'Drill série et parallèle'},
      body:()=>`${tbl(['','En série','En parallèle'],[['Le chemin','Un seul chemin, les composants se suivent','Plusieurs chemins, côte à côte'],['Le courant','Le même dans tous les composants','Il se partage entre les branches, puis se rassemble'],['La tension','Elle se répartit entre les composants','La même sur chaque branche'],['Un composant coupé','Tout s’arrête','Les autres continuent']])}
@@ -255,11 +255,11 @@ defChapter({
       ${labo('montages','Construis ton propre circuit série, parallèle ou mixte : le schéma se dessine et chaque calcul est détaillé étape par étape.')}
       ${exbox('b6d','Drill — série et parallèle','En parallèle, vérifie que le résultat est plus petit que la plus petite des résistances.')}`,
      mount:root=>{ mountSP(root);
-       mountDrillW(root.querySelector('#b6d'),'b6sp',{rows:[
-         {q:'100 Ω et 150 Ω en série → R',unit:'Ω',ans:250},{q:'100 Ω et 150 Ω en parallèle → R',unit:'Ω',ans:100*150/250},{q:'470 Ω et 330 Ω en série → R',unit:'Ω',ans:800},
-         {q:'470 Ω et 330 Ω en parallèle → R',unit:'Ω',ans:470*330/800,hint:'Le résultat doit être plus petit que 330 Ω.'},{q:'1 kΩ et 1 kΩ en parallèle → R',unit:'Ω',ans:500},{q:'10 Ω, 20 Ω et 30 Ω en série → R',unit:'Ω',ans:60},
-         {q:'40 Ω et 80 Ω en série sous 24 V → I',unit:'A',ans:0.2},{q:'… tension aux bornes de 40 Ω → U1',unit:'V',ans:8},{q:'… tension aux bornes de 80 Ω → U2',unit:'V',ans:16},
-         {q:'230 Ω et 115 Ω en parallèle sous 230 V → I1',unit:'A',ans:1},{q:'… courant dans 115 Ω → I2',unit:'A',ans:2},{q:'… courant total → I',unit:'A',ans:3}]});
+       (v=>{ const om=x=>x>=1000?fr(x/1000)+' kΩ':x+' Ω'; return mountDrillW(root.querySelector('#b6d'),'b6sp',{rows:[
+         {q:`${v.a[0]} Ω et ${v.a[1]} Ω en série → R`,unit:'Ω',ans:v.a[0]+v.a[1]},{q:`${v.a[0]} Ω et ${v.a[1]} Ω en parallèle → R`,unit:'Ω',ans:v.a[0]*v.a[1]/(v.a[0]+v.a[1])},{q:`${v.b[0]} Ω et ${v.b[1]} Ω en série → R`,unit:'Ω',ans:v.b[0]+v.b[1]},
+         {q:`${v.b[0]} Ω et ${v.b[1]} Ω en parallèle → R`,unit:'Ω',ans:v.b[0]*v.b[1]/(v.b[0]+v.b[1]),hint:`Le résultat doit être plus petit que ${Math.min(...v.b)} Ω.`},{q:`${om(v.c)} et ${om(v.c)} en parallèle → R`,unit:'Ω',ans:v.c/2},{q:`${v.d[0]} Ω, ${v.d[1]} Ω et ${v.d[2]} Ω en série → R`,unit:'Ω',ans:v.d[0]+v.d[1]+v.d[2]},
+         {q:`${v.e[0]} Ω et ${v.e[1]} Ω en série sous ${v.e[2]} V → I`,unit:'A',ans:v.e[2]/(v.e[0]+v.e[1])},{q:`… tension aux bornes de ${v.e[0]} Ω → U1`,unit:'V',ans:v.e[0]*v.e[2]/(v.e[0]+v.e[1])},{q:`… tension aux bornes de ${v.e[1]} Ω → U2`,unit:'V',ans:v.e[1]*v.e[2]/(v.e[0]+v.e[1])},
+         {q:`${v.f[0]} Ω et ${v.f[1]} Ω en parallèle sous 230 V → I1`,unit:'A',ans:230/v.f[0]},{q:`… courant dans ${v.f[1]} Ω → I2`,unit:'A',ans:230/v.f[1]},{q:'… courant total → I',unit:'A',ans:230/v.f[0]+230/v.f[1]}]}); })(vx('b6sp',{a:[[100,150],[120,180],[220,330]],b:[[470,330],[560,270],[680,390]],c:[1000,2200,470],d:[[10,20,30],[15,22,33],[12,18,27]],e:[[40,80,24],[30,90,12],[60,120,48]],f:[[230,115],[115,46],[230,46]]}));
      }},
     {id:'b7', sec:'2.2.6', t:'Puissance, énergie et effet Joule', pdf:34, quiz:['b7q1','b7q2'], ex:{keys:['b7p','b7w','b7j'], lbl:'Les trois drills'},
      body:()=>`<p class="lead">La puissance, notée P, se mesure en watts (W). Elle dit à quelle vitesse un appareil consomme de l'énergie.</p>
@@ -280,18 +280,16 @@ defChapter({
       ${terrain('Une borne desserrée, un embout mal serti, un conducteur sous-dimensionné, des pastilles de contacteur piquées : une résistance parasite est apparue et transforme le courant en chaleur. C’est ce que cherche la caméra thermique : un point chaud, c’est un R × I² qui n’a rien à faire là.')}
       ${exbox('b7jd','Drill — l’effet Joule','Calcule d’abord I², puis multiplie par R.')}`,
      mount:root=>{ mountPasse(root);
-       mountDrillW(root.querySelector('#b7pd'),'b7p',{rows:[
-         {q:'U = 230 V · I = 4 A → P',unit:'W',ans:920},{q:'P = 60 W · U = 230 V → I',unit:'A',ans:60/230,hint:'I = P ÷ U. Garde trois décimales.'},{q:'P = 2 300 W · I = 10 A → U',unit:'V',ans:230},
-         {q:'P = 3,5 kW · U = 230 V → I',unit:'A',ans:3500/230,hint:'3,5 kW = 3 500 W.'},{q:'Triphasé 400 V · I = 10 A · cos φ 0,85 → P',unit:'W',ans:R3*400*10*0.85},
-         {q:'Triphasé 400 V · I = 6,4 A · cos φ 0,82 → P',unit:'W',ans:R3*400*6.4*0.82},{q:'Triphasé 400 V · P = 7 500 W · cos φ 0,85 → I',unit:'A',ans:7500/(R3*400*0.85),hint:'I = P ÷ (√3 × U × cos φ).'}]});
-       mountDrillW(root.querySelector('#b7wd'),'b7w',{rows:[
-         {q:'2 kW pendant 5 h → énergie',unit:'kWh',ans:10},{q:'… coût',unit:'€',ans:2.5},
-         {q:'100 W, 8 h par jour, 30 jours → énergie',unit:'kWh',ans:0.1*8*30,hint:'100 W = 0,1 kW.'},{q:'… coût',unit:'€',ans:0.1*8*30*0.25},
-         {q:'3,5 kW, 2 h par jour, 250 jours → énergie',unit:'kWh',ans:3.5*2*250},{q:'… coût',unit:'€',ans:3.5*2*250*0.25},
-         {q:'750 W, 6 h par jour, 220 jours → énergie',unit:'kWh',ans:0.75*6*220},{q:'… coût',unit:'€',ans:0.75*6*220*0.25}]});
-       mountDrillW(root.querySelector('#b7jd'),'b7j',{rows:[
-         {q:'R = 0,5 Ω · I = 10 A → P',unit:'W',ans:0.5*100},{q:'R = 0,02 Ω · I = 32 A → P',unit:'W',ans:0.02*32*32},{q:'R = 0,3 Ω · I = 16 A → P',unit:'W',ans:0.3*256},
-         {q:'R = 0,1 Ω · I = 63 A → P',unit:'W',ans:0.1*63*63},{q:'R = 0,002 Ω · I = 25 A → P',unit:'W',ans:0.002*625}]});
+       (v=>mountDrillW(root.querySelector('#b7pd'),'b7p',{rows:[
+         {q:`U = 230 V · I = ${v.a} A → P`,unit:'W',ans:230*v.a},{q:`P = ${v.b} W · U = 230 V → I`,unit:'A',ans:v.b/230,hint:'I = P ÷ U. Garde trois décimales.'},{q:`P = ${v.c[0].toLocaleString('fr-BE')} W · I = ${v.c[1]} A → U`,unit:'V',ans:v.c[0]/v.c[1]},
+         {q:`P = ${fr(v.d)} kW · U = 230 V → I`,unit:'A',ans:v.d*1000/230,hint:'kW en W : × 1 000.'},{q:`Triphasé 400 V · I = ${v.e[0]} A · cos φ ${fr(v.e[1])} → P`,unit:'W',ans:R3*400*v.e[0]*v.e[1]},
+         {q:`Triphasé 400 V · I = ${fr(v.f[0])} A · cos φ ${fr(v.f[1])} → P`,unit:'W',ans:R3*400*v.f[0]*v.f[1]},{q:`Triphasé 400 V · P = ${v.g[0].toLocaleString('fr-BE')} W · cos φ ${fr(v.g[1])} → I`,unit:'A',ans:v.g[0]/(R3*400*v.g[1]),hint:'I = P ÷ (√3 × U × cos φ).'}]}))(vx('b7p',{a:[4,6,8],b:[60,40,100],c:[[2300,10],[1840,8],[4000,10]],d:[3.5,2.5,5],e:[[10,0.85],[8,0.8],[12,0.88]],f:[[6.4,0.82],[5.2,0.78],[7.5,0.86]],g:[[7500,0.85],[5500,0.83],[11000,0.87]]}));
+       (v=>mountDrillW(root.querySelector('#b7wd'),'b7w',{rows:[
+         {q:`${fr(v.a[0])} kW pendant ${v.a[1]} h → énergie`,unit:'kWh',ans:v.a[0]*v.a[1]},{q:'… coût',unit:'€',ans:v.a[0]*v.a[1]*0.25},
+         {q:`${v.b[0]} W, ${v.b[1]} h par jour, 30 jours → énergie`,unit:'kWh',ans:v.b[0]/1000*v.b[1]*30,hint:'W en kW : ÷ 1 000.'},{q:'… coût',unit:'€',ans:v.b[0]/1000*v.b[1]*30*0.25},
+         {q:`${fr(v.c[0])} kW, ${fr(v.c[1])} h par jour, ${v.c[2]} jours → énergie`,unit:'kWh',ans:v.c[0]*v.c[1]*v.c[2]},{q:'… coût',unit:'€',ans:v.c[0]*v.c[1]*v.c[2]*0.25},
+         {q:`${v.d[0]} W, ${v.d[1]} h par jour, ${v.d[2]} jours → énergie`,unit:'kWh',ans:v.d[0]/1000*v.d[1]*v.d[2]},{q:'… coût',unit:'€',ans:v.d[0]/1000*v.d[1]*v.d[2]*0.25}]}))(vx('b7w',{a:[[2,5],[3,4],[1.5,6]],b:[[100,8],[60,10],[150,6]],c:[[3.5,2,250],[2.2,3,220],[4,1.5,200]],d:[[750,6,220],[550,8,250],[1100,4,200]]}));
+       (v=>mountDrillW(root.querySelector('#b7jd'),'b7j',{rows:[v.a,v.b,v.c,v.d,v.e].map(([R,I])=>({q:`R = ${fr(R,3)} Ω · I = ${I} A → P`,unit:'W',ans:R*I*I}))}))(vx('b7j',{a:[[0.5,10],[0.4,8],[0.8,12]],b:[[0.02,32],[0.03,25],[0.05,40]],c:[[0.3,16],[0.2,20],[0.25,10]],d:[[0.1,63],[0.15,50],[0.05,40]],e:[[0.002,25],[0.005,32],[0.003,63]]}));
      }},
     {id:'b8', sec:'2.2.7-2.2.9', t:'Le réseau et ses couleurs', pdf:39, quiz:['b8q1','b8q2','b8q3','b8q4'], ex:{keys:['b8col','b8v'], lbl:'Couleurs et tensions'},
      body:()=>`${tbl(['','Description'],[['Courant continu (DC)','Toujours dans le même sens : une borne est le plus, l’autre le moins. Piles, batteries, alimentations 24 V des circuits de commande.'],['Courant alternatif (AC)','Il change de sens régulièrement : 50 fois par seconde en Belgique, la fréquence est de 50 hertz (Hz). Les deux conducteurs jouent alternativement les deux rôles.']])}
@@ -333,16 +331,16 @@ defChapter({
       ${terrain('Une machine en bout d’atelier démarre mal, cale, fait déclencher son thermique — et toutes les mesures à l’armoire sont parfaites. Au démarrage, le moteur absorbe six fois son courant nominal : la chute dans le câble est six fois plus grande. Le calcul se fait au démarrage, pas seulement en régime.')}
       ${exbox('b9dd','Drill — la chute de tension','Donne ΔU en volts, puis le pourcentage de la tension du réseau.')}`,
      mount:root=>{ mountChute(root);
-       mountDrillW(root.querySelector('#b9pd'),'b9pou',{rows:[
-         {q:'Cuivre · 1,5 mm² · 20 m → R',unit:'Ω',ans:RHO*20/1.5},{q:'Cuivre · 2,5 mm² · 45 m → R',unit:'Ω',ans:RHO*45/2.5},{q:'Cuivre · 6 mm² · 100 m → R',unit:'Ω',ans:RHO*100/6},
-         {q:'Aluminium · 16 mm² · 80 m → R',unit:'Ω',ans:RHO_AL*80/16,hint:'Aluminium : ρ = 0,036.'},{q:'Cuivre · 4 mm² · 25 m → R',unit:'Ω',ans:RHO*25/4,hint:'Garde quatre décimales.'},
-         {q:'R0 = 10 Ω · t = 60 °C → Rt',unit:'Ω',ans:10*(1+0.004*60)},{q:'R0 = 5 Ω · t = 80 °C → Rt',unit:'Ω',ans:5*(1+0.004*80)},{q:'R0 = 20 Ω · t = 40 °C → Rt',unit:'Ω',ans:20*(1+0.004*40)}]});
+       (v=>mountDrillW(root.querySelector('#b9pd'),'b9pou',{rows:[
+         ...[v.a,v.b,v.c].map(([S,L])=>({q:`Cuivre · ${fr(S)} mm² · ${L} m → R`,unit:'Ω',ans:RHO*L/S})),
+         {q:`Aluminium · ${v.d[0]} mm² · ${v.d[1]} m → R`,unit:'Ω',ans:RHO_AL*v.d[1]/v.d[0],hint:'Aluminium : ρ = 0,036.'},{q:`Cuivre · ${v.e[0]} mm² · ${v.e[1]} m → R`,unit:'Ω',ans:RHO*v.e[1]/v.e[0],hint:'Garde quatre décimales.'},
+         ...[v.f,v.g,v.h].map(([R0,t])=>({q:`R0 = ${R0} Ω · t = ${t} °C → Rt`,unit:'Ω',ans:R0*(1+0.004*t)}))]}))(vx('b9pou',{a:[[1.5,20],[1,15],[2.5,30]],b:[[2.5,45],[4,35],[2.5,60]],c:[[6,100],[10,80],[6,120]],d:[[16,80],[25,60],[16,100]],e:[[4,25],[6,40],[4,30]],f:[[10,60],[12,50],[8,70]],g:[[5,80],[4,90],[6,75]],h:[[20,40],[15,30],[25,45]]}));
        const du=(k,L,I,S)=>k*RHO*L*I/S;
-       mountDrillW(root.querySelector('#b9dd'),'b9du',{rows:[
-         {q:'Mono 230 V · 2,5 mm² · 30 m · 16 A → ΔU',unit:'V',ans:du(2,30,16,2.5)},{q:'… en % de 230 V',unit:'%',ans:du(2,30,16,2.5)/230*100,tol:0.03},
-         {q:'Mono 230 V · 1,5 mm² · 20 m · 10 A → ΔU',unit:'V',ans:du(2,20,10,1.5)},{q:'… en % de 230 V',unit:'%',ans:du(2,20,10,1.5)/230*100,tol:0.03},
-         {q:'Tri 400 V · 4 mm² · 50 m · 20 A → ΔU',unit:'V',ans:du(R3,50,20,4),hint:'Triphasé : facteur √3, pas 2.'},{q:'… en % de 400 V',unit:'%',ans:du(R3,50,20,4)/400*100,tol:0.03},
-         {q:'Tri 400 V · 2,5 mm² · 40 m · 6,4 A → ΔU',unit:'V',ans:du(R3,40,6.4,2.5)},{q:'… en % de 400 V',unit:'%',ans:du(R3,40,6.4,2.5)/400*100,tol:0.05}]});
+       (v=>mountDrillW(root.querySelector('#b9dd'),'b9du',{rows:[
+         {q:`Mono 230 V · ${fr(v.a[0])} mm² · ${v.a[1]} m · ${v.a[2]} A → ΔU`,unit:'V',ans:du(2,v.a[1],v.a[2],v.a[0])},{q:'… en % de 230 V',unit:'%',ans:du(2,v.a[1],v.a[2],v.a[0])/230*100,tol:0.03},
+         {q:`Mono 230 V · ${fr(v.b[0])} mm² · ${v.b[1]} m · ${v.b[2]} A → ΔU`,unit:'V',ans:du(2,v.b[1],v.b[2],v.b[0])},{q:'… en % de 230 V',unit:'%',ans:du(2,v.b[1],v.b[2],v.b[0])/230*100,tol:0.03},
+         {q:`Tri 400 V · ${fr(v.c[0])} mm² · ${v.c[1]} m · ${v.c[2]} A → ΔU`,unit:'V',ans:du(R3,v.c[1],v.c[2],v.c[0]),hint:'Triphasé : facteur √3, pas 2.'},{q:'… en % de 400 V',unit:'%',ans:du(R3,v.c[1],v.c[2],v.c[0])/400*100,tol:0.03},
+         {q:`Tri 400 V · ${fr(v.d[0])} mm² · ${v.d[1]} m · ${fr(v.d[2])} A → ΔU`,unit:'V',ans:du(R3,v.d[1],v.d[2],v.d[0])},{q:'… en % de 400 V',unit:'%',ans:du(R3,v.d[1],v.d[2],v.d[0])/400*100,tol:0.05}]}))(vx('b9du',{a:[[2.5,30,16],[4,25,20],[2.5,40,16]],b:[[1.5,20,10],[2.5,15,16],[1.5,25,10]],c:[[4,50,20],[6,40,25],[4,60,20]],d:[[2.5,40,6.4],[1.5,30,5.2],[2.5,50,8]]}));
      }},
     {id:'b10', sec:'2.2.11-2.2.13', t:'Câblage, contrôles et déchets', pdf:47, quiz:['b10q1','b10q2','b10q3'], ex:{keys:['b10ctl','b10dech'], lbl:'Contrôles et tri'},
      body:()=>`<h3 style="margin-top:0">Les techniques de câblage</h3>

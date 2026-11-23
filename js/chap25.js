@@ -128,7 +128,7 @@ defChapter({
       <p class="small" style="margin-top:12px">Le <b>pouvoir de coupure</b>, en kA, doit dépasser le court-circuit possible à l'endroit où l'appareil est installé. En atelier, 6 kA ou 10 kA sont courants.</p>
       ${exbox('e3box','Drill — le seuil magnétique','Calcule les deux bornes du déclenchement instantané.')}`,
      mount:root=>{ mountTrip(root);
-       mountDrillW(root.querySelector('#e3box'),'e3dr',{rows:[[10,'B'],[16,'C'],[6,'D'],[25,'C'],[32,'B'],[20,'D']].flatMap(([In,c])=>[{q:`${In} A courbe ${c} : borne basse`,unit:'A',ans:CRB[c][0]*In},{q:'… borne haute',unit:'A',ans:CRB[c][1]*In}])}); }},
+       (v=>mountDrillW(root.querySelector('#e3box'),'e3dr',{rows:v.L.flatMap(([In,c])=>[{q:`${In} A courbe ${c} : borne basse`,unit:'A',ans:CRB[c][0]*In},{q:'… borne haute',unit:'A',ans:CRB[c][1]*In}])}))(vx('e3dr',{L:[[[10,'B'],[16,'C'],[6,'D'],[25,'C'],[32,'B'],[20,'D']],[[16,'B'],[10,'C'],[20,'D'],[32,'C'],[25,'B'],[6,'D']],[[20,'B'],[25,'C'],[10,'D'],[16,'C'],[40,'B'],[32,'D']]]})); }},
     {id:'e4', sec:'2.5.3 e-2.5.4', t:'Disjoncteur-moteur et relais thermique', pdf:79, quiz:['e4q1','e4q2','e4q3','e4q4'], ex:{keys:['e4reg','e4ctl'], lbl:'Régler et vérifier'},
      body:()=>`<h3 style="margin-top:0">Le disjoncteur-moteur</h3>
       ${tbl(['Ce qu’il contient','Ce que cela fait','Ce que cela remplace'],[['Un déclencheur magnétique','Coupe instantanément en cas de court-circuit','Le disjoncteur ou les fusibles aM'],['Un déclencheur thermique réglable','Surveille la surcharge ; molette réglée sur le courant nominal du moteur','Le relais thermique'],['Une poignée ou deux boutons','Ouvre et ferme le départ à la main','—']])}
@@ -143,9 +143,7 @@ defChapter({
       ${tbl(['Contrôle','Comment','Résultat attendu'],[['Le réglage','Lire la molette, comparer à la plaque, pour le couplage réalisé','Le courant nominal du moteur'],['Les contacts, hors tension','Ohmmètre sur 95-96 puis 97-98 : au repos, après TEST, après réarmement','Au repos : 95-96 fermé, 97-98 ouvert (OL). Après TEST : l’inverse.'],['Le courant, en marche','Pince sur chacune des trois phases, en charge normale','Trois courants voisins, tous inférieurs au réglage']])}
       ${exbox('e4c','Tes mesures : normal ou anormal ?')}`,
      mount:root=>{
-       mountDrillW(root.querySelector('#e4r'),'e4reg',{rows:[
-         {q:'Plaque « 11,0 A Δ / 6,4 A Y » — couplé en étoile',unit:'A',ans:6.4,tol:0.001},{q:'Plaque « 4,6 A Δ / 2,65 A Y » — couplé en triangle',unit:'A',ans:4.6,tol:0.001},
-         {q:'Plaque « 8,5 A Δ / 4,9 A Y » — couplé en étoile',unit:'A',ans:4.9,tol:0.001},{q:'Plaque « 15,2 A Δ / 8,8 A Y » — couplé en triangle',unit:'A',ans:15.2,tol:0.001}],hint:'Étoile : le plus petit courant. Triangle : le plus grand.'});
+       (v=>mountDrillW(root.querySelector('#e4r'),'e4reg',{rows:[[11.0,6.4],[4.6,2.65],[8.5,4.9],[15.2,8.8]].map(([d,y],i)=>{ const et=v.c[i]; return {q:`Plaque « ${fr(d,2)} A Δ / ${fr(y,2)} A Y » — couplé en ${et?'étoile':'triangle'}`,unit:'A',ans:et?y:d,tol:0.001}; }),hint:'Étoile : le plus petit courant. Triangle : le plus grand.'}))(vx('e4reg',{c:[[1,0,1,0],[0,1,1,0],[1,1,0,0],[0,0,1,1],[1,0,0,1]]}));
        mountSortW(root.querySelector('#e4c'),'e4ctl',{cats:[['ok','Normal'],['ko','Anormal']],items:[
          ['Au repos, 95-96 : 0,1 Ω','ok'],['Au repos, 97-98 : OL','ok'],['Au repos, 95-96 : OL','ko','Le relais est déclenché ou le contact est défectueux : on réarme, puis on remesure.'],['Après TEST, 95-96 : OL','ok'],
          ['En marche : 6,1 A · 6,2 A · 6,0 A, réglage 6,4 A','ok'],['En marche : 6,1 A · 6,2 A · 9,5 A, réglage 6,4 A','ko','Une phase absorbe nettement plus : borne mal serrée, tension anormale, enroulement abîmé.'],['En marche : 7,0 A · 0 A · 7,2 A','ko','Une phase à zéro : le moteur tourne sur deux phases et chauffe. On l’arrête.']],ok:'Juste. Le défaut n’est pas dans le relais : il le signale.'});

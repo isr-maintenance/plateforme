@@ -124,10 +124,10 @@ defChapter({
       <p class="small">Le démarrage direct convient aux moteurs de faible et moyenne puissance, sur des machines qui démarrent à vide ou sous faible charge. Au-delà : étoile-triangle, démarreur progressif, variateur — vus les années suivantes. Le réglage du thermique et la courbe du disjoncteur sont traités au chapitre 2.5.</p>
       ${exbox('d5box','Drill — le démarrage direct','Courant de démarrage : de 5 à 8 fois le courant nominal. Puissance triphasée : P = √3 × U × I × cos φ.')}
       <div class="note" style="margin-top:14px"><b>★ Dessin</b>Tracer le schéma de puissance d'un démarrage direct : chapitre 5 du Cours de dessin électrique, avant le TP É04.</div>`,
-     mount:root=>mountDrillW(root.querySelector('#d5box'),'d5dr',{rows:[
-       ...[4,6.4,11,2.5,8.2].flatMap(In=>[{q:`In = ${fr(In,1)} A : pointe minimale (5 × In)`,unit:'A',ans:5*In},{q:'… pointe maximale (8 × In)',unit:'A',ans:8*In}]),
-       {q:'Moteur 400 V · 12 A · cos φ 0,85 : puissance absorbée',unit:'W',ans:R3*400*12*0.85},
-       {q:'Moteur 400 V · 3,5 A · cos φ 0,78 : puissance absorbée',unit:'W',ans:R3*400*3.5*0.78}]})},
+     mount:root=>(v=>mountDrillW(root.querySelector('#d5box'),'d5dr',{rows:[
+       ...v.L.flatMap(In=>[{q:`In = ${fr(In,1)} A : pointe minimale (5 × In)`,unit:'A',ans:5*In},{q:'… pointe maximale (8 × In)',unit:'A',ans:8*In}]),
+       {q:`Moteur 400 V · ${v.a[0]} A · cos φ ${fr(v.a[1])} : puissance absorbée`,unit:'W',ans:R3*400*v.a[0]*v.a[1]},
+       {q:`Moteur 400 V · ${fr(v.b[0])} A · cos φ ${fr(v.b[1])} : puissance absorbée`,unit:'W',ans:R3*400*v.b[0]*v.b[1]}]}))(vx('d5dr',{L:[[4,6.4,11,2.5,8.2],[3.2,5,9.5,2,7.1],[4.8,6.4,13,2.6,10]],a:[[12,0.85],[10,0.83],[15,0.86]],b:[[3.5,0.78],[2.8,0.75],[4.2,0.8]]}))},
   ],
   prereq:[
     {t:'Expliquer pourquoi un contacteur n’est pas un simple gros relais.', cap:'d1'},
