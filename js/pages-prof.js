@@ -303,7 +303,8 @@ function pageAgenda(){
     <div class="row wrap"><div class="seg">${[['WEEK','Semaine'],['MONTH','Mois'],['AGENDA','Liste']].map(([k,l])=>`<button class="${k===mode?'on':''}" data-agm="${k}">${l}</button>`).join('')}</div>
       <a class="btn" href="${ouvrir}" target="_blank" rel="noopener">Ouvrir dans Google Agenda ↗</a></div></div>
   ${L.length>1?coches:''}
-  ${sel.length?`<div class="card agenda"><iframe title="Agenda" src="${agendaSrc(mode, sel)}" loading="lazy"></iframe></div>`
+  ${sel.length?`<div class="card agenda"><iframe title="Agenda" src="${agendaSrc(mode, sel)}" loading="lazy"></iframe></div>
+    <p class="small muted" style="margin:8px 2px 0">Tu vois « Impossible d’accéder à votre compte Google » ? Ton navigateur bloque les cookies de Google à l’intérieur de la page (fréquent sur iPhone et en navigation privée). Utilise le bouton « Ouvrir dans Google Agenda », ou connecte-toi d’abord à ton compte de l’école dans Google Agenda, puis recharge cette page.</p>`
     :`<div class="card pad"><p class="muted" style="margin:0">Coche au moins un agenda pour l’afficher.</p></div>`}`;
 }
 function bindAgenda(m){
