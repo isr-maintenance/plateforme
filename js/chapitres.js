@@ -37,7 +37,7 @@ function DR(){ const p=P(); if(!p.dr||typeof p.dr!=='object') p.dr={}; return p.
 
 /* chapitres ouverts : le prof les ouvre pour sa classe et son cours (Suivi). Par défaut : les trois premiers.
    En 3QEM, les cours techniques sont donnés aux groupes de CT : c'est le groupe de CT de l'élève qui compte. */
-const OUV_DEF={ '4-elec':['2.1','2.2','2.3'], '3em-elec':['0.1','0.2','0.3'] };
+const OUV_DEF={ '4-elec':['2.1','2.2','2.3'], '3em-elec':['0.1','0.2','0.3'], '4-meca':['10.1','10.2','10.3'] };
 function classeDuCours(course){
   const co=COURS.find(c=>c.id===course);
   if(S.me && S.me.role==='eleve' && co && co.type!=='tp' && /^3qem/.test(S.me.classe||'') && S.me.ct) return S.me.ct;

@@ -18,7 +18,7 @@ const COURS = [
   { id:'3em-tpm',  titre:'TP mécanique', type:'tp', per:4, pour:[['3qem',3]], statut:'attente' },
   // --- 4e : Électricité et Mécanique communes aux deux filières
   { id:'4-elec', titre:'Électricité', sous:'UAA1 · début UAA2 · début UAA3', type:'elec', per:3, pour:[['eqem',4],['eqmm',4]], statut:'demo', pdf:'elec4', commun:true },
-  { id:'4-meca', titre:'Mécanique', type:'meca', per:3, pour:[['eqem',4],['eqmm',4]], statut:'attente', commun:true },
+  { id:'4-meca', titre:'Mécanique', sous:'Partie 1 mécanique générale · technologie · mise en situation', type:'meca', per:3, pour:[['eqem',4],['eqmm',4]], statut:'demo', chip:'Partie 1 en ligne', commun:true },
   { id:'4eqem-tpe', titre:'TP électricité', type:'tp', per:4, pour:[['eqem',4]], statut:'demo-tp', tps:true, module:'dossier' },
   { id:'4eqem-tpem', titre:'TP électromécanique', type:'tp', per:4, pour:[['eqem',4]], statut:'attente' },
   { id:'4eqmm-tpm', titre:'TP mécanique', type:'tp', per:4, pour:[['eqmm',4]], statut:'attente' },
@@ -71,6 +71,7 @@ const affOf = (cl,c) => AFFECT.find(x=>x.cl===cl && x.c===c);
 const profsOf = (cl,c) => (affOf(cl,c)||{profs:[]}).profs;
 
 /* Plans des cours qui ont des chapitres dans la plateforme (hors Électricité 4e, qui garde sa page propre).
+   Le plan du cours de Mécanique 4e (COURSE_PLANS['4-meca']) est dans js/meca4.js.
    Clé interne d'un chapitre de 3QEM : « 0.N » (le serveur n'accepte que des numéros du type 2.3) ; il s'affiche « N ». */
 const AF3 = [
   ['Éclairage d’un local','Circuit ouvert ou fermé, conducteurs et isolants'],

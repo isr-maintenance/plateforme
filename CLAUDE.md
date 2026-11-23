@@ -54,7 +54,7 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
 
 ## Les cours interactifs
 
-Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`) et **Électricité 3QEM** (`3em-elec`, « Ampère & Fils »).
+Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`), **Électricité 3QEM** (`3em-elec`, « Ampère & Fils ») et **Mécanique 4e** (`4-meca`).
 
 - Chaque chapitre appartient à un cours : `defChapter({ course:'3em-elec', … })` (par défaut `4-elec`).
 - Le plan d'un cours (titre, parties, chapitres) est dans `COURSE_PLANS` (`js/catalog.js`) ; le cours y a `statut:'demo'` et un `chip`.
@@ -77,6 +77,15 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
 - **Les points « à l'atelier »** : un élément de `prereq` sans capsule (`cap:null`) reçoit une clé `atel` (par exemple `A1mont`). Le prof le coche dans Suivi (« À l'atelier — validé par toi », action serveur `setAtelier`) ; l'élève ne peut pas le cocher lui-même.
 - **Les séries d'exercices (devoirs)** : `js/af3-series.js`, une capsule `A{n}s` « Série d'exercices » ajoutée à la fin des chapitres 6 à 16 et 20, avec `serieAF(n, [[énoncé, résultats, options]])`. Clés `A{n}s1`, `A{n}s2`… Options en plus de `AX` : `texte:true` (question à justifier : une seule case « Ta réponse », lue par le prof), `alt:[…]` dans un résultat (autre réponse admise quand l'énoncé permet deux lectures). Les en-têtes Nom / Classe / Date du devoir papier ne sont pas repris.
 
+## Le cours de Mécanique 4e (4EQEM + 4EQMM)
+
+- Source : les fichiers Word du dossier Drive **Cours › 4EQMM** (cours de mécanique industrielle 4 QM) : Partie 1 Mécanique générale, Partie 2 Technologie, Partie 3 Mise en situation (UAA1).
+- Fichiers : `js/meca4.js` (plan `MECA4` des 27 chapitres, `COURSE_PLANS['4-meca']`, formulaire, dessins et labos communs : levier, poulies, train de roues, poutre), `js/meca4-1.js` (chapitres 1 à 4), `meca4-2.js` (5 et 6), `meca4-3.js` (7 à 9), `meca4-4.js` (10 à 12).
+- Même moteur que le 3QEM : `defMC(n, {Q, caps, prereq})`, clé `10.n` (affichée `n`), exercices en quatre colonnes `MX(n, clé, numéro, énoncé, [{lbl, unit, ans, tol, alt}], {hint})`.
+- Identifiants : capsules `M6a`, questions `M6aq1`, exercices `M6x1` (M = Mécanique).
+- Partie 1 (chapitres 1 à 12) en ligne. Parties 2 et 3 (chapitres 13 à 27) : dans le plan, « En préparation ». Un nouveau chapitre se met dans un fichier `js/meca4-5.js`… (à brancher dans `index.html` et `sw.js`).
+- Les charges des machines simples sont en kg (kilogramme-force), comme dans le cours. Vitesse de coupe : π = 3,14, et le résultat avec π = 3 (atelier) est accepté (`alt`).
+
 ## Règles de rédaction
 
 - **Langue** : français de Belgique. Écris « septante » et « nonante », pas « soixante-dix » ni « quatre-vingt-dix ».
@@ -94,7 +103,7 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
 
 ## Limites actuelles (à savoir avant de promettre quelque chose)
 
-- **Deux cours interactifs** : Électricité 4e et Électricité 3QEM. Ajouter un autre cours (Mécanique, TP, 5e-6e…) suit « Les cours interactifs » ; demande d'abord l'accord d'Olivier.
+- **Trois cours interactifs** : Électricité 4e, Électricité 3QEM et Mécanique 4e. Ajouter un autre cours (TP, 5e-6e…) suit « Les cours interactifs » ; demande d'abord l'accord d'Olivier.
 - **Taille de la progression** : tout ce qu'un élève fait est enregistré dans un seul document, limité à 45 000 caractères par le serveur. Les cases du tableau en quatre colonnes sont limitées à 250 caractères pour cette raison.
 - **Les PDF des cours** sont sur Google Drive (liens dans `js/config.js` ou réglés dans Bibliothèque) ; ils ne vont pas dans le dépôt.
 - **3QEM** : la classe de l'élève est son groupe de TP (`3qem1` à `3qem3`). Les cours techniques sont donnés aux groupes de CT (`3qemct1`, `3qemct2`), dans lesquels un prof place les élèves.
