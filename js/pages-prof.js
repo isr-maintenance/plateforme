@@ -288,15 +288,25 @@ function bindAdmin(m){
 
 /* ---------------- Agenda de l'école (profs) ----------------
    Google Agenda intégré : Google n'affiche les événements qu'à un compte qui a accès à l'agenda. */
-function agendaSrc(mode){ const id=encodeURIComponent(CONFIG.AGENDA||'');
-  return `https://calendar.google.com/calendar/embed?src=${id}&ctz=Europe%2FBrussels&hl=fr&wkst=2&mode=${mode}&showTitle=0&showPrint=0&showTz=0`; }
+const agendas = () => CONFIG.AGENDAS || (CONFIG.AGENDA ? [{ id:CONFIG.AGENDA, nom:'Agenda de l’école', couleur:'#1f5fbf' }] : []);
+function agendaSel(){ const L=agendas(), s=(S.agendaSel||[]).filter(id=>L.some(a=>a.id===id)); return S.agendaSel ? s : L.map(a=>a.id); }   // par défaut : tous cochés
+function agendaSrc(mode, ids){
+  const src = agendas().filter(a=>ids.includes(a.id)).map(a=>`src=${encodeURIComponent(a.id)}&color=${encodeURIComponent(a.couleur||'#1f5fbf')}`).join('&');
+  return `https://calendar.google.com/calendar/embed?${src}&ctz=Europe%2FBrussels&hl=fr&wkst=2&mode=${mode}&showTitle=0&showPrint=0&showTz=0&showCalendars=0`; }
 function pageAgenda(){
-  if(!CONFIG.AGENDA) return `<div class="page-head"><div><h1>Agenda</h1></div></div><div class="card pad"><p class="muted" style="margin:0">L'agenda de l'école n'est pas encore relié (CONFIG.AGENDA).</p></div>`;
-  const mode=S.agendaMode||'MONTH', ouvrir='https://calendar.google.com/calendar/u/0/r?cid='+encodeURIComponent(CONFIG.AGENDA);
-  return `<div class="page-head"><div><div class="kicker">Réservé aux profs</div><h1>Agenda de l'école</h1>
+  const L=agendas();
+  if(!L.length) return `<div class="page-head"><div><h1>Agenda</h1></div></div><div class="card pad"><p class="muted" style="margin:0">Aucun agenda n'est encore relié (CONFIG.AGENDAS).</p></div>`;
+  const mode=S.agendaMode||'MONTH', sel=agendaSel(), ouvrir='https://calendar.google.com/calendar/u/0/r?cid='+encodeURIComponent((L.find(a=>sel.includes(a.id))||L[0]).id);
+  const coches=`<div class="row wrap" style="gap:14px;margin:0 0 12px">${L.map(a=>`<label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" data-agsel="${esc(a.id)}" ${sel.includes(a.id)?'checked':''} style="width:18px;height:18px;accent-color:${a.couleur}"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${a.couleur}"></span><b>${esc(a.nom)}</b></label>`).join('')}</div>`;
+  return `<div class="page-head"><div><div class="kicker">Réservé aux profs</div><h1>Agenda</h1>
       <p class="muted small" style="margin-top:4px">Les événements s'affichent si ton navigateur est connecté au compte Google de l'école (…@${PLAT.DOMAIN}).</p></div>
     <div class="row wrap"><div class="seg">${[['WEEK','Semaine'],['MONTH','Mois'],['AGENDA','Liste']].map(([k,l])=>`<button class="${k===mode?'on':''}" data-agm="${k}">${l}</button>`).join('')}</div>
       <a class="btn" href="${ouvrir}" target="_blank" rel="noopener">Ouvrir dans Google Agenda ↗</a></div></div>
-  <div class="card agenda"><iframe title="Agenda de l'école" src="${agendaSrc(mode)}" loading="lazy"></iframe></div>`;
+  ${L.length>1?coches:''}
+  ${sel.length?`<div class="card agenda"><iframe title="Agenda" src="${agendaSrc(mode, sel)}" loading="lazy"></iframe></div>`
+    :`<div class="card pad"><p class="muted" style="margin:0">Coche au moins un agenda pour l’afficher.</p></div>`}`;
 }
-function bindAgenda(m){ m.querySelectorAll('[data-agm]').forEach(b=>b.onclick=()=>{ S.agendaMode=b.dataset.agm; render(); }); }
+function bindAgenda(m){
+  m.querySelectorAll('[data-agm]').forEach(b=>b.onclick=()=>{ S.agendaMode=b.dataset.agm; render(); });
+  m.querySelectorAll('[data-agsel]').forEach(c=>c.onchange=()=>{ S.agendaSel=[...m.querySelectorAll('[data-agsel]')].filter(x=>x.checked).map(x=>x.dataset.agsel); savePrefs(); render(); });
+}
