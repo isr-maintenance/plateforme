@@ -299,8 +299,8 @@ const MODULES = {
    Seules les apps qui savent parler à la plateforme (bouton retour, défis réussis) ont panel:true. */
 const APPS = {
   banc:{url:'https://olivier7887.github.io/banc-de-cablage/', sso:true, panel:true},
-  dossier:{url:'https://olivier7887.github.io/dossier-tp/', sso:true},
-  arduino:{url:'https://olivier7887.github.io/Labo-Arduino/', sso:false},
+  dossier:{url:'https://olivier7887.github.io/dossier-tp/', sso:true, panel:true},
+  arduino:{url:'https://olivier7887.github.io/Labo-Arduino/', sso:false, panel:true},
 };
 const appOrigin = k => { try{ return new URL(APPS[k].url, location.href).origin; }catch(e){ return ''; } };
 /* opts.defi : 'clé:niveau' d'un défi à ouvrir directement (Banc) */
@@ -352,8 +352,8 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('#appPanel') &
    Un défi réussi est enregistré dans la progression de l'élève sous la clé « app:clé:niveau » (ex. banc:tl1:2),
    et compte aussi pour les niveaux inférieurs : c'est cette clé que les capsules demandent (defiApp). */
 window.addEventListener('message',e=>{
-  const k=Object.keys(APPS).find(x=>appOrigin(x)===e.origin); const d=e.data;
-  if(!k || !d || typeof d!=='object' || d.src!==k) return;
+  const d=e.data; if(!d || typeof d!=='object') return;
+  const k=d.src; if(!APPS[k] || appOrigin(k)!==e.origin) return;     // les apps partagent la même adresse (olivier7887.github.io) : on se fie à src
   if(d.type==='fermer'){ closePanel(); return; }
   if(d.type==='reussi' && typeof d.k==='string' && /^[\w.\-:]{1,80}$/.test(d.k)){
     if(d.complet===false) return;                      // une étape d'une fiche (identification, principe) : on attend la fin
