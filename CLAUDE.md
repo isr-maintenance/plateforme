@@ -16,6 +16,7 @@ Lis ce fichier en entier avant de toucher au dépôt. Il remplace les longues ex
 | Ajouter ou corriger un chapitre, des capsules, des quiz, des exercices (`js/chapXX.js`) | Toucher à `apps-script/` (le serveur) : chaque changement doit être redéployé par Olivier |
 | Corriger un texte, une coquille, une page PDF | Ajouter un nouveau cours interactif (voir « Les cours interactifs ») |
 | Ajouter un outil autonome dans `outils/` | Changer la connexion, les droits, le carnet de cotes, les stages |
+| Ajouter ou corriger un exercice du Simulateur PLC (`outils/simulateur-plc.html`, voir plus bas) | |
 
 **Publier** : regarde d'abord avec quel compte GitHub la session travaille : `gh api user --jq .login`.
 - **`isr-maintenance`** (le compte d'Olivier, administrateur du dépôt) : fais les vérifications ci-dessous, puis pousse directement sur `main`. Pas de *pull request* : Olivier ne veut pas valider ses propres demandes.
@@ -98,8 +99,25 @@ Deux cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`
 - **Les PDF des cours** sont sur Google Drive (liens dans `js/config.js` ou réglés dans Bibliothèque) ; ils ne vont pas dans le dépôt.
 - **3QEM** : la classe de l'élève est son groupe de TP (`3qem1` à `3qem3`). Les cours techniques sont donnés aux groupes de CT (`3qemct1`, `3qemct2`), dans lesquels un prof place les élèves.
 - **Les apps séparées** (Banc de câblage, Dossier TP, Labo Arduino) ont leurs propres dépôts, sur le compte `olivier7887`. On ne les modifie pas depuis ici.
-- **Ouverture dans la plateforme** : `APPS` (`js/pages.js`). Avec `panel:true`, l'app s'ouvre dans un panneau plein écran (`openPanel`), sinon dans un nouvel onglet. Les trois apps ont `panel:true` : chacune sait qu'elle est dans la plateforme (`#plateforme&embed` : pas de bouton « ← Plateforme »). Le Banc et le Labo Arduino ouvrent un défi précis (`#defi=…`) et signalent leurs défis réussis (`postMessage` `{src, type:'reussi', k, complet, titre}` vers `https://isr-maintenance.github.io`) ; le Dossier TP n'a pas de défis. Les outils de la plateforme (`outils/…`) s'ouvrent aussi dans le panneau.
+- **Ouverture dans la plateforme** : `APPS` (`js/pages.js`). Avec `panel:true`, l'app s'ouvre dans un panneau plein écran (`openPanel`), sinon dans un nouvel onglet. Les trois apps ont `panel:true` : chacune sait qu'elle est dans la plateforme (`#plateforme&embed` : pas de bouton « ← Plateforme »). Le Banc et le Labo Arduino ouvrent un défi précis (`#defi=…`) et signalent leurs défis réussis (`postMessage` `{src, type:'reussi', k, complet, titre}` vers `https://isr-maintenance.github.io`) ; le Dossier TP n'a pas de défis. Les outils de la plateforme (`outils/…` : Lois de base, Simulateur PLC) s'ouvrent aussi dans le panneau.
 
+
+## Le Simulateur PLC (Philippe Dachelet)
+
+- **Fichier unique** : `outils/simulateur-plc.html` (HTML, CSS et script dans le même fichier). Il s'ouvre dans le panneau de la plateforme depuis Outils (carte `plc` de `MODULES`, `js/pages.js`). Auteur : Philippe Dachelet.
+- **Ce fichier est la version de référence.** On ne repart jamais d'une ancienne copie (page Claude, fichier local) : on écraserait les changements publiés depuis. Ajoute toujours dans le fichier du dépôt.
+- **Publier** : comme le reste, une branche puis une *pull request* vers `main` (Olivier valide). Une fois fusionné, l'exercice est en ligne pour tout le monde une ou deux minutes plus tard. Rien à changer dans `sw.js` ni dans `apps-script/`.
+
+**Ajouter un exercice** (ce qu'il faut toucher, tout dans `outils/simulateur-plc.html`) :
+1. **Le programme** : une entrée dans `PRESETS`, `clé:['Titre affiché', () => ({ ...io(entrées, sorties, 'scène'), rungs:[…] })]`.
+   - `io` : jusqu'à 8 entrées `{n:'Nom', m:1}` (`m:1` = bouton poussoir, `m:0` = interrupteur ou capteur) et 8 sorties `{n:'Nom', c:'g'}` (couleur `g` vert, `o` orange, `r` rouge, `b` bleu, `w` blanc).
+   - Un réseau : `R('Commentaire', ['ligne 1', 'ligne 2'…], ['ligne,colonne'…])`. Chaque ligne a **7 cases** séparées par une espace : `-` vide, `W` fil, `NO:I0.0`, `NC:I0.1`, `P:` / `N:` fronts, `Q:Q0.0`, `S:` / `R:` mise à 1 / à 0, `TON:T0:5000` (ms), `TOF:`, `CTU:C0:5`, `CMP:AIW0:<:20`, `PID:AIW0:AIW1:3:8:0.5` (mesure, consigne, Kp, Ti en s, Td en s). La bobine est en 7e case. Le 3e argument liste les liaisons verticales (`'0,0'` : case colonne 0 de la ligne 0 reliée à la ligne du dessous).
+   - Adresses : I0.0–I1.7, Q0.0–Q0.7, M0–M15, T0–T15, C0–C7, AIW0–AIW1, AQW0.
+2. **L'explication** : une entrée `clé:{h:`<p>…</p>`}` dans `EX` (même clé). Sans elle, la zone « Explication de l'exemple » reste vide.
+3. **En option** : le GRAFCET (`GRAF[clé]` avec `GF([étapes], [transitions])`, et `GNOTE[clé]`), un pupitre (`PUP[clé]`).
+4. **Une nouvelle maquette** (seulement si aucune scène de `SCN` ne convient) : une entrée dans `SCN`, son animation dans `stepScene` et `drawScene` (`if(S=='clé'){…}`), ses boutons dans `renderPC`. C'est la partie la plus lourde : réutilise une scène existante quand c'est possible.
+
+**Vérifier** : serveur local (`python3 -m http.server 8765`), ouvrir `outils/simulateur-plc.html`, choisir le nouvel exemple, passer en RUN, actionner les entrées et voir la maquette réagir, sans erreur dans la console, aussi à 390 px de large. Recharger aussi les anciens exemples : aucun ne doit être cassé.
 
 ## Déposer le PDF d'un cours (profs)
 
