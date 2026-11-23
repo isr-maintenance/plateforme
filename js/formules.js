@@ -188,6 +188,17 @@ function bindToolbar(root, getTa){
   });
 }
 
+/* ---------- 3 bis. Données variables : chaque élève a ses propres valeurs ----------
+   vx('A6x1', {I:[2,3,4,5], t:[3,4,5,6]}) tire une valeur dans chaque liste, toujours la même pour un élève
+   (graine = son adresse + la clé), souvent différente de celle de son voisin. Les réponses se calculent à partir de ces valeurs.
+   Vue prof : VARY_MAIL donne les valeurs d'un élève précis (voirExercices). */
+let VARY_MAIL = null;
+function vx(key, choix){
+  const mail = VARY_MAIL || (S.me && S.me.mail) || '', r = hasard(graine(mail+'|v|'+key)), o = {};
+  Object.keys(choix).forEach(k=>{ const L=choix[k]; o[k]=L[Math.floor(r()*L.length)]; });
+  return o;
+}
+
 /* ---------- 4. Le tableau d'exercice en quatre colonnes ---------- */
 const DIFS_REG = {};      // clé → { course, chap, n, enonce, res, sans }
 const DIFS_COLS = [['d','Données','ex. U = 230 V'],['i','Inconnue(s)','ex. I = ? A'],['f','Formule(s)','ex. I = P / U'],['s','Solution','le calcul, puis le résultat avec son unité']];
@@ -200,7 +211,7 @@ const difsFilled = d => DIFS_COLS.every(([k])=>String(d[k]||'').trim().length>0)
 const DIFS_TXT = [['s','Ta réponse','explique avec tes mots, en phrases complètes']];
 const difsCols = cfg => cfg && cfg.texte ? DIFS_TXT : DIFS_COLS;
 /* le registre se remplit quand une capsule s'affiche : la vue prof le remplit d'un coup pour tout le cours */
-function fillDIFS(course){ Object.values(CHAPTERS).filter(ch=>ch.course===course).forEach(ch=>ch.caps.forEach(c=>{ try{ if(c.body) c.body(); }catch(e){} })); }
+function fillDIFS(course, mail){ VARY_MAIL=mail||null; try { Object.values(CHAPTERS).filter(ch=>ch.course===course).forEach(ch=>ch.caps.forEach(c=>{ try{ if(c.body) c.body(); }catch(e){} })); } finally { VARY_MAIL=null; } }
 function mountAllDIFS(root){ root.querySelectorAll('[data-difs]').forEach(b=>mountDIFS(b, b.dataset.difs)); }
 function mountDIFS(box, key){
   const cfg=DIFS_REG[key]; if(!cfg){ box.textContent='Exercice introuvable'; return; }
@@ -287,7 +298,7 @@ function mountTriangles(root){
 /* ---------- 7. Vue prof : les tableaux d'un élève ---------- */
 function exDoneOf(mail, course){ fillDIFS(course); const p=progOf(mail); return Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course && p.ex[k]).length; }
 function voirExercices(mail, course){
-  fillDIFS(course);
+  fillDIFS(course, mail);   // les valeurs de CET élève (données variables)
   const p=progOf(mail), dr=(p.dr&&typeof p.dr==='object')?p.dr:{};
   const keys=Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course);
   const byCh={}; keys.forEach(k=>{ const c=DIFS_REG[k].chap; (byCh[c]=byCh[c]||[]).push(k); });

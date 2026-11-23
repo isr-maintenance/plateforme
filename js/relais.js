@@ -104,10 +104,10 @@ function quizHTML(id){
   const answered = a && a.sel!=null;
   return `<div class="q" data-q="${id}">
     <div class="qt">${q.q}</div>
-    <div class="opts">${q.o.map((o,i)=>{
+    <div class="opts">${melange(id, q.o.length).map((i,pos)=>{ const o=q.o[i];
       let cls='';
       if(answered){ if(i===a.sel) cls = a.ok?'good':'wrong'; }
-      return `<button class="opt ${cls}" data-qopt="${id}" data-i="${i}"><span class="l">${'ABC'[i]}</span><span>${o}</span></button>`;}).join('')}
+      return `<button class="opt ${cls}" data-qopt="${id}" data-i="${i}"><span class="l">${'ABCDE'[pos]}</span><span>${o}</span></button>`;}).join('')}
     </div>
     ${answered ? (a.ok
       ? `<div class="fb good"><b>Juste.</b> ${q.e}</div>`

@@ -5,6 +5,18 @@
    questions rapides et exercices interactifs génériques.
    ========================================================= */
 const CHAPTERS = {};
+/* ---------- ordre mélangé, propre à chaque élève ----------
+   Les choix d'une question et les éléments d'un exercice s'affichent dans un ordre tiré au sort,
+   le même pour un élève à chaque visite (graine = son adresse + l'identifiant), différent d'un élève à l'autre.
+   Les indices d'origine ne changent pas : la correction et les réponses enregistrées restent valables. */
+function graine(txt){ let h=2166136261; for(const c of String(txt)){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+function hasard(seed){ let a=seed||1; return ()=>{ a=(a+0x6D2B79F5)|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function melange(id, n, pasIdentite){
+  const r=hasard(graine(((typeof S!=='undefined'&&S.me&&S.me.mail)||'')+'|'+id)), p=[...Array(n).keys()];
+  for(let i=n-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [p[i],p[j]]=[p[j],p[i]]; }
+  if(pasIdentite && n>1 && p.every((v,i)=>v===i)) p.reverse();   // pour remettre dans l'ordre : jamais déjà rangé
+  return p;
+}
 function defChapter(ch){ ch.course=ch.course||'4-elec'; ch.caps.forEach(c=>{ c.chap=ch.num; }); CHAPTERS[ch.num]=ch; if(ch.Q) Object.assign(Q, ch.Q); }
 /* numéro affiché : « 2.3 » en 4e ; en 3QEM la clé interne « 0.6 » s'affiche « 6 » */
 const chapLbl = num => { const ch=CHAPTERS[num]; return ch&&ch.lbl ? ch.lbl : num; };
@@ -69,7 +81,7 @@ function mountDefiW(box, cfg){
 function mountOrderW(box, key, cfg){
   box._w={key,cfg};
   const st = WS[key] || (WS[key]={ slots:[], fb:'' });
-  const order = cfg.shuffle || cfg.items.map((_,i)=>i).reverse();
+  const order = melange(key, cfg.items.length, true);   // ordre de départ tiré au sort pour chaque élève (cfg.shuffle n'est plus utilisé)
   const draw = ()=>{
     if(P().ex[key]){ wDone(box, `<b>${cfg.ok||'Ordre correct.'}</b><ol style="margin:6px 0 0 18px">${cfg.items.map(x=>`<li>${x}</li>`).join('')}</ol>`); return; }
     const n=cfg.items.length;
@@ -94,7 +106,7 @@ function mountSortW(box, key, cfg){
   const st = WS[key] || (WS[key]={ sel:{}, checked:false });
   const draw = ()=>{
     const done=!!P().ex[key];
-    box.innerHTML = `${cfg.intro?`<p class="small" style="margin-top:0">${cfg.intro}</p>`:''}<div class="sortw">${cfg.items.map(([lbl,good,why],i)=>{
+    box.innerHTML = `${cfg.intro?`<p class="small" style="margin-top:0">${cfg.intro}</p>`:''}<div class="sortw">${melange(key, cfg.items.length).map(i=>{ const [lbl,good,why]=cfg.items[i];
       const s=done?good:st.sel[i], ok=s===good;
       return `<div class="srow ${done||st.checked&&s!=null?(ok?'good':'wrong'):''}"><div class="lbl">${lbl}${(done||st.checked&&!ok&&s!=null)&&why?`<div class="tiny muted">${why}</div>`:''}</div>
         <div class="seg">${cfg.cats.map(([k,l])=>`<button class="${s===k?'on':''}" data-sit="${i}" data-sc="${k}" ${done?'disabled':''}>${l}</button>`).join('')}</div></div>`; }).join('')}</div>
