@@ -266,6 +266,7 @@ let clock=null;
 function startClock(){ clearInterval(clock); clock=setInterval(()=>{ if(S.view.page!=='player'){ clearInterval(clock); return; } if(!actif()) return; S.prog.sec+=10; if(S.prog.sec%60===0) save(); },10000); }   // un onglet inactif ne compte ni n'enregistre rien
 
 /* ---------- feu vert ---------- */
+const R5_DEFI='banc:r5:1';   // défi « Relais 5 · marche-arrêt avec maintien » du Banc (entraînement au point « Câblage »)
 function fvHTML(){
   const all=FEUVERT.every(x=>feuVert(x.k));
   return `<div class="cap-body"><div class="kicker">Avant d'entrer à l'atelier</div><h2>Feu vert pour le TP É03 — Relais, cinq exercices progressifs</h2>
@@ -273,8 +274,9 @@ function fvHTML(){
     <div class="bigflag ${all?'ok':''}" style="margin:14px 0"><span class="lamp"></span><div><b style="font-size:17px">${all?'Feu vert : tu es prêt pour le TP É03':'Pas encore prêt'}</b><div class="small muted">${FEUVERT.filter(x=>feuVert(x.k)).length}/6 prérequis validés · ton prof le voit dans son tableau de bord</div></div></div>
     <div class="fv">${FEUVERT.map(x=>`<div class="it ${feuVert(x.k)?'ok':''}"><span class="lamp"></span><span>${x.t}</span><span class="src">${x.src}${x.cap&&!feuVert(x.k)?`<br><button class="revoir btn sm ghost" style="padding:2px 0" data-goto="${x.cap}">y aller →</button>`:''}</span></div>`).join('')}</div>
     <div class="card pad" style="margin-top:16px;border-color:var(--tp)"><div class="row between wrap"><div><div class="kicker" style="color:var(--tp)">Module Banc de câblage</div><b>Exercice : câbler le circuit à auto-maintien de la figure 2.25, sans modèle</b>
-      <div class="small muted">Entraîne-toi sur le Banc de câblage ou sur le panneau de l'atelier : c'est ton prof qui valide ce point quand ton câblage fonctionne.</div></div>
-      ${S.prog.banc?`<span class="chip ok">✓ Validé par ton prof</span>`:`<span class="row" style="gap:8px"><button class="btn" data-banc style="border-color:var(--tp);color:var(--tp)">Voir le schéma à câbler</button><button class="btn primary" data-app="banc">Ouvrir le Banc ↗</button></span>`}</div></div></div>`;
+      <div class="small muted">Entraîne-toi d'abord sur le défi « Relais 5 · marche-arrêt avec maintien » du Banc de câblage : il se coche tout seul quand tu l'as réussi. Puis câble le circuit sur le panneau de l'atelier : c'est ton prof qui valide ce point quand ton câblage fonctionne.</div>
+      ${P().ex[R5_DEFI]?`<div style="margin-top:8px"><span class="chip ok">✓ Défi Relais 5 réussi dans le Banc</span></div>`:''}</div>
+      ${S.prog.banc?`<span class="chip ok">✓ Validé par ton prof</span>`:`<span class="row" style="gap:8px"><button class="btn" data-banc style="border-color:var(--tp);color:var(--tp)">Voir le schéma à câbler</button><button class="btn primary" data-app="banc" data-defi="r5:1">${P().ex[R5_DEFI]?'Refaire':'Faire'} le défi dans le Banc</button></span>`}</div></div></div>`;
 }
 function bindFV(m){
   m.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto));
