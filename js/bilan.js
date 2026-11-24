@@ -47,7 +47,7 @@ function pageBilan(){
   const exHTML=i=>{ const x=def.ex[i], d=(rep.d||{})[i]||{}, sch=schemaHTML(x.scenes||[]), max=bilPts(x);
     const pts=note&&note.pts?note.pts[i]:null; if(pts!=null) tot+=+pts;
     const show=pub||B.apercu;
-    const res=(x.res||[]).map((r,k)=>{ const v=(d.r||[])[k]||'', good=show&&r.ans!=null?bilOkVal(r,v):null;
+    const res=(x.res||[]).map((r,k)=>{ const v=(d.r||[])[k]||'', good=pub&&r.ans!=null?bilOkVal(r,v):null;   // en aperçu : la réponse seule, sans rouge
       return `<div class="drow ${good===true?'good':good===false?'wrong':''}"><span class="dn">${k+1}</span><span class="dq">${esc(r.lbl||'Résultat')}</span>
         <span class="din"><input type="text" inputmode="decimal" data-br="${i}|${k}" value="${esc(B.apercu?'':v)}" ${ro?'disabled':''} aria-label="${esc(r.lbl||'Résultat')}"><span class="u">${esc(r.unit||'')}</span></span>
         ${show&&r.ans!=null?`<span class="dh">Réponse : ${frN(r.ans)} ${esc(r.unit||'')}</span>`:''}</div>`; }).join('');
