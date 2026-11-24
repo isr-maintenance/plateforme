@@ -75,6 +75,33 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
 .svgm .hi2{stroke:var(--accent);stroke-width:1.4;stroke-dasharray:4 3}
 .svgm .hit{fill:var(--accent);font:700 15px var(--font)}
 
+.svgm .body{fill:var(--panel);stroke:var(--line);stroke-width:2}
+.svgm .face{fill:var(--plate);stroke:var(--line);stroke-width:1.5}
+.svgm .lcd{fill:#c9d6b8;stroke:var(--line);stroke-width:2}
+.svgm .lcdt{fill:#1b2616;font:600 44px var(--mono)}
+.svgm .needle{stroke:var(--bad);stroke-width:2.4;stroke-linecap:round}
+.svgm .hub{fill:var(--ink)}
+.svgm .txt{fill:var(--ink);font:600 15px var(--font)}
+.svgm .gl{fill:var(--muted);font:600 13px var(--font)}
+.svgm .pl{fill:var(--ink);font:600 12px var(--font);pointer-events:none}
+.svgm .ptr{stroke:var(--accent);stroke-width:5;stroke-linecap:round}
+.svgm .hitc,.svgm .hitr{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.svgm .selc,.svgm .selr{fill:var(--accent-soft);stroke:var(--accent);stroke-width:3}
+.svgm .pos{cursor:pointer}.svgm .pos:hover circle,.svgm .pos:hover rect{stroke:var(--accent)}
+.svgm .jk{fill:#222;stroke:var(--line);stroke-width:2}
+.svgm .jred{fill:#d32f2f}.svgm .jblk{fill:#555;stroke:#fff}
+.svgm .wire{fill:none;stroke:#b87333;stroke-width:6}
+.fig.dial{max-width:440px}.fig.met{max-width:380px}
+.lcdbox{display:inline-flex;align-items:baseline;gap:10px;background:#c9d6b8;color:#1b2616;border:2px solid var(--line);border-radius:10px;padding:10px 18px;font:600 44px var(--mono)}
+.lcdbox small{font:600 20px var(--mono)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chips button{font:600 14px var(--font);padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ck{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}.ck li{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel)}
+.ck li.y{border-color:var(--good);background:var(--good-soft)}.ck li.n{border-color:var(--bad);background:var(--bad-soft)}
+.tbl{border-collapse:collapse;font-size:14px}.tbl td,.tbl th{border:1px solid var(--line);padding:4px 10px;text-align:left}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;font:500 15px var(--font);padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.opt.y{border-color:var(--good);background:var(--good-soft)}.opt.n{border-color:var(--bad);background:var(--bad-soft)}
+
 </style>
 </head>
 <body>
@@ -89,6 +116,7 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
   <button role="tab" id="t-mic" aria-selected="false" aria-controls="p-mic">Microm&egrave;tre</button>
   <button role="tab" id="t-tol" aria-selected="false" aria-controls="p-tol">Tol&eacute;rances</button>
   <button role="tab" id="t-cal2" aria-selected="false" aria-controls="p-cales">Cales &eacute;talons</button>
+  <button role="tab" id="t-ele" aria-selected="false" aria-controls="p-ele">&Eacute;lectricit&eacute;</button>
 </nav>
 
 <!-- PIED A COULISSE -->
@@ -165,6 +193,90 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
     <div class="score" id="cales-score"></div>
   </div>
 </section>
+
+<!-- ELECTRICITE -->
+<section id="p-ele" role="tabpanel" aria-labelledby="t-ele" hidden>
+  <div class="row">
+    <div class="seg" id="ele-sub" role="group" aria-label="Exercice d'&eacute;lectricit&eacute;">
+      <button data-v="br" aria-pressed="true">Brancher</button>
+      <button data-v="aig" aria-pressed="false">Lire l&rsquo;aiguille</button>
+      <button data-v="num" aria-pressed="false">Lire l&rsquo;afficheur</button>
+      <button data-v="quiz" aria-pressed="false">Quiz</button>
+    </div>
+  </div>
+
+  <div id="ele-br">
+    <div class="row">
+      <div class="seg" id="br-model" role="group" aria-label="Appareil">
+        <button data-v="num" aria-pressed="true">Num&eacute;rique</button>
+        <button data-v="ana" aria-pressed="false">&Agrave; aiguille</button>
+        <button data-v="tes" aria-pressed="false">Testeur &agrave; m&acirc;choire</button>
+      </div>
+      <button class="btn alt" id="br-new">Autre mission</button>
+    </div>
+    <div class="card q"><div class="ask" id="br-task"></div><div class="hint" id="br-model-note"></div></div>
+    <div class="card" style="margin-top:12px"><div class="fig met" id="br-fig"></div></div>
+    <div class="card q">
+      <div id="br-jacks">
+        <div class="ask">Sonde rouge dans la borne&nbsp;:</div><div class="chips" id="br-red"></div>
+        <div class="ask" style="margin-top:8px">Sonde noire dans la borne&nbsp;:</div><div class="chips" id="br-black"></div>
+      </div>
+      <div class="ask">Comment l&rsquo;appareil est-il plac&eacute; ?</div>
+      <div class="chips" id="br-br"></div>
+      <div class="in"><button class="btn" id="br-ok">V&eacute;rifier</button><button class="btn alt" id="br-no">Cet appareil ne convient pas</button><button class="btn alt" id="br-sol">Solution</button></div>
+      <div class="hint" id="br-help">Clique sur le s&eacute;lecteur de l&rsquo;appareil pour le tourner, puis choisis les bornes et le branchement.</div>
+      <div class="fb" id="br-fb" role="status"></div>
+      <ul class="ck" id="br-ck"></ul>
+      <div class="score" id="br-score"></div>
+    </div>
+  </div>
+
+  <div id="ele-aig" hidden>
+    <div class="row">
+      <div class="seg" id="aig-mode" role="group" aria-label="Mode">
+        <button data-v="explore" aria-pressed="true">Explorer</button>
+        <button data-v="exo" aria-pressed="false">Exercice</button>
+      </div>
+      <div class="seg" id="aig-cal" role="group" aria-label="Calibre"></div>
+    </div>
+    <div class="card"><div class="fig dial" id="aig-fig"></div></div>
+    <div id="aig-explore">
+      <div class="slider"><label for="aig-sl">Aiguille</label><input type="range" id="aig-sl" min="0" max="100" step="1" value="40"></div>
+      <ol class="steps" id="aig-steps"></ol>
+    </div>
+    <div id="aig-exo" class="q" hidden>
+      <div class="ask">Quelle est la valeur mesur&eacute;e ? <span class="hint">(lis la division, puis convertis avec le calibre)</span></div>
+      <div class="in"><input type="text" id="aig-in" inputmode="decimal" autocomplete="off" aria-label="Valeur lue" placeholder="0,0"><span id="aig-unit"></span>
+        <button class="btn" id="aig-ok">V&eacute;rifier</button><button class="btn alt" id="aig-sol">Solution</button><button class="btn alt" id="aig-new">Nouvelle mesure</button></div>
+      <div class="fb" id="aig-fb" role="status"></div>
+      <div class="score" id="aig-score"></div>
+    </div>
+  </div>
+
+  <div id="ele-num" hidden>
+    <div class="card q">
+      <div class="ask">Lis l&rsquo;afficheur, regarde le calibre, puis donne la valeur dans l&rsquo;unit&eacute; de base (V, A ou &Omega;).</div>
+      <div class="big"><span class="hint">Calibre</span><span class="cote" id="num-range"></span></div>
+      <div><span class="lcdbox" id="num-lcd"></span></div>
+      <div class="in"><input type="text" id="num-in" inputmode="decimal" autocomplete="off" aria-label="Valeur en unit&eacute; de base" placeholder="0,000"><span id="num-unit"></span>
+        <button class="btn" id="num-ok">V&eacute;rifier</button><button class="btn alt" id="num-sol">Solution</button><button class="btn alt" id="num-new">Nouvelle mesure</button></div>
+      <div class="fb" id="num-fb" role="status"></div>
+      <div class="score" id="num-score"></div>
+      <table class="tbl" aria-label="Pr&eacute;fixes"><tr><th>&micro;</th><th>m</th><th>k</th><th>M</th></tr><tr><td>&times; 0,000&nbsp;001</td><td>&times; 0,001</td><td>&times; 1&nbsp;000</td><td>&times; 1&nbsp;000&nbsp;000</td></tr></table>
+    </div>
+  </div>
+
+  <div id="ele-quiz" hidden>
+    <div class="card q">
+      <div class="ask" id="qz-q"></div>
+      <div id="qz-opts"></div>
+      <div class="fb" id="qz-fb" role="status"></div>
+      <div class="in"><button class="btn alt" id="qz-next" hidden>Question suivante</button></div>
+      <div class="score" id="qz-score"></div>
+    </div>
+  </div>
+</section>
+
 </div>
 
 <script>
@@ -327,6 +439,225 @@ function genComp(r) {
   return { ref, d: d / 100, tol: t / 100, cote, ok: Math.abs(d) <= t };
 }
 
+/* Appareils de mesure électriques : réglages, bornes et branchement (logique + dessin) */
+const mkPos = (id, lab, f, r, g) => ({ id, lab, f, r, g: g || '' });
+const POS = {
+  num: [
+    mkPos('off', 'OFF', 'off', 0, ''),
+    mkPos('v~200', '200', 'V~', 200, 'V~'), mkPos('v~600', '600', 'V~', 600, 'V~'),
+    mkPos('v=0.2', '200m', 'V=', 0.2, 'V='), mkPos('v=2', '2', 'V=', 2, 'V='), mkPos('v=20', '20', 'V=', 20, 'V='), mkPos('v=200', '200', 'V=', 200, 'V='), mkPos('v=600', '600', 'V=', 600, 'V='),
+    mkPos('o200', '200', 'Ω', 200, 'Ω'), mkPos('o2k', '2k', 'Ω', 2000, 'Ω'), mkPos('o20k', '20k', 'Ω', 20000, 'Ω'), mkPos('o200k', '200k', 'Ω', 200000, 'Ω'), mkPos('o2M', '2M', 'Ω', 2000000, 'Ω'),
+    mkPos('cont', 'bip', 'cont', 0, ''),
+    mkPos('a=0.2', '200m', 'A=', 0.2, 'A='), mkPos('a=10', '10', 'A=', 10, 'A='),
+    mkPos('a~0.2', '200m', 'A~', 0.2, 'A~'), mkPos('a~10', '10', 'A~', 10, 'A~')
+  ],
+  ana: [
+    mkPos('off', 'OFF', 'off', 0, ''),
+    mkPos('v=10', '10', 'V=', 10, 'V='), mkPos('v=50', '50', 'V=', 50, 'V='), mkPos('v=250', '250', 'V=', 250, 'V='), mkPos('v=1000', '1000', 'V=', 1000, 'V='),
+    mkPos('v~10', '10', 'V~', 10, 'V~'), mkPos('v~50', '50', 'V~', 50, 'V~'), mkPos('v~250', '250', 'V~', 250, 'V~'), mkPos('v~1000', '1000', 'V~', 1000, 'V~'),
+    mkPos('a=0.005', '5m', 'A=', 0.005, 'A='), mkPos('a=0.05', '50m', 'A=', 0.05, 'A='), mkPos('a=0.5', '500m', 'A=', 0.5, 'A='), mkPos('a=10', '10', 'A=', 10, 'A='),
+    mkPos('o1', '×1', 'Ω', 1, 'Ω'), mkPos('o10', '×10', 'Ω', 10, 'Ω'), mkPos('o100', '×100', 'Ω', 100, 'Ω'), mkPos('o1k', '×1k', 'Ω', 1000, 'Ω')
+  ],
+  tes: [mkPos('off', 'OFF', 'off', 0), mkPos('V', 'V', 'V', 0), mkPos('ohm', 'Ω bip', 'Ω', 0), mkPos('A', 'A', 'A', 0)]
+};
+const JACKS = { num: ['COM', 'V Ω', 'mA', '10 A'], ana: ['COM', 'V Ω mA', '10 A'], tes: [] };
+const MODEL_NAME = { num: 'Multimètre numérique', ana: 'Multimètre à aiguille', tes: 'Testeur à mâchoire (type T5)' };
+const FNAME = {
+  num: { 'V~': 'tension alternative (V~)', 'V=': 'tension continue (V=)', 'A~': 'courant alternatif (A~)', 'A=': 'courant continu (A=)', 'Ω': 'résistance (Ω)', cont: 'continuité (bip)', off: 'OFF' }
+};
+FNAME.ana = FNAME.num;
+FNAME.tes = { V: 'tension (V, alternatif ou continu en automatique)', 'Ω': 'résistance / continuité (Ω bip)', A: 'courant (mâchoire ouverte)', off: 'OFF' };
+
+const TASKS = [
+  { kind: 'V~', val: 230, txt: 'Tension du secteur à une prise : environ 230 V alternatif.' },
+  { kind: 'V=', val: 12, txt: 'Tension d’une batterie de voiture : environ 12 V continu.' },
+  { kind: 'V=', val: 24, txt: 'Tension de commande d’une bobine de relais : 24 V continu.' },
+  { kind: 'V~', val: 400, txt: 'Tension entre deux phases d’un réseau triphasé : environ 400 V alternatif.' },
+  { kind: 'V=', val: 5, txt: 'Signal d’un capteur : environ 5 V continu.' },
+  { kind: 'V~', val: 24, txt: 'Tension d’un transformateur de sonnette : environ 24 V alternatif.' },
+  { kind: 'A=', val: 0.15, txt: 'Courant de commande d’un circuit 24 V continu : environ 150 mA.' },
+  { kind: 'A~', val: 8, txt: 'Courant d’un radiateur électrique : environ 8 A alternatif.' },
+  { kind: 'A=', val: 3, txt: 'Courant d’un moteur à courant continu : environ 3 A continu.' },
+  { kind: 'Ω', val: 4700, txt: 'Résistance d’un composant isolé du circuit : environ 4,7 kΩ.' },
+  { kind: 'Ω', val: 220, txt: 'Résistance d’une petite résistance chauffante isolée : environ 220 Ω.' },
+  { kind: 'cont', val: 0, txt: 'Vérifier qu’un fil n’est pas coupé (continuité), circuit hors tension.' }
+];
+
+/* réglage attendu pour (appareil, mission) ; ok:false = l'appareil ne convient pas */
+function expected(m, t) {
+  const k = t.kind, v = t.val, first = arr => arr.find(x => x >= v - 1e-12);
+  if (m === 'tes') {
+    if (k === 'V~' || k === 'V=') return v <= 1000 ? { ok: true, f: 'V', br: 'par' } : { ok: false };
+    if (k === 'cont') return { ok: true, f: 'Ω', br: 'off' };
+    if (k === 'Ω') return v <= 1000 ? { ok: true, f: 'Ω', br: 'off' } : { ok: false, why: 'Il mesure la résistance jusqu’à 1000 Ω seulement.' };
+    if (k === 'A~') return v <= 100 ? { ok: true, f: 'A', br: 'clamp' } : { ok: false };
+    return { ok: false, why: 'La mâchoire ne mesure que le courant alternatif (jusqu’à 100 A).' };
+  }
+  const exp = { ok: true, f: k, br: 'par' };
+  if (k === 'V~' || k === 'V=') {
+    const r = first(m === 'num' ? (k === 'V~' ? [200, 600] : [0.2, 2, 20, 200, 600]) : [10, 50, 250, 1000]);
+    exp.r = r; exp.red = m === 'num' ? 'V Ω' : 'V Ω mA'; return exp;
+  }
+  if (k === 'A~' || k === 'A=') {
+    exp.br = 'ser';
+    if (m === 'ana' && k === 'A~') return { ok: false, why: 'Ce multimètre à aiguille ne mesure le courant qu’en continu.' };
+    const rs = m === 'num' ? [0.2, 10] : [0.005, 0.05, 0.5, 10];
+    exp.r = first(rs);
+    exp.red = m === 'num' ? (exp.r <= 0.2 ? 'mA' : '10 A') : (exp.r <= 0.5 ? 'V Ω mA' : '10 A');
+    return exp;
+  }
+  exp.br = 'off'; exp.red = m === 'num' ? 'V Ω' : 'V Ω mA';
+  if (k === 'cont') { if (m === 'ana') { exp.f = 'Ω'; exp.r = 1; } return exp; }
+  if (m === 'num') exp.r = first([200, 2000, 20000, 200000, 2000000]);
+  else exp.r = [1, 10, 100, 1000].find(x => v / x <= 50);
+  return exp;
+}
+
+const BR_TXT = {
+  par: 'En parallèle sur le composant (circuit sous tension)',
+  ser: 'En série : j’ouvre le circuit et j’intercale l’appareil',
+  off: 'Sur le composant isolé, circuit hors tension',
+  clamp: 'Sans couper : un seul conducteur dans la mâchoire'
+};
+const BR_WHY = {
+  par: 'La tension se mesure en parallèle, aux bornes du composant, circuit sous tension.',
+  ser: 'Le courant traverse l’appareil : on ouvre le circuit et on intercale l’appareil en série.',
+  off: 'La résistance et la continuité se mesurent hors tension, composant isolé : l’appareil envoie lui-même un petit courant.',
+  clamp: 'La mâchoire se referme sur un seul conducteur : le courant est mesuré sans couper le circuit.'
+};
+const posOf = (m, id) => POS[m].find(p => p.id === id);
+const posLabel = (m, p) => p ? (p.f === 'off' ? 'OFF' : (m === 'tes' ? p.lab : (p.g ? p.g + ' ' + p.lab : p.lab))) : '—';
+function expPos(m, e) {
+  if (!e.ok) return null;
+  return POS[m].find(p => p.f === e.f && (m === 'tes' || e.r === undefined || p.r === e.r)) || null;
+}
+function describeExp(m, e) {
+  if (!e.ok) return 'Cet appareil ne convient pas pour cette mission.';
+  const p = expPos(m, e);
+  let s = 'Sélecteur sur ' + posLabel(m, p);
+  if (m !== 'tes') s += ' · sonde rouge dans ' + e.red + ', noire dans COM';
+  return s + ' · ' + BR_TXT[e.br].toLowerCase();
+}
+
+/* contrôle d'une réponse : ans = {pos, red, black, br, declined} */
+function check(m, t, ans) {
+  const e = expected(m, t), steps = [], danger = [];
+  if (!e.ok) {
+    if (ans.declined) return { pass: true, steps: [{ ok: true, msg: 'Bonne décision : ' + (e.why || 'cet appareil ne permet pas cette mesure.') }], danger, exp: e };
+    steps.push({ ok: false, msg: 'Cet appareil ne permet pas cette mesure. ' + (e.why || '') });
+    return { pass: false, steps, danger, exp: e };
+  }
+  if (ans.declined) return { pass: false, steps: [{ ok: false, msg: 'Cet appareil permet cette mesure.' }], danger, exp: e };
+  const p = posOf(m, ans.pos), fn = FNAME[m];
+  let fOk = !!p && p.f === e.f, cOk = true;
+  if (!p || p.f === 'off') steps.push({ ok: false, msg: 'Le sélecteur est sur OFF : tourne-le sur la bonne fonction.' });
+  else if (fOk) steps.push({ ok: true, msg: 'Fonction : ' + fn[e.f] + '.' });
+  else steps.push({ ok: false, msg: 'Fonction : il faut ' + fn[e.f] + ', tu as choisi ' + (fn[p.f] || p.f) + '.' });
+  if (e.r !== undefined && m !== 'tes') {
+    if (!fOk) { cOk = false; steps.push({ ok: false, msg: 'Calibre : à choisir après la bonne fonction.' }); }
+    else if (p.r === e.r) steps.push({ ok: true, msg: 'Calibre : ' + posLabel(m, p) + ', le plus petit qui convient.' });
+    else if (p.f === 'Ω' && m === 'ana') { cOk = false; steps.push({ ok: false, msg: 'Multiplicateur : choisis celui qui place l’aiguille dans la partie lisible de l’échelle (ici ' + posLabel(m, expPos(m, e)) + ').' }); }
+    else if (p.r < e.r) { cOk = false; steps.push({ ok: false, msg: 'Calibre trop petit : la valeur dépasse l’étendue de mesure (surcharge). Il faut au moins ' + posLabel(m, expPos(m, e)) + '.' }); danger.push('Un calibre trop petit sature l’appareil et peut l’endommager.'); }
+    else steps.push({ ok: true, msg: 'Calibre ' + posLabel(m, p) + ' : la mesure est possible, mais moins précise. Le plus petit calibre qui convient est ' + posLabel(m, expPos(m, e)) + '.' });
+  } else if (m === 'tes' && fOk && e.f !== 'A') steps.push({ ok: true, msg: 'Pas de calibre à choisir : l’appareil s’en occupe tout seul.' });
+  let bOk = true;
+  if (m !== 'tes') {
+    const cur = j => j === 'mA' || j === '10 A';
+    if (!ans.red || !ans.black) { bOk = false; steps.push({ ok: false, msg: 'Bornes : branche la sonde rouge et la sonde noire.' }); }
+    else {
+      const msgs = [];
+      if (ans.black !== 'COM') { bOk = false; msgs.push('la sonde noire va toujours dans COM'); }
+      if (ans.red !== e.red) {
+        bOk = false;
+        const isCur = e.f === 'A~' || e.f === 'A=';
+        if (!isCur && (cur(ans.red) || (m === 'ana' && ans.red === '10 A'))) { msgs.push('sonde rouge dans une borne courant pour une mesure de ' + (e.f === 'Ω' || e.f === 'cont' ? 'résistance' : 'tension')); danger.push('Une tension appliquée sur une borne courant met l’appareil en court-circuit : fusible grillé, danger.'); }
+        else if (isCur && e.red === '10 A') { msgs.push('le courant dépasse la borne mA : il faut la borne 10 A'); danger.push('Un fort courant dans la borne mA fait griller le fusible de l’appareil.'); }
+        else if (isCur && e.red !== '10 A' && ans.red === '10 A') msgs.push('pour un petit courant, utilise la borne mA, plus précise');
+        else if (isCur) msgs.push('pour un courant, la sonde rouge va dans une borne courant (mA ou 10 A)');
+        else msgs.push('la sonde rouge va dans ' + e.red);
+      }
+      steps.push(bOk ? { ok: true, msg: 'Bornes : rouge dans ' + e.red + ', noire dans COM.' } : { ok: false, msg: 'Bornes : ' + msgs.join(' ; ') + '.' });
+    }
+  }
+  let brOk = ans.br === e.br;
+  if (!ans.br) steps.push({ ok: false, msg: 'Branchement : choisis comment l’appareil est placé dans le circuit.' });
+  else if (brOk) steps.push({ ok: true, msg: 'Branchement : ' + BR_WHY[e.br] });
+  else {
+    steps.push({ ok: false, msg: 'Branchement : ' + BR_WHY[e.br] });
+    if (e.br === 'ser' && ans.br === 'par') danger.push('Un ampèremètre en parallèle sur une source est un court-circuit.');
+    if (e.br === 'off' && (ans.br === 'par' || ans.br === 'ser')) danger.push('Mesurer une résistance sous tension fausse la mesure et peut détruire l’appareil.');
+    if (e.br === 'par' && ans.br === 'ser') danger.push('Un voltmètre en série n’indique rien d’utile et coupe le circuit.');
+  }
+  return { pass: fOk && cOk && bOk && brOk, steps, danger, exp: e };
+}
+
+/* ---------- dessin ---------- */
+function meterSVG(m, sel, o) {
+  o = o || {};
+  const L = POS[m], n = L.length;
+  let s = '<svg class="svgm" viewBox="0 0 380 ' + (m === 'tes' ? 540 : 560) + '" role="group" aria-label="' + MODEL_NAME[m] + '">';
+  if (m === 'tes') {
+    s += '<rect x="110" y="96" width="160" height="424" rx="22" class="body"/>';
+    s += '<path d="M110 96V44Q110 22 132 22H146Q168 22 168 44V96M270 96V44Q270 22 248 22H234Q212 22 212 44V96" class="body" fill="none"/>';
+    s += '<rect x="110" y="22" width="58" height="76" rx="14" class="body"/><rect x="212" y="22" width="58" height="76" rx="14" class="body"/>';
+    if (sel === 'A') s += '<circle cx="190" cy="60" r="9" class="wire"/><text x="190" y="86" text-anchor="middle" class="gl">conducteur</text>';
+    s += '<rect x="130" y="116" width="120" height="70" rx="8" class="lcd"/><text x="190" y="162" text-anchor="middle" class="lcdt">' + (sel === 'off' ? '' : '----') + '</text>';
+    L.forEach((p, i) => {
+      const y = 214 + i * 56, on = p.id === sel;
+      s += '<g class="pos" data-pos="' + p.id + '" role="button" tabindex="0" aria-label="Position ' + posLabel(m, p) + '"><rect x="138" y="' + y + '" width="104" height="42" rx="10" class="' + (on ? 'selr' : 'hitr') + '"/><text x="190" y="' + (y + 27) + '" text-anchor="middle" class="pl">' + p.lab + '</text></g>';
+    });
+    s += '<circle cx="150" cy="488" r="11" class="jk"/><circle cx="230" cy="488" r="11" class="jk"/>';
+    s += '</svg>'; return s;
+  }
+  s += '<rect x="20" y="10" width="340" height="540" rx="30" class="body"/>';
+  if (m === 'num') s += '<rect x="60" y="34" width="260" height="84" rx="10" class="lcd"/><text x="300" y="96" text-anchor="end" class="lcdt">' + (sel === 'off' ? '' : '-.---') + '</text>';
+  else {
+    s += '<rect x="60" y="34" width="260" height="96" rx="10" class="face"/>';
+    s += '<path d="M100 112A110 110 0 0 1 280 112" fill="none" class="tk"/>';
+    for (let i = 0; i <= 10; i++) { const a = (-50 + i * 10) * Math.PI / 180, x1 = 190 + 118 * Math.sin(a), y1 = 150 - 118 * Math.cos(a), x2 = 190 + 108 * Math.sin(a), y2 = 150 - 108 * Math.cos(a); s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" class="tk"/>'; }
+    s += '<line x1="190" y1="124" x2="150" y2="52" class="needle"/>';
+  }
+  const cx = 190, cy = 300;
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="72" class="plate"/>';
+  const ang = i => (-90 + i * 360 / n) * Math.PI / 180;
+  const si = Math.max(0, L.findIndex(p => p.id === sel));
+  s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + 60 * Math.cos(ang(si))).toFixed(1) + '" y2="' + (cy + 60 * Math.sin(ang(si))).toFixed(1) + '" class="ptr"/><circle cx="' + cx + '" cy="' + cy + '" r="7" class="hub"/>';
+  let run = null;
+  const flush = () => { if (run) { const a = (ang(run.a) + ang(run.b)) / 2; s += '<text x="' + (cx + 162 * Math.cos(a)).toFixed(1) + '" y="' + (cy + 162 * Math.sin(a) + 4).toFixed(1) + '" text-anchor="middle" class="gl">' + run.g + '</text>'; run = null; } };
+  L.forEach((p, i) => { if (p.g && run && run.g === p.g) run.b = i; else { flush(); if (p.g) run = { g: p.g, a: i, b: i }; } });
+  flush();
+  L.forEach((p, i) => {
+    const x = cx + 128 * Math.cos(ang(i)), y = cy + 128 * Math.sin(ang(i)), on = p.id === sel;
+    s += '<g class="pos" data-pos="' + p.id + '" role="button" tabindex="0" aria-label="Position ' + posLabel(m, p) + '"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="17" class="' + (on ? 'selc' : 'hitc') + '"/><text x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="middle" class="pl">' + p.lab + '</text></g>';
+  });
+  const J = JACKS[m], step = 280 / (J.length);
+  J.forEach((j, i) => {
+    const x = 60 + step * (i + 0.5) + 10;
+    const cls = o.red === j ? 'jred' : o.black === j ? 'jblk' : 'jk';
+    s += '<circle cx="' + x.toFixed(1) + '" cy="494" r="17" class="jk"/>' + (cls !== 'jk' ? '<circle cx="' + x.toFixed(1) + '" cy="494" r="11" class="' + cls + '"/>' : '') + '<text x="' + x.toFixed(1) + '" y="534" text-anchor="middle" class="gl">' + j + '</text>';
+  });
+  return s + '</svg>';
+}
+
+/* cadran à aiguille : pos 0..50 divisions */
+function dialSVG(pos, max, unit, o) {
+  o = o || {};
+  const cx = 180, cy = 205, R = 150, A = a => (a * Math.PI / 180);
+  let s = '<svg class="svgm" viewBox="0 0 360 236" role="img" aria-label="Cadran \u00e0 aiguille, \u00e9chelle 0 \u00e0 50, calibre ' + max + ' ' + unit + '">';
+  s += '<rect x="2" y="2" width="356" height="232" rx="14" class="plate"/>';
+  s += '<path d="M' + (cx + R * Math.sin(A(-50))).toFixed(1) + ' ' + (cy - R * Math.cos(A(-50))).toFixed(1) + ' A' + R + ' ' + R + ' 0 0 1 ' + (cx + R * Math.sin(A(50))).toFixed(1) + ' ' + (cy - R * Math.cos(A(50))).toFixed(1) + '" fill="none" class="tk"/>';
+  for (let i = 0; i <= 50; i++) {
+    const a = A(-50 + i * 2), L = i % 10 === 0 ? 16 : i % 5 === 0 ? 11 : 6;
+    s += '<line x1="' + (cx + R * Math.sin(a)).toFixed(1) + '" y1="' + (cy - R * Math.cos(a)).toFixed(1) + '" x2="' + (cx + (R - L) * Math.sin(a)).toFixed(1) + '" y2="' + (cy - (R - L) * Math.cos(a)).toFixed(1) + '" class="tk"/>';
+    if (i % 10 === 0) s += '<text x="' + (cx + (R - 30) * Math.sin(a)).toFixed(1) + '" y="' + (cy - (R - 30) * Math.cos(a) + 5).toFixed(1) + '" text-anchor="middle" class="lab">' + i + '</text>';
+  }
+  s += '<text x="' + cx + '" y="120" text-anchor="middle" class="labs">\u00e9chelle 0 \u2013 50</text>';
+  const a = A(-50 + pos * 2);
+  s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + (R - 6) * Math.sin(a)).toFixed(1) + '" y2="' + (cy - (R - 6) * Math.cos(a)).toFixed(1) + '" class="needle"/><circle cx="' + cx + '" cy="' + cy + '" r="8" class="hub"/>';
+  s += '<text x="14" y="224" class="txt">Calibre : ' + String(max).replace('.', ',') + ' ' + unit + '</text>';
+  return s + '</svg>';
+}
+
 </script>
 <script>
 (function(){
@@ -339,7 +670,7 @@ function genComp(r) {
   const scoreTxt = sc => sc.n ? 'Réussis : ' + sc.ok + ' sur ' + sc.n : 'Lis la mesure, tape ta réponse puis vérifie.';
 
   /* ---- Onglets ---- */
-  const tabs = [['t-cal', 'p-cal'], ['t-mic', 'p-mic'], ['t-tol', 'p-tol'], ['t-cal2', 'p-cales']];
+  const tabs = [['t-cal', 'p-cal'], ['t-mic', 'p-mic'], ['t-tol', 'p-tol'], ['t-cal2', 'p-cales'], ['t-ele', 'p-ele']];
   tabs.forEach(([t, p]) => $('#' + t).addEventListener('click', () => {
     tabs.forEach(([t2, p2]) => { $('#' + t2).setAttribute('aria-selected', t2 === t); $('#' + p2).hidden = p2 !== p; });
   }));
@@ -490,10 +821,179 @@ function genComp(r) {
   $('#cales-sol').addEventListener('click', () => { const p = calesSolve(K.T); if (!K.done) { K.done = true; bump(K.score, false); } fb($('#cales-fb'), 'info', 'Solution : ' + p.map(fmtC).join(' + ') + ' = <b>' + FR(K.T / 100, 2) + ' mm</b> (' + p.length + ' cales).'); $('#cales-score').textContent = scoreTxt(K.score); });
   $('#cales-new').addEventListener('click', calesNew);
 
+
+  /* ---- Électricité ---- */
+  const nf = v => String(Number(v.toFixed(4))).replace('.', ',');
+  const E = { sub: 'br', model: 'num', task: null, pos: 'off', red: null, black: null, br: null, score: { n: 0, ok: 0 }, done: false };
+  const A = { mode: 'explore', cal: 1, v: 40, ex: null, score: { n: 0, ok: 0 }, shown: false };
+  const N = { r: null, n: 0, score: { n: 0, ok: 0 }, done: false };
+  const Z = { i: 0, order: [], score: { n: 0, ok: 0 }, done: false };
+  const CALS = [{ u: 'V', max: 10 }, { u: 'V', max: 50 }, { u: 'V', max: 250 }, { u: 'mA', max: 5 }, { u: 'mA', max: 50 }, { u: 'mA', max: 500 }];
+  const RNG = [
+    { l: '200 mV', u: 'mV', b: 'V', f: 1e-3, d: 1 }, { l: '2 V', u: 'V', b: 'V', f: 1, d: 3 }, { l: '20 V', u: 'V', b: 'V', f: 1, d: 2 }, { l: '200 V', u: 'V', b: 'V', f: 1, d: 1 },
+    { l: '20 mA', u: 'mA', b: 'A', f: 1e-3, d: 2 }, { l: '200 mA', u: 'mA', b: 'A', f: 1e-3, d: 1 }, { l: '10 A', u: 'A', b: 'A', f: 1, d: 2 },
+    { l: '200 Ω', u: 'Ω', b: 'Ω', f: 1, d: 1 }, { l: '2 kΩ', u: 'kΩ', b: 'Ω', f: 1e3, d: 3 }, { l: '20 kΩ', u: 'kΩ', b: 'Ω', f: 1e3, d: 2 }, { l: '2 MΩ', u: 'MΩ', b: 'Ω', f: 1e6, d: 3 }
+  ];
+  const QZ = [
+    { q: 'Tu veux mesurer la tension aux bornes d’un moteur en marche. Comment places-tu le multimètre ?', o: ['En parallèle sur le moteur', 'En série avec le moteur', 'Hors tension, en série'], g: 0, e: 'Un voltmètre se place toujours en parallèle, aux bornes du composant.' },
+    { q: 'Tu veux mesurer le courant d’une lampe avec un multimètre. Comment le places-tu ?', o: ['En parallèle sur la lampe', 'En série : j’ouvre le circuit et j’intercale l’appareil', 'Aux bornes de l’alimentation, circuit fermé'], g: 1, e: 'Le courant doit traverser l’ampèremètre : on l’intercale en série.' },
+    { q: 'Que se passe-t-il si tu branches un ampèremètre en parallèle sur une source ?', o: ['Rien, il indique la tension', 'C’est un court-circuit : fusible grillé ou pire', 'Il indique un courant plus petit'], g: 1, e: 'Un ampèremètre a une résistance presque nulle : en parallèle sur une source, c’est un court-circuit.' },
+    { q: 'Pour mesurer la résistance d’un bobinage, le circuit doit être…', o: ['Sous tension, pour avoir une vraie mesure', 'Hors tension, le composant isolé', 'Sous tension, mais sur le plus petit calibre'], g: 1, e: 'L’ohmmètre envoie lui-même un petit courant. Une tension externe fausse la mesure et peut l’abimer.' },
+    { q: 'Un testeur à mâchoire (type T5) mesure un courant. Que fais-tu ?', o: ['Je referme la mâchoire sur les trois fils du câble', 'Je place la mâchoire autour d’un seul conducteur', 'Je le branche en série avec les pointes de touche'], g: 1, e: 'Autour de plusieurs conducteurs, les champs s’annulent et la mesure est fausse. Un seul conducteur par mesure.' },
+    { q: 'Tu ne connais pas la valeur à mesurer. Quel calibre choisis-tu pour commencer ?', o: ['Le plus petit, pour être précis', 'Le plus grand, puis je diminue', 'N’importe lequel'], g: 1, e: 'On part du plus grand calibre pour ne pas surcharger l’appareil, puis on descend pour gagner en précision.' },
+    { q: 'Avant de déclarer une installation hors tension, que fais-tu avec ton testeur ?', o: ['Je le contrôle sur une source connue avant et après la mesure', 'Je mesure une seule fois', 'Je me fie à l’interrupteur'], g: 0, e: 'Vérification d’absence de tension : on contrôle d’abord que le testeur fonctionne, on mesure, puis on le recontrôle.' },
+    { q: 'L’afficheur indique 1,234 sur le calibre 2 kΩ. Quelle est la résistance ?', o: ['1,234 Ω', '1 234 Ω', '12 340 Ω'], g: 1, e: 'Sur le calibre 2 kΩ, l’afficheur est en kΩ : 1,234 kΩ = 1 234 Ω.' },
+    { q: 'La sonde rouge d’un multimètre numérique est dans la borne 10 A. Tu mesures la tension d’une prise. Danger ?', o: ['Non, la borne n’a pas d’importance', 'Oui : court-circuit via la borne courant', 'Non, mais la mesure sera fausse'], g: 1, e: 'Les bornes courant ont une résistance quasi nulle : c’est un court-circuit sur la source. Toujours rouge dans V Ω pour une tension.' },
+    { q: 'Tu mesures la continuité d’un câble. Il bipe. Que signifie le bip ?', o: ['Le câble est coupé', 'Le circuit est continu : le câble conduit', 'Le câble est sous tension'], g: 1, e: 'Le bip indique que la résistance est très faible : le conducteur est continu. Toujours hors tension.' }
+  ];
+  const shuf = a => shuffle(Math.random, a);
+
+  /* sous-onglets */
+  seg('#ele-sub', v => { E.sub = v; ['br', 'aig', 'num', 'quiz'].forEach(k => $('#ele-' + k).hidden = k !== v); });
+
+  /* --- Brancher --- */
+  function brChips(el, items, cur, cb) {
+    el.innerHTML = items.map(([v, l]) => '<button data-v="' + v + '" aria-pressed="' + (cur === v) + '">' + l + '</button>').join('');
+    el.onclick = e => { const b = e.target.closest('button'); if (b) cb(b.dataset.v); };
+  }
+  function brDraw() {
+    const m = E.model, o = { red: E.red, black: E.black };
+    $('#br-fig').innerHTML = meterSVG(m, E.pos, o);
+    $('#br-jacks').hidden = m === 'tes';
+    if (m !== 'tes') {
+      const J = JACKS[m].map(j => [j, j]);
+      brChips($('#br-red'), J, E.red, v => { E.red = v; brDraw(); });
+      brChips($('#br-black'), J, E.black, v => { E.black = v; brDraw(); });
+    }
+    const B = [['par', 'En parallèle'], ['ser', 'En série'], ['off', 'Hors tension, composant isolé']];
+    if (m === 'tes') B.push(['clamp', 'Mâchoire sur un conducteur']);
+    brChips($('#br-br'), B, E.br, v => { E.br = v; brDraw(); });
+    const p = posOf(m, E.pos);
+    $('#br-help').textContent = 'Sélecteur : ' + posLabel(m, p) + (m === 'tes' ? '. Pas de calibre à régler.' : '.');
+  }
+  function brNew() {
+    let t; do { t = pick(Math.random, TASKS); } while (E.task && t === E.task && TASKS.length > 1);
+    E.task = t; E.pos = 'off'; E.red = null; E.black = null; E.br = null; E.done = false;
+    $('#br-task').innerHTML = 'Mission&nbsp;: ' + t.txt;
+    $('#br-model-note').textContent = MODEL_NAME[E.model] + (E.model === 'tes' ? ' : tension, résistance jusqu’à 1000 Ω, courant alternatif jusqu’à 100 A.' : E.model === 'ana' ? ' : lis l’échelle, courant continu seulement.' : '.');
+    fb($('#br-fb'), '', ''); $('#br-fb').className = 'fb'; $('#br-ck').innerHTML = '';
+    $('#br-score').textContent = E.score.n ? 'Réussis : ' + E.score.ok + ' sur ' + E.score.n : 'Tourne le sélecteur, choisis les bornes et le branchement, puis vérifie.';
+    brDraw();
+  }
+  function brShow(r) {
+    $('#br-ck').innerHTML = r.steps.map(s => '<li class="' + (s.ok ? 'y' : 'n') + '">' + (s.ok ? '✓ ' : '✗ ') + s.msg + '</li>').join('') + r.danger.map(d => '<li class="n"><b>Danger&nbsp;:</b> ' + d + '</li>').join('');
+  }
+  function brGrade(ans) {
+    const r = check(E.model, E.task, ans);
+    if (!E.done) { E.done = true; bump(E.score, r.pass); }
+    fb($('#br-fb'), r.pass ? 'ok' : 'ko', r.pass ? 'Bravo, le réglage et le branchement sont corrects.' : 'Il y a des erreurs : lis la correction ci-dessous.');
+    brShow(r);
+    $('#br-score').textContent = 'Réussis : ' + E.score.ok + ' sur ' + E.score.n;
+  }
+  $('#br-fig').addEventListener('click', e => { const g = e.target.closest('[data-pos]'); if (g) { E.pos = g.dataset.pos; brDraw(); } });
+  $('#br-fig').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.pos) { e.preventDefault(); E.pos = e.target.dataset.pos; brDraw(); const n = $('[data-pos="' + E.pos + '"]'); if (n) n.focus(); } });
+  $('#br-ok').addEventListener('click', () => brGrade({ pos: E.pos, red: E.red, black: E.black, br: E.br }));
+  $('#br-no').addEventListener('click', () => brGrade({ declined: true }));
+  $('#br-sol').addEventListener('click', () => {
+    const e = expected(E.model, E.task);
+    if (!E.done) { E.done = true; bump(E.score, false); }
+    fb($('#br-fb'), 'info', 'Solution : ' + describeExp(E.model, e) + '.');
+    $('#br-ck').innerHTML = ''; $('#br-score').textContent = 'Réussis : ' + E.score.ok + ' sur ' + E.score.n;
+  });
+  $('#br-new').addEventListener('click', brNew);
+  seg('#br-model', v => { E.model = v; brNew(); });
+
+  /* --- Aiguille --- */
+  function aigCalSetup() {
+    $('#aig-cal').innerHTML = CALS.map((c, i) => '<button data-v="' + i + '" aria-pressed="' + (i === A.cal) + '">' + c.max + ' ' + c.u + '</button>').join('');
+  }
+  function aigDraw() {
+    const c = CALS[A.cal], exo = A.mode === 'exo', pos = exo ? A.ex.pos : A.v / 2;
+    $('#aig-fig').innerHTML = dialSVG(pos, c.max, c.u);
+    $('#aig-unit').textContent = c.u;
+    if (!exo) {
+      const k = c.max / 50, val = pos * k;
+      $('#aig-steps').innerHTML =
+        '<li><b>Calibre</b> : l’échelle 0 – 50 correspond à <span class="num">' + c.max + ' ' + c.u + '</span></li>' +
+        '<li><b>Une division</b> = <span class="num">' + c.max + ' ÷ 50 = ' + nf(k) + ' ' + c.u + '</span></li>' +
+        '<li><b>Aiguille</b> : <span class="num">' + nf(pos) + ' divisions</span></li>' +
+        '<li class="res"><b>Lecture</b> : <span class="num">' + nf(pos) + ' × ' + nf(k) + ' = ' + nf(val) + ' ' + c.u + '</span></li>';
+    }
+  }
+  function aigNew() {
+    const c = CALS[A.cal]; let p; do { p = ri(Math.random, 3, 48); } while (A.ex && p === A.ex.pos);
+    A.ex = { pos: p }; A.shown = false; $('#aig-in').value = ''; $('#aig-fb').className = 'fb'; $('#aig-score').textContent = scoreTxt(A.score); aigDraw();
+  }
+  function aigGrade(giveUp) {
+    const c = CALS[A.cal], val = A.ex.pos * c.max / 50;
+    if (!A.shown) { A.shown = true; }
+    if (giveUp) { bump(A.score, false); fb($('#aig-fb'), 'info', 'Solution : ' + A.ex.pos + ' × ' + nf(c.max / 50) + ' = <b>' + nf(val) + ' ' + c.u + '</b>.'); }
+    else {
+      const x = parse($('#aig-in').value);
+      if (x === null) { fb($('#aig-fb'), 'ko', 'Tape un nombre.'); return; }
+      const ok = Math.abs(x - val) <= c.max / 100 + 1e-9;
+      bump(A.score, ok);
+      fb($('#aig-fb'), ok ? 'ok' : 'ko', ok ? 'Juste : ' + nf(val) + ' ' + c.u + '.' : 'Pas tout à fait. L’aiguille est à ' + A.ex.pos + ' divisions, et une division vaut ' + nf(c.max / 50) + ' ' + c.u + '.');
+    }
+    $('#aig-score').textContent = scoreTxt(A.score);
+  }
+  seg('#aig-mode', v => { A.mode = v; $('#aig-explore').hidden = v !== 'explore'; $('#aig-exo').hidden = v !== 'exo'; if (v === 'exo') aigNew(); else aigDraw(); });
+  $('#aig-cal').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; A.cal = +b.dataset.v; $$('button', $('#aig-cal')).forEach(x => x.setAttribute('aria-pressed', x === b)); if (A.mode === 'exo') aigNew(); else aigDraw(); });
+  $('#aig-sl').addEventListener('input', e => { A.v = +e.target.value; aigDraw(); });
+  $('#aig-ok').addEventListener('click', () => aigGrade(false));
+  $('#aig-in').addEventListener('keydown', e => { if (e.key === 'Enter') aigGrade(false); });
+  $('#aig-sol').addEventListener('click', () => aigGrade(true));
+  $('#aig-new').addEventListener('click', aigNew);
+
+  /* --- Afficheur --- */
+  function numNew() {
+    const r = pick(Math.random, RNG); N.r = r; N.n = ri(Math.random, 100, 1999); N.done = false;
+    const txt = (N.n / Math.pow(10, r.d)).toFixed(r.d).replace('.', ',');
+    $('#num-range').textContent = r.l; $('#num-lcd').innerHTML = txt + ' <small>' + r.u + '</small>';
+    $('#num-unit').textContent = r.b; $('#num-in').value = ''; $('#num-fb').className = 'fb'; $('#num-score').textContent = scoreTxt(N.score);
+  }
+  function numGrade(giveUp) {
+    const r = N.r, shown = N.n / Math.pow(10, r.d), val = shown * r.f;
+    const conv = r.f === 1 ? '' : ' (' + String(shown.toFixed(r.d)).replace('.', ',') + ' ' + r.u + ' × ' + String(r.f).replace('e-3', '').replace('1e3', '1 000').replace('1e6', '1 000 000') + ')';
+    const sol = (r.f === 1 ? '' : (r.f < 1 ? shown.toFixed(r.d).replace('.', ',') + ' ' + r.u + ' = ' : shown.toFixed(r.d).replace('.', ',') + ' ' + r.u + ' = ')) + '<b>' + nf(val) + ' ' + r.b + '</b>';
+    if (giveUp) { if (!N.done) { N.done = true; bump(N.score, false); } fb($('#num-fb'), 'info', 'Solution : ' + sol + '.'); }
+    else {
+      const x = parse($('#num-in').value);
+      if (x === null) { fb($('#num-fb'), 'ko', 'Tape un nombre.'); return; }
+      const ok = Math.abs(x - val) <= Math.abs(val) * 1e-6 + 1e-12;
+      if (!N.done) { N.done = true; bump(N.score, ok); }
+      fb($('#num-fb'), ok ? 'ok' : 'ko', ok ? 'Juste : ' + sol + '.' : 'Pas tout à fait. L’afficheur est en ' + r.u + ' sur ce calibre. ' + sol + '.');
+    }
+    $('#num-score').textContent = scoreTxt(N.score);
+  }
+  $('#num-ok').addEventListener('click', () => numGrade(false));
+  $('#num-in').addEventListener('keydown', e => { if (e.key === 'Enter') numGrade(false); });
+  $('#num-sol').addEventListener('click', () => numGrade(true));
+  $('#num-new').addEventListener('click', numNew);
+
+  /* --- Quiz --- */
+  function qzNew() {
+    if (Z.i >= Z.order.length) { Z.order = shuf(QZ.map((_, i) => i)); Z.i = 0; }
+    const q = QZ[Z.order[Z.i]], opts = shuf(q.o.map((t, k) => ({ t, ok: k === q.g })));
+    Z.cur = opts; Z.done = false; $('#qz-q').textContent = q.q;
+    $('#qz-opts').innerHTML = opts.map((o, i) => '<button class="opt" data-i="' + i + '">' + o.t + '</button>').join('');
+    $('#qz-fb').className = 'fb'; $('#qz-next').hidden = true; $('#qz-score').textContent = Z.score.n ? 'Réussis : ' + Z.score.ok + ' sur ' + Z.score.n : 'Choisis la bonne réponse.';
+  }
+  $('#qz-opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || Z.done) return; Z.done = true;
+    const o = Z.cur[+b.dataset.i], q = QZ[Z.order[Z.i]];
+    bump(Z.score, o.ok);
+    $$('.opt', $('#qz-opts')).forEach((x, i) => { x.classList.add(Z.cur[i].ok ? 'y' : (x === b ? 'n' : 'x')); });
+    fb($('#qz-fb'), o.ok ? 'ok' : 'ko', (o.ok ? 'Juste. ' : 'Pas tout à fait. ') + q.e);
+    Z.i++; $('#qz-next').hidden = false; $('#qz-score').textContent = 'Réussis : ' + Z.score.ok + ' sur ' + Z.score.n;
+  });
+  $('#qz-next').addEventListener('click', qzNew);
+
   /* ---- Démarrage ---- */
   calSliderSetup(); calDraw();
   $('#mic-sl').value = M.val; micDraw();
   tolNew(); calesNew();
+  aigCalSetup(); aigDraw(); numNew(); brNew(); qzNew();
 })();
 </script>
 </body>
