@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fr-BE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Labo de mesure – Plateforme technique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Palette acier et bleu de contrôle ; mise en page : outils en onglets, dessin au centre, lecture détaillée dessous */
+:root{
+  --bg:#e9eef2; --panel:#fbfcfd; --plate:#dde5eb; --ink:#14202b; --muted:#566673; --line:#9fb0bd;
+  --accent:#1456d8; --accent-soft:#dbe6fb; --good:#17703f; --good-soft:#dcf0e4; --bad:#b3261e; --bad-soft:#f8dedc;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f161c; --panel:#16202a; --plate:#223240; --ink:#e7eef4; --muted:#9db0bf; --line:#4a6073;
+  --accent:#6aa6ff; --accent-soft:#1d3355; --good:#5fd18d; --good-soft:#15352a; --bad:#ff8a80; --bad-soft:#3d1f1d; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f161c; --panel:#16202a; --plate:#223240; --ink:#e7eef4; --muted:#9db0bf; --line:#4a6073;
+  --accent:#6aa6ff; --accent-soft:#1d3355; --good:#5fd18d; --good-soft:#15352a; --bad:#ff8a80; --bad-soft:#3d1f1d; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--font)}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+header h1{font:600 26px/1.2 var(--font);margin:0}
+header p{margin:4px 0 0;color:var(--muted)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:18px 0 14px;border-bottom:2px solid var(--line)}
+.tabs button{font:500 15px var(--font);padding:10px 14px;border:0;background:none;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:500 14px var(--font);padding:8px 12px;border:0;background:var(--panel);color:var(--ink);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.fig{max-width:760px;margin:0 auto}
+.fig.mic{max-width:540px}
+.slider{display:flex;gap:12px;align-items:center;margin:14px 0 4px}
+.slider label{font-weight:600;white-space:nowrap}
+.slider input[type=range]{flex:1;accent-color:var(--accent);min-width:0}
+.steps{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.steps li{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px}
+.steps li.res{border-left-color:var(--good);background:var(--good-soft)}
+.num{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.q{margin-top:12px;display:grid;gap:10px}
+.q .ask{font-weight:600}
+.in{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.btn{font:600 15px var(--font);padding:9px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+.btn.alt{background:var(--panel);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.fb{min-height:1.6em;padding:8px 12px;border-radius:8px;display:none}
+.fb.ok{display:block;background:var(--good-soft);color:var(--good);border:1px solid var(--good)}
+.fb.ko{display:block;background:var(--bad-soft);color:var(--bad);border:1px solid var(--bad)}
+.fb.info{display:block;background:var(--accent-soft);color:var(--ink);border:1px solid var(--accent)}
+.score{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.cote{font:600 22px var(--mono)}
+.hint{color:var(--muted);font-size:14px}
+.big{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline}
+[hidden]{display:none!important}
+@media (max-width:520px){.tabs button{padding:9px 10px;font-size:14px}.slider{flex-wrap:wrap}}
+.svgm{width:100%;height:auto;display:block}
+.svgm .bar{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.svgm .plate{fill:var(--plate);stroke:var(--line);stroke-width:1.5}
+.svgm .tk{stroke:var(--ink);stroke-width:1.3}
+.svgm .refl{stroke:var(--ink);stroke-width:1.6}
+.svgm .lab{fill:var(--ink);font:600 15px var(--font)}
+.svgm .labs{fill:var(--muted);font:500 12px var(--font)}
+.svgm .hi{stroke:var(--accent);stroke-width:2.6}
+.svgm .hi2{stroke:var(--accent);stroke-width:1.4;stroke-dasharray:4 3}
+.svgm .hit{fill:var(--accent);font:700 15px var(--font)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Labo de mesure</h1>
+  <p>Lecture des instruments de mesure en m&eacute;canique industrielle. Explore, puis entra&icirc;ne-toi avec des mesures al&eacute;atoires.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Instruments">
+  <button role="tab" id="t-cal" aria-selected="true" aria-controls="p-cal">Pied &agrave; coulisse</button>
+  <button role="tab" id="t-mic" aria-selected="false" aria-controls="p-mic">Microm&egrave;tre</button>
+  <button role="tab" id="t-tol" aria-selected="false" aria-controls="p-tol">Tol&eacute;rances</button>
+  <button role="tab" id="t-cal2" aria-selected="false" aria-controls="p-cales">Cales &eacute;talons</button>
+</nav>
+
+<!-- PIED A COULISSE -->
+<section id="p-cal" role="tabpanel" aria-labelledby="t-cal">
+  <div class="row">
+    <div class="seg" id="cal-prec" role="group" aria-label="Pr&eacute;cision du vernier">
+      <button data-v="0.1" aria-pressed="true">1/10 &middot; 0,1 mm</button>
+      <button data-v="0.05" aria-pressed="false">1/20 &middot; 0,05 mm</button>
+    </div>
+    <div class="seg" id="cal-mode" role="group" aria-label="Mode">
+      <button data-v="explore" aria-pressed="true">Explorer</button>
+      <button data-v="exo" aria-pressed="false">Exercice</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="cal-mm"> Num&eacute;roter les mm</label>
+  </div>
+  <div class="card"><div class="fig" id="cal-fig"></div></div>
+  <div id="cal-explore">
+    <div class="slider"><label for="cal-sl">Ouverture</label><input type="range" id="cal-sl" step="1"></div>
+    <ol class="steps" id="cal-steps"></ol>
+  </div>
+  <div id="cal-exo" class="q" hidden>
+    <div class="ask">Quelle est la lecture du pied &agrave; coulisse ?</div>
+    <div class="in"><input type="text" id="cal-in" inputmode="decimal" autocomplete="off" aria-label="Lecture en mm" placeholder="0,0"><span>mm</span>
+      <button class="btn" id="cal-ok">V&eacute;rifier</button><button class="btn alt" id="cal-sol">Solution</button><button class="btn alt" id="cal-new">Nouvelle mesure</button></div>
+    <div class="fb" id="cal-fb" role="status"></div>
+    <div class="score" id="cal-score"></div>
+  </div>
+</section>
+
+<!-- MICROMETRE -->
+<section id="p-mic" role="tabpanel" aria-labelledby="t-mic" hidden>
+  <div class="row">
+    <div class="seg" id="mic-mode" role="group" aria-label="Mode">
+      <button data-v="explore" aria-pressed="true">Explorer</button>
+      <button data-v="exo" aria-pressed="false">Exercice</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="mic-mm"> Num&eacute;roter les mm</label>
+  </div>
+  <div class="card"><div class="fig mic" id="mic-fig"></div></div>
+  <div id="mic-explore">
+    <div class="slider"><label for="mic-sl">Ouverture</label><input type="range" id="mic-sl" min="300" max="2450" step="1"></div>
+    <ol class="steps" id="mic-steps"></ol>
+  </div>
+  <div id="mic-exo" class="q" hidden>
+    <div class="ask">Quelle est la lecture du microm&egrave;tre ?</div>
+    <div class="in"><input type="text" id="mic-in" inputmode="decimal" autocomplete="off" aria-label="Lecture en mm" placeholder="0,00"><span>mm</span>
+      <button class="btn" id="mic-ok">V&eacute;rifier</button><button class="btn alt" id="mic-sol">Solution</button><button class="btn alt" id="mic-new">Nouvelle mesure</button></div>
+    <div class="fb" id="mic-fb" role="status"></div>
+    <div class="score" id="mic-score"></div>
+  </div>
+</section>
+
+<!-- TOLERANCES -->
+<section id="p-tol" role="tabpanel" aria-labelledby="t-tol" hidden>
+  <div class="card q">
+    <div class="ask">La pi&egrave;ce est-elle conforme ?</div>
+    <div class="big"><span class="hint">Cote du plan</span><span class="cote" id="tol-cote"></span><span class="hint">mm</span></div>
+    <div class="big"><span class="hint">Pi&egrave;ce mesur&eacute;e</span><span class="cote" id="tol-meas"></span><span class="hint">mm</span></div>
+    <div class="in"><button class="btn" id="tol-yes">Conforme</button><button class="btn" id="tol-no">Non conforme</button><button class="btn alt" id="tol-new">Autre pi&egrave;ce</button></div>
+    <div class="fb" id="tol-fb" role="status"></div>
+    <div class="score" id="tol-score"></div>
+  </div>
+</section>
+
+<!-- CALES -->
+<section id="p-cales" role="tabpanel" aria-labelledby="t-cal2" hidden>
+  <div class="card q">
+    <div class="ask">Construis la cote avec le moins de cales possible.</div>
+    <div class="big"><span class="hint">Cote &agrave; obtenir</span><span class="cote" id="cales-target"></span><span class="hint">mm</span></div>
+    <div class="in"><input type="text" id="cales-in" autocomplete="off" aria-label="Cales s&eacute;par&eacute;es par des +" placeholder="1,26 + 12 + 25" style="width:16em">
+      <button class="btn" id="cales-ok">V&eacute;rifier</button><button class="btn alt" id="cales-sol">Solution</button><button class="btn alt" id="cales-new">Nouvelle cote</button></div>
+    <div class="hint">S&eacute;rie : 1,01 &agrave; 1,49 (par 0,01) &middot; 0,5 &agrave; 24,5 (par 0,5) &middot; 25, 50, 75, 100. Une seule cale de chaque valeur. S&eacute;pare les cales par un +.</div>
+    <div class="fb" id="cales-fb" role="status"></div>
+    <div class="score" id="cales-score"></div>
+  </div>
+</section>
+</div>
+
+<script>
+/* Labo de mesure — code partagé (page interactive + feuilles imprimables) */
+const FR = (x, d) => Number(x).toFixed(d).replace('.', ',');
+const sgn = (x, d) => (x < 0 ? '−' : '+') + FR(Math.abs(x), d);
+
+function rng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const ri = (r, a, b) => a + Math.floor(r() * (b - a + 1));
+const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
+function shuffle(r, arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ---------- Pied à coulisse ---------- */
+/* value en mm (multiple de prec), prec = 0.1 ou 0.05 */
+function caliperParts(value, prec) {
+  const n = Math.round(1 / prec);
+  const v = Math.round(value / prec);          // en unités de prec
+  const whole = Math.floor(v / n);
+  const k = v - whole * n;                     // trait du vernier qui coïncide
+  return { n, whole, k, frac: k * prec };
+}
+
+function caliperSVG(value, prec, o) {
+  o = o || {};
+  const { n, whole, k } = caliperParts(value, prec);
+  const vl = n - 1;                            // longueur du vernier en mm
+  const W = vl + 4, pw = 700, px = pw / W, ws = whole - 1;
+  const X = mm => 10 + (mm - ws) * px;
+  const vv = whole + k * prec;
+  const H = 150;
+  let s = '<svg class="svgm" viewBox="0 0 720 ' + H + '" role="img" aria-label="Pied à coulisse, graduations de la règle et du vernier">';
+  s += '<rect x="10" y="6" width="700" height="64" class="bar"/>';
+  for (let m = ws; m <= ws + W; m++) {
+    const len = m % 10 === 0 ? 28 : m % 5 === 0 ? 20 : 13;
+    s += '<line x1="' + X(m).toFixed(1) + '" x2="' + X(m).toFixed(1) + '" y1="70" y2="' + (70 - len) + '" class="tk"/>';
+    if (m % 10 === 0 && m > 0) s += '<text x="' + X(m).toFixed(1) + '" y="30" text-anchor="middle" class="lab">' + (m / 10) + '</text>';
+    else if (o.mm) s += '<text x="' + X(m).toFixed(1) + '" y="38" text-anchor="middle" class="labs">' + m + '</text>';
+  }
+  if (o.mm) for (let m = ws; m <= ws + W; m++) if (m % 10 === 0 && m > 0) { /* le chiffre des cm est déjà affiché */ }
+  const step = vl / n;
+  const px0 = X(vv), px1 = X(vv + vl);
+  s += '<rect x="' + (px0 - 10).toFixed(1) + '" y="70" width="' + (px1 - px0 + 20).toFixed(1) + '" height="60" class="plate"/>';
+  for (let i = 0; i <= n; i++) {
+    const x = X(vv + i * step).toFixed(1);
+    const major = n === 10 ? (i % 5 === 0) : (i % 2 === 0);
+    s += '<line x1="' + x + '" x2="' + x + '" y1="70" y2="' + (major ? 88 : 82) + '" class="tk"/>';
+    if (n === 10) s += '<text x="' + x + '" y="108" text-anchor="middle" class="labs">' + i + '</text>';
+    else if (i % 2 === 0) s += '<text x="' + x + '" y="108" text-anchor="middle" class="labs">' + (i / 2) + '</text>';
+  }
+  if (o.answer) {
+    const xk = X(vv + k * step).toFixed(1);
+    s += '<line x1="' + xk + '" x2="' + xk + '" y1="40" y2="100" class="hi"/>';
+    const xz = X(vv).toFixed(1);
+    s += '<line x1="' + xz + '" x2="' + xz + '" y1="70" y2="124" class="hi2"/>';
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- Micromètre ---------- */
+/* value en mm, multiple de 0.01 */
+function micParts(value) {
+  const v100 = Math.round(value * 100);
+  const d = v100 % 50;
+  const base100 = v100 - d;
+  return { v100, base: base100 / 100, d, half: base100 % 100 === 50 };
+}
+
+function micSVG(value, o) {
+  o = o || {};
+  const P = micParts(value);
+  const pxm = 34, yr = 100, xr = 34 + 8.5 * pxm, tw = 175;
+  const val = P.v100 / 100;
+  let s = '<svg class="svgm" viewBox="0 0 520 200" role="img" aria-label="Micromètre, douille et tambour gradués">';
+  s += '<rect x="10" y="' + (yr - 34) + '" width="' + (xr - 10).toFixed(1) + '" height="68" class="bar"/>';
+  const smin = Math.max(0, val - 8.5);
+  for (let h = Math.ceil(smin * 2); h / 2 <= val + 1e-9; h++) {
+    const sv = h / 2, x = (xr - (val - sv) * pxm).toFixed(1);
+    if (h % 2 === 0) {
+      const mm = h / 2, len = mm % 5 === 0 ? 28 : 20;
+      s += '<line x1="' + x + '" x2="' + x + '" y1="' + yr + '" y2="' + (yr - len) + '" class="tk"/>';
+      if (mm % 5 === 0) { if (+x < xr - 16) s += '<text x="' + x + '" y="' + (yr - 38 - 4) + '" text-anchor="middle" class="lab">' + mm + '</text>'; }
+      else if (o.mm) s += '<text x="' + x + '" y="' + (yr - 24) + '" text-anchor="middle" class="labs">' + mm + '</text>';
+    } else {
+      s += '<line x1="' + x + '" x2="' + x + '" y1="' + yr + '" y2="' + (yr + 16) + '" class="tk"/>';
+    }
+  }
+  s += '<line x1="10" x2="' + xr.toFixed(1) + '" y1="' + yr + '" y2="' + yr + '" class="refl"/>';
+  s += '<rect x="' + xr.toFixed(1) + '" y="' + (yr - 78) + '" width="' + tw + '" height="156" class="plate"/>';
+  for (let m = -7; m <= 7; m++) {
+    const L = (((P.d + m) % 50) + 50) % 50, y = yr + m * 10;
+    const major = L % 5 === 0;
+    s += '<line x1="' + xr.toFixed(1) + '" x2="' + (xr + (major ? 22 : 13)).toFixed(1) + '" y1="' + y + '" y2="' + y + '" class="tk"/>';
+    if (major) s += '<text x="' + (xr + 34).toFixed(1) + '" y="' + (y + 5) + '" class="lab">' + L + '</text>';
+  }
+  if (o.answer) {
+    s += '<line x1="' + (xr - 6).toFixed(1) + '" x2="' + (xr + 28).toFixed(1) + '" y1="' + yr + '" y2="' + yr + '" class="hi"/>';
+    s += '<text x="' + (xr + 80).toFixed(1) + '" y="' + (yr + 5) + '" class="hit">\u25c0 ' + P.d + '</text>';
+    const xl = (xr - (val - (P.base)) * pxm).toFixed(1);
+    s += '<line x1="' + xl + '" x2="' + xl + '" y1="' + (yr - 34) + '" y2="' + (yr + 34) + '" class="hi"/>';
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- Tolérances ---------- */
+function genTol(r) {
+  const nom = pick(r, [12, 18, 20, 25, 30, 40, 50]);
+  const kind = ri(r, 0, 2);
+  let up, lo, label;
+  if (kind === 0) { const t = pick(r, [2, 5, 10, 20]); up = t; lo = -t; label = nom + ' ±' + FR(t / 100, 2); }
+  else if (kind === 1) { up = pick(r, [10, 20, 30]); lo = 0; label = nom + ' +' + FR(up / 100, 2) + ' / 0'; }
+  else { up = pick(r, [5, 10]); const b = pick(r, [2, 5]); lo = -b; label = nom + ' +' + FR(up / 100, 2) + ' / −' + FR(b / 100, 2); }
+  const dIn = lo + ri(r, 0, up - lo), dUp = up + ri(r, 1, 4), dLo = lo - ri(r, 1, 4);
+  const meas = shuffle(r, [{ d: dIn, ok: true }, { d: dUp, ok: false }, { d: dLo, ok: false }])
+    .map(m => ({ v: (nom * 100 + m.d) / 100, ok: m.ok }));
+  return { nom, label, min: (nom * 100 + lo) / 100, max: (nom * 100 + up) / 100, tol: (up - lo) / 100, meas };
+}
+
+const INSTR = [
+  { tol: 5, name: 'règle graduée (0,5 mm)' },
+  { tol: 1, name: 'pied à coulisse 1/10' },
+  { tol: 0.5, name: 'pied à coulisse 1/20' },
+  { tol: 0.2, name: 'pied à coulisse 1/50' },
+  { tol: 0.1, name: 'micromètre 1/100' },
+  { tol: 0.02, name: 'micromètre ou comparateur au 1/1000' }
+];
+
+/* ---------- Cales étalons ---------- */
+/* T en centièmes de mm. Série : 1,01–1,49 (0,01) ; 0,5–24,5 (0,5) ; 25, 50, 75, 100 */
+function calesSolve(T) {
+  const pcs = []; let R = T;
+  const r = T % 50;
+  if (r !== 0) { pcs.push(100 + r); R -= 100 + r; }
+  const big = [10000, 7500, 5000, 2500];
+  for (const b of big) { if (R >= b) { pcs.push(b); R -= b; break; } }
+  if (R > 0) pcs.push(R);
+  return pcs.sort((a, b) => b - a);
+}
+function calesValid(c) { return (c >= 101 && c <= 149) || (c >= 50 && c <= 2450 && c % 50 === 0) || c === 2500 || c === 5000 || c === 7500 || c === 10000; }
+
+/* ---------- Comparateur ---------- */
+function genComp(r) {
+  const ref = pick(r, [20, 25, 30, 40]);
+  let d = 0; while (d === 0) d = ri(r, -12, 12);
+  const t = pick(r, [5, 10]);
+  const cote = (ref * 100 + d) / 100;
+  return { ref, d: d / 100, tol: t / 100, cote, ok: Math.abs(d) <= t };
+}
+
+</script>
+<script>
+(function(){
+  const $ = (s, e) => (e || document).querySelector(s);
+  const $$ = (s, e) => Array.from((e || document).querySelectorAll(s));
+  const parse = t => { const x = parseFloat(String(t).replace(',', '.').replace(/\s/g, '')); return isNaN(x) ? null : x; };
+  function seg(id, cb) { const g = $(id); g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $$('button', g).forEach(x => x.setAttribute('aria-pressed', x === b)); cb(b.dataset.v); }); }
+  function fb(el, kind, html) { el.className = 'fb ' + kind; el.innerHTML = html; }
+  function bump(sc, ok) { sc.n++; if (ok) sc.ok++; }
+  const scoreTxt = sc => sc.n ? 'Réussis : ' + sc.ok + ' sur ' + sc.n : 'Lis la mesure, tape ta réponse puis vérifie.';
+
+  /* ---- Onglets ---- */
+  const tabs = [['t-cal', 'p-cal'], ['t-mic', 'p-mic'], ['t-tol', 'p-tol'], ['t-cal2', 'p-cales']];
+  tabs.forEach(([t, p]) => $('#' + t).addEventListener('click', () => {
+    tabs.forEach(([t2, p2]) => { $('#' + t2).setAttribute('aria-selected', t2 === t); $('#' + p2).hidden = p2 !== p; });
+  }));
+  $('.tabs').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = tabs.findIndex(([t]) => $('#' + t).getAttribute('aria-selected') === 'true');
+    const j = (i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+    $('#' + tabs[j][0]).click(); $('#' + tabs[j][0]).focus();
+  });
+
+  /* ---- Pied à coulisse ---- */
+  const C = { prec: 0.1, mode: 'explore', mm: false, val: 23.4, ex: null, score: { n: 0, ok: 0 }, shown: false };
+  function calSliderSetup() {
+    const n = Math.round(1 / C.prec), sl = $('#cal-sl');
+    sl.min = 2 * n; sl.max = 90 * n; sl.value = Math.round(C.val / C.prec);
+  }
+  function calDraw() {
+    const exo = C.mode === 'exo', v = exo ? C.ex : C.val;
+    $('#cal-fig').innerHTML = caliperSVG(v, C.prec, { mm: C.mm, answer: exo ? C.shown : true });
+    if (!exo) {
+      const P = caliperParts(v, C.prec);
+      $('#cal-steps').innerHTML =
+        '<li><b>R&egrave;gle</b> : le z&eacute;ro du vernier a d&eacute;pass&eacute; <span class="num">' + P.whole + ' mm</span></li>' +
+        '<li><b>Vernier</b> : le <span class="num">' + P.k + (P.k === 1 ? 'er' : 'e') + '</span> trait co&iuml;ncide avec un trait de la r&egrave;gle, donc ' +
+        '<span class="num">' + P.k + ' &times; ' + FR(C.prec, C.prec < 0.1 ? 2 : 1) + ' = ' + FR(P.frac, 2) + ' mm</span></li>' +
+        '<li class="res"><b>Lecture</b> : <span class="num">' + P.whole + ' + ' + FR(P.frac, 2) + ' = ' + FR(v, C.prec < 0.1 ? 2 : 1) + ' mm</span></li>';
+    }
+  }
+  function calNew() {
+    const n = Math.round(1 / C.prec); let v;
+    do { v = Math.round((ri(Math.random, 4, 70) + ri(Math.random, 1, n - 1) * C.prec) * 100) / 100; } while (v === C.ex);
+    C.ex = v; C.shown = false; $('#cal-in').value = ''; $('#cal-fb').className = 'fb';
+    calDraw(); $('#cal-in').focus({ preventScroll: true });
+  }
+  function calMode(m) {
+    C.mode = m; $('#cal-explore').hidden = m !== 'explore'; $('#cal-exo').hidden = m !== 'exo';
+    if (m === 'exo') { calNew(); $('#cal-score').textContent = scoreTxt(C.score); } else calDraw();
+  }
+  seg('#cal-prec', v => { C.prec = parseFloat(v); C.val = Math.round(C.val / C.prec) * C.prec; calSliderSetup(); if (C.mode === 'exo') calNew(); else calDraw(); });
+  seg('#cal-mode', calMode);
+  $('#cal-mm').addEventListener('change', e => { C.mm = e.target.checked; calDraw(); });
+  $('#cal-sl').addEventListener('input', e => { C.val = Math.round(+e.target.value * C.prec * 100) / 100; calDraw(); });
+  function calCheck() {
+    const a = parse($('#cal-in').value), fbEl = $('#cal-fb'), P = caliperParts(C.ex, C.prec);
+    if (a === null) { fb(fbEl, 'info', 'Tape ta lecture en mm, par exemple ' + FR(C.prec === 0.1 ? 23.4 : 23.45, C.prec === 0.1 ? 1 : 2) + '.'); return; }
+    const ok = Math.abs(a - C.ex) < C.prec / 2;
+    if (!C.shown) bump(C.score, ok);
+    C.shown = true; calDraw();
+    if (ok) fb(fbEl, 'ok', 'Juste : <b>' + FR(C.ex, C.prec < 0.1 ? 2 : 1) + ' mm</b>.');
+    else if (Math.abs(a - P.whole - P.frac) < 1e-9) fb(fbEl, 'ok', 'Juste.');
+    else fb(fbEl, 'ko', 'Pas tout &agrave; fait. La r&eacute;ponse est <b>' + FR(C.ex, C.prec < 0.1 ? 2 : 1) + ' mm</b> : ' + P.whole + ' mm sur la r&egrave;gle, puis ' + P.k + ' &times; ' + FR(C.prec, C.prec < 0.1 ? 2 : 1) + ' au vernier.');
+    $('#cal-score').textContent = scoreTxt(C.score);
+  }
+  $('#cal-ok').addEventListener('click', calCheck);
+  $('#cal-in').addEventListener('keydown', e => { if (e.key === 'Enter') calCheck(); });
+  $('#cal-sol').addEventListener('click', () => { const P = caliperParts(C.ex, C.prec); if (!C.shown) { bump(C.score, false); } C.shown = true; calDraw();
+    fb($('#cal-fb'), 'info', 'Solution : ' + P.whole + ' mm + ' + P.k + ' &times; ' + FR(C.prec, C.prec < 0.1 ? 2 : 1) + ' = <b>' + FR(C.ex, C.prec < 0.1 ? 2 : 1) + ' mm</b>.'); $('#cal-score').textContent = scoreTxt(C.score); });
+  $('#cal-new').addEventListener('click', calNew);
+
+  /* ---- Micromètre ---- */
+  const M = { mode: 'explore', mm: false, val: 1284, ex: null, score: { n: 0, ok: 0 }, shown: false };
+  function micDraw() {
+    const exo = M.mode === 'exo', v = (exo ? M.ex : M.val) / 100;
+    $('#mic-fig').innerHTML = micSVG(v, { mm: M.mm, answer: exo ? M.shown : true });
+    if (!exo) {
+      const P = micParts(v);
+      $('#mic-steps').innerHTML =
+        '<li><b>Douille</b> : dernier trait visible &agrave; <span class="num">' + FR(P.base, 1) + ' mm</span> (' + (P.half ? 'mm entiers + demi-mm visible' : 'pas de demi-mm visible apr&egrave;s le dernier mm') + ')</li>' +
+        '<li><b>Tambour</b> : le trait <span class="num">' + P.d + '</span> est en face de la ligne de r&eacute;f&eacute;rence, donc <span class="num">' + P.d + ' &times; 0,01 = ' + FR(P.d / 100, 2) + ' mm</span></li>' +
+        '<li class="res"><b>Lecture</b> : <span class="num">' + FR(P.base, 1) + ' + ' + FR(P.d / 100, 2) + ' = ' + FR(v, 2) + ' mm</span></li>';
+    }
+  }
+  function micNew() {
+    let v; do { v = ri(Math.random, 300, 2450); } while (v % 50 === 0 || v === M.ex);
+    M.ex = v; M.shown = false; $('#mic-in').value = ''; $('#mic-fb').className = 'fb';
+    micDraw(); $('#mic-in').focus({ preventScroll: true });
+  }
+  function micMode(m) {
+    M.mode = m; $('#mic-explore').hidden = m !== 'explore'; $('#mic-exo').hidden = m !== 'exo';
+    if (m === 'exo') { micNew(); $('#mic-score').textContent = scoreTxt(M.score); } else micDraw();
+  }
+  seg('#mic-mode', micMode);
+  $('#mic-mm').addEventListener('change', e => { M.mm = e.target.checked; micDraw(); });
+  $('#mic-sl').addEventListener('input', e => { M.val = +e.target.value; micDraw(); });
+  function micCheck() {
+    const a = parse($('#mic-in').value), f = $('#mic-fb'), v = M.ex / 100, P = micParts(v);
+    if (a === null) { fb(f, 'info', 'Tape ta lecture en mm, par exemple 12,84.'); return; }
+    const ok = Math.round(a * 100) === M.ex;
+    if (!M.shown) bump(M.score, ok);
+    M.shown = true; micDraw();
+    if (ok) fb(f, 'ok', 'Juste : <b>' + FR(v, 2) + ' mm</b>.');
+    else fb(f, 'ko', 'Pas tout &agrave; fait. La r&eacute;ponse est <b>' + FR(v, 2) + ' mm</b> : douille ' + FR(P.base, 1) + ' mm + tambour ' + P.d + ' &times; 0,01 mm.');
+    $('#mic-score').textContent = scoreTxt(M.score);
+  }
+  $('#mic-ok').addEventListener('click', micCheck);
+  $('#mic-in').addEventListener('keydown', e => { if (e.key === 'Enter') micCheck(); });
+  $('#mic-sol').addEventListener('click', () => { const v = M.ex / 100, P = micParts(v); if (!M.shown) bump(M.score, false); M.shown = true; micDraw();
+    fb($('#mic-fb'), 'info', 'Solution : ' + FR(P.base, 1) + ' mm + ' + P.d + ' &times; 0,01 mm = <b>' + FR(v, 2) + ' mm</b>.'); $('#mic-score').textContent = scoreTxt(M.score); });
+  $('#mic-new').addEventListener('click', micNew);
+
+  /* ---- Tolérances ---- */
+  const T = { t: null, m: null, done: false, score: { n: 0, ok: 0 } };
+  function tolNew() {
+    T.t = genTol(Math.random); T.m = T.t.meas[Math.floor(Math.random() * 3)]; T.done = false;
+    $('#tol-cote').textContent = T.t.label; $('#tol-meas').textContent = FR(T.m.v, 2);
+    $('#tol-fb').className = 'fb'; $('#tol-yes').disabled = $('#tol-no').disabled = false;
+    $('#tol-score').textContent = scoreTxt(T.score).replace('Lis la mesure, tape ta réponse puis vérifie.', 'Compare la pièce aux cotes mini et maxi.');
+  }
+  function tolAnswer(yes) {
+    if (T.done) return; T.done = true;
+    const ok = yes === T.m.ok; bump(T.score, ok);
+    const lim = 'mini <b>' + FR(T.t.min, 2) + '</b>, maxi <b>' + FR(T.t.max, 2) + '</b> (tol&eacute;rance ' + FR(T.t.tol, 2) + ' mm)';
+    const why = T.m.ok ? FR(T.m.v, 2) + ' est entre le mini et le maxi : pi&egrave;ce conforme.' : FR(T.m.v, 2) + (T.m.v > T.t.max ? ' d&eacute;passe le maxi' : ' est sous le mini') + ' : pi&egrave;ce non conforme.';
+    fb($('#tol-fb'), ok ? 'ok' : 'ko', (ok ? 'Juste. ' : 'Pas tout &agrave; fait. ') + lim + '. ' + why);
+    $('#tol-yes').disabled = $('#tol-no').disabled = true; $('#tol-score').textContent = scoreTxt(T.score);
+  }
+  $('#tol-yes').addEventListener('click', () => tolAnswer(true));
+  $('#tol-no').addEventListener('click', () => tolAnswer(false));
+  $('#tol-new').addEventListener('click', tolNew);
+
+  /* ---- Cales étalons ---- */
+  const K = { T: 0, done: false, score: { n: 0, ok: 0 } };
+  const fmtC = c => FR(c / 100, c % 50 === 0 ? 1 : 2);
+  function calesNew() {
+    K.T = ri(Math.random, 2000, 11900); K.done = false;
+    $('#cales-target').textContent = FR(K.T / 100, 2); $('#cales-in').value = ''; $('#cales-fb').className = 'fb';
+    $('#cales-score').textContent = K.score.n ? scoreTxt(K.score) : 'Commence par le dernier chiffre après la virgule, avec la série 1,01 à 1,49.';
+  }
+  function calesCheck() {
+    const f = $('#cales-fb'), txt = $('#cales-in').value.trim();
+    if (!txt) { fb(f, 'info', 'Tape les cales séparées par un +, par exemple 1,26 + 12 + 25.'); return; }
+    const toks = txt.split(/[+;]/).map(x => x.trim()).filter(Boolean);
+    const vals = toks.map(t => { const x = parse(t); return x === null ? null : Math.round(x * 100); });
+    const opt = calesSolve(K.T);
+    if (vals.some(v => v === null)) { fb(f, 'ko', 'Je ne comprends pas une des valeurs. &Eacute;cris par exemple 1,26 + 12 + 25.'); return; }
+    const bad = vals.find(v => !calesValid(v));
+    if (bad !== undefined) { fb(f, 'ko', 'La cale de ' + FR(bad / 100, 2) + ' mm n&rsquo;existe pas dans la s&eacute;rie.'); return; }
+    if (new Set(vals).size !== vals.length) { fb(f, 'ko', 'Une cale de chaque valeur seulement : ' + FR(0, 0) + ' ne peut pas se r&eacute;p&eacute;ter.'.replace(FR(0, 0) + ' ne', 'elle ne')); return; }
+    const sum = vals.reduce((a, b) => a + b, 0);
+    if (sum !== K.T) { const d = K.T - sum; fb(f, 'ko', 'Ta somme fait <b>' + FR(sum / 100, 2) + ' mm</b> : il ' + (d > 0 ? 'manque ' : 'y a ') + FR(Math.abs(d) / 100, 2) + ' mm' + (d > 0 ? '.' : ' en trop.')); return; }
+    if (!K.done) { K.done = true; bump(K.score, vals.length <= opt.length); }
+    if (vals.length <= opt.length) fb(f, 'ok', 'Juste, en <b>' + vals.length + ' cales</b>, c&rsquo;est le minimum.');
+    else fb(f, 'info', 'La somme est juste, mais il existe une solution en <b>' + opt.length + ' cales</b> : ' + opt.map(fmtC).join(' + ') + '.');
+    $('#cales-score').textContent = scoreTxt(K.score);
+  }
+  $('#cales-ok').addEventListener('click', calesCheck);
+  $('#cales-in').addEventListener('keydown', e => { if (e.key === 'Enter') calesCheck(); });
+  $('#cales-sol').addEventListener('click', () => { const p = calesSolve(K.T); if (!K.done) { K.done = true; bump(K.score, false); } fb($('#cales-fb'), 'info', 'Solution : ' + p.map(fmtC).join(' + ') + ' = <b>' + FR(K.T / 100, 2) + ' mm</b> (' + p.length + ' cales).'); $('#cales-score').textContent = scoreTxt(K.score); });
+  $('#cales-new').addEventListener('click', calesNew);
+
+  /* ---- Démarrage ---- */
+  calSliderSetup(); calDraw();
+  $('#mic-sl').value = M.val; micDraw();
+  tolNew(); calesNew();
+})();
+</script>
+</body>
+</html>
