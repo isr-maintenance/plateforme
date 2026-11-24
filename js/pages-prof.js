@@ -126,7 +126,7 @@ function dashChap(cl, studs, co='4-elec'){
     .filter(x=>x[1]!=null && x[2]>=1).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const toGrade=e4?studs.filter(s=>{ const t=progOf(s.mail).test; return t.submitted && TEST.some(q=>q.type==='open' && (t.open||{})[q.id]==null); }):[];
   const cell=(d,n)=> !d?`<span class="cell none" style="min-width:0">·</span>`:d>=n?`<span class="cell ok" style="min-width:0">✓</span>`:`<span class="cell run" style="min-width:0">${d}/${n}</span>`;
-  return `<div class="card pad" style="margin-bottom:16px"><h3 style="margin:0">Chapitres ouverts pour ${cls(cl).nom}</h3>
+  return `${typeof bilanDash==='function'?bilanDash(cl, co, studs):''}<div class="card pad" style="margin-bottom:16px"><h3 style="margin:0">Chapitres ouverts pour ${cls(cl).nom}</h3>
     <p class="small muted" style="margin:4px 0 10px">${e4?'Ouvre chaque chapitre au moment du TP correspondant':'Ouvre chaque chapitre quand vous y arrivez en classe'} : tes élèves ne voient pas les chapitres fermés. Clique pour ouvrir ou fermer.</p>
     <div class="chipset">${NUMS.map(k=>`<button class="chtog ${ON.includes(k)?'on':''}" data-ouv="${k}" data-ouvco="${co}" title="${esc(CHAPTERS[k].titre)}"><b>${chapLbl(k)}</b><span>${ON.includes(k)?'ouvert':'fermé'}</span></button>`).join('')}</div></div>
   <div class="grid g4" style="margin-bottom:16px">
@@ -182,6 +182,7 @@ function bindDash(m){
   m.querySelectorAll('[data-atel]').forEach(c=>c.onchange=async()=>{ const [mail,k]=c.dataset.atel.split('|'), v=c.checked, pr=(S.progs[mail]||(S.progs[mail]={})); pr.atel=pr.atel||{};
     if(v) pr.atel[k]=Date.now(); else delete pr.atel[k];
     const r=await act('setAtelier',{mail,k,v}); if(!r){ if(v) delete pr.atel[k]; else pr.atel[k]=Date.now(); const y=window.scrollY; render(); window.scrollTo(0,y); } });
+  if(typeof bindBilanDash==='function') bindBilanDash(m);
   m.querySelectorAll('[data-voirex]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.voirex.split('|'); voirExercices(mail,co); });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };
   m.querySelectorAll('[data-dmode]').forEach(b=>b.onclick=()=>{ S.dashMode=b.dataset.dmode; savePrefs(); render(); window.scrollTo(0,0); });

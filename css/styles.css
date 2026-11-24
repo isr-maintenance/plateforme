@@ -480,3 +480,16 @@ details.vx summary{cursor:pointer}
 .app-panel-load{position:absolute;top:60px;left:0;right:0;text-align:center;color:var(--muted);font-size:14px;pointer-events:none}
 .app-panel.ready .app-panel-load{display:none}
 body.panel-open{overflow:hidden}
+/* schémas à compléter (placer les données) et bilan en ligne */
+.schs{display:grid;gap:10px}
+.sch{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px;max-width:560px;margin:0 auto;width:100%}
+.sch svg{display:block;width:100%;height:auto}
+.plgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.plrow{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:8px;padding:5px 8px;flex-wrap:wrap}
+.plrow select{flex:1;min-width:120px}
+.plrow.good{border-color:var(--ok);background:var(--ok-soft)}
+.plrow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.pln{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--meca);color:#fff;font-weight:800;font-size:13px;flex:none}
+.bil-ex{border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;background:var(--surface)}
+.bil-ex h3{margin:0 0 6px}
+.bil-lock{display:flex;gap:12px;align-items:center}

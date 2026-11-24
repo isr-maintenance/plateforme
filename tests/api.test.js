@@ -231,3 +231,35 @@ console.log(`✓ ${n} vérifications réussies`);
   H(co, 'setAffect', { affect: [{ cl: '3qemct1', c: '3em-elec', profs: ['O. Lesenfants'] }] });
   ok(H(co, 'setOuv', { key: '3qemct1|3em-elec', chaps: ['1.1'] }).ok, 'un groupe de CT est une classe reconnue');
   console.log(`✓ ${n} vérifications réussies (avec groupes TP et CT)`); }
+
+// Bilan verrouillé : définition côté serveur, ouverture par classe, copie, remise, note publiée par le prof
+{ const st9 = memStore(), a9 = ctx.makeApi(st9, deps); a9.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a9.handle({ t: a9.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', pr = 'gregory.baudson@elmarche.be';
+  const e1 = 'lea.a.student@elmarche.be', e2 = 'tom.b.student@elmarche.be';
+  H(co, 'setProfs', { profs: [{ nom: 'O. Lesenfants', mail: co, role: 'Coordinateur' }, { nom: 'G. Baudson', mail: pr, role: 'Professeur' }] });
+  H(e1, 'setClasse', { classe: '4eqmm' }); H(e2, 'setClasse', { classe: '4eqem' });
+  const def = { id: 'test-bilan', course: '4-meca', titre: 'Bilan test', ex: [{ enonce: 'Q ?', place: { 1: 0 }, tokens: ['D = 95 mm'], res: [{ lbl: 'D’', unit: 'mm', ans: 503.3, tol: 0.01 }] }] };
+  ok(H(pr, 'bilanSet', { def }).ok === false, 'seul le coordinateur dépose un bilan');
+  ok(H(co, 'bilanSet', { def }).ok, 'le coordinateur dépose le bilan');
+  let b = H(e1, 'boot').data.bilans; ok(b.length === 1 && b[0].open === false && !('ex' in b[0]), 'l’élève voit le bilan verrouillé, sans son contenu');
+  ok(H(e1, 'bilan', { id: 'test-bilan' }).ok === false, 'bilan verrouillé : contenu refusé');
+  ok(H(e1, 'bilanSave', { id: 'test-bilan', d: {} }).ok === false, 'bilan verrouillé : pas de copie');
+  ok(H(pr, 'bilanOuvrir', { id: 'test-bilan', cl: '4eqmm', open: true }).ok === false, 'un prof qui ne donne pas cours dans la classe ne l’ouvre pas');
+  ok(H(co, 'bilanOuvrir', { id: 'test-bilan', cl: '4eqmm', open: true }).ok, 'le prof ouvre pour la 4EQMM');
+  let r = H(e1, 'bilan', { id: 'test-bilan' });
+  ok(r.ok && r.def.ex[0].res[0].ans === undefined && r.def.ex[0].place === undefined, 'l’élève reçoit les énoncés sans les réponses');
+  ok(H(e2, 'bilan', { id: 'test-bilan' }).ok === false, 'une autre classe reste verrouillée');
+  ok(H(e1, 'bilanSave', { id: 'test-bilan', d: { 0: { d: 'D = 95 mm', i: 'D’ = ?', f: 'D’ = D . N / N’', s: '503', r: ['503'], pl: { 1: 0 } } } }).ok, 'copie enregistrée');
+  ok(H(e1, 'bilanSave', { id: 'test-bilan', d: { 0: { s: 'x'.repeat(5000) } }, remettre: true }).ok && st9.get('bilanrep:test-bilan|' + e1).d[0].s.length === 400, 'copie remise, cases bornées');
+  ok(H(e1, 'bilanSave', { id: 'test-bilan', d: {} }).ok === false, 'copie remise : plus modifiable');
+  r = H(co, 'bilanCopies', { id: 'test-bilan' }); ok(r.ok && r.def.ex[0].res[0].ans === 503.3 && r.reps[e1].remis, 'le prof voit les réponses et la copie');
+  ok(H(e1, 'bilanNoter', { id: 'test-bilan', mail: e1, pts: { 0: 2 } }).ok === false, 'l’élève ne se note pas');
+  ok(H(co, 'bilanNoter', { id: 'test-bilan', mail: e1, pts: { 0: 2 }, com: 'Bien' }).ok, 'le prof note');
+  r = H(e1, 'bilan', { id: 'test-bilan' }); ok(r.rep.note === null && r.def.ex[0].res[0].ans === undefined, 'note pas encore publiée : invisible');
+  H(co, 'bilanNoter', { id: 'test-bilan', mail: e1, pts: { 0: 2 }, com: 'Bien', pub: true });
+  r = H(e1, 'bilan', { id: 'test-bilan' }); ok(r.rep.note.pts[0] === 2 && r.def.ex[0].res[0].ans === 503.3, 'note publiée : l’élève voit sa note et la correction');
+  H(co, 'bilanOuvrir', { id: 'test-bilan', cl: '4eqmm', open: false });
+  ok(H(e1, 'bilan', { id: 'test-bilan' }).ok, 'bilan refermé : l’élève garde l’accès à sa note publiée');
+  ok(H(co, 'bilanNoter', { id: 'test-bilan', mail: e1, rouvrir: true }).ok && !st9.get('bilanrep:test-bilan|' + e1).remis, 'le prof peut rendre la copie');
+  ok(H(co, 'boot').data.bilanouv && H(co, 'boot').data.bilans.length === 1, 'le prof reçoit la liste et les ouvertures');
+  console.log(`✓ ${n} vérifications réussies (avec bilan verrouillé)`); }

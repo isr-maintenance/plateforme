@@ -86,6 +86,14 @@ Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec
 - Partie 1 (chapitres 1 à 12) en ligne. Parties 2 et 3 (chapitres 13 à 27) : dans le plan, « En préparation ». Un nouveau chapitre se met dans un fichier `js/meca4-5.js`… (à brancher dans `index.html` et `sw.js`).
 - Les charges des machines simples sont en kg (kilogramme-force), comme dans le cours. Vitesse de coupe : π = 3,14, et le résultat avec π = 3 (atelier) est accepté (`alt`).
 
+## Les bilans en ligne (évaluations verrouillées)
+
+- **Le contenu d'un bilan n'est jamais dans le dépôt** : énoncés, valeurs et réponses sont sur le serveur (`bilan:<id>` dans le Google Sheet), comme les évaluations formatives. Le code public ne contient que l'affichage (`js/bilan.js`) et les dessins (`js/schemas.js`).
+- **Déposer ou remplacer un bilan** : le coordinateur, connecté à la plateforme, envoie la définition avec `API.call('bilanSet', {def})` (depuis la console de son navigateur, ou par Claude dans Chrome). `def` = `{ id, course, titre, sous, consignes, ex:[{ part, enonce, scenes:[{type,p}], tokens:[…], place:{emplacement:indexDuToken}, res:[{lbl, unit, ans, tol}], pts }] }`. Garde la définition hors du dépôt.
+- **Déroulement** : l'élève voit le bilan verrouillé (🔒) dans la page du cours ; le prof le déverrouille pour sa classe dans Suivi ; l'élève remplit sa copie (enregistrée au fur et à mesure, document `bilanrep:<id>|<mail>`) et la remet ; le prof corrige (points proposés : dessin juste = 1, chaque résultat juste = 1) et publie ; l'élève voit alors sa note et la correction.
+- **Dessins à compléter** (`js/schemas.js`) : `SCENES` (roues de friction, poulies, cônes, chaîne, engrenages, vis sans fin, leviers, plan incliné, treuil) portent des emplacements numérotés, sans aucune valeur. `mountPlaceW(box, key, {scenes, tokens, place})` en fait un exercice d'entraînement corrigé tout de suite.
+- **Mécanique 4e** : `js/meca4-ent.js` construit les exercices du bilan (`BILEX`) et les met en entraînement, avec des valeurs propres à chaque élève, dans la capsule « Comme au bilan » des chapitres 6, 7 et 9 (`M6z`, `M7z`, `M9z`). Les valeurs du bilan n'y figurent pas.
+
 ## Règles de rédaction
 
 - **Langue** : français de Belgique. Écris « septante » et « nonante », pas « soixante-dix » ni « quatre-vingt-dix ».

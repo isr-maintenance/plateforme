@@ -109,6 +109,30 @@ function makeApi(store, deps) {
   }
   function isProfOf(me, cl){ return me.coord || doc('affect', []).some(function(a){ return a.cl === cl && a.profs.indexOf(me.nom) >= 0; }); }
 
+  /* ---------- bilans (évaluations en ligne verrouillées) ----------
+     « bilan:<id> » = la définition (énoncés, emplacements des dessins, réponses) : jamais dans le code public.
+     « bilanouv » = { '<id>|<classe>': date d'ouverture } : le prof déverrouille pour sa classe.
+     « bilanrep:<id>|<mail> » = la copie de l'élève { d, remis, note:{pts, com, at, by}, pub }.
+     L'élève ne reçoit jamais les réponses ; il voit sa note et la correction quand le prof publie. */
+  function bilanMeta(){ return store.list('bilan:').map(function(r){ var v = r.value || {}; return { id: v.id, titre: v.titre, course: v.course }; }); }
+  function bilanOuvert(id, me){ var O = doc('bilanouv', {}), el = doc('eleve:' + me.mail, {}) || {};
+    return !!(O[id + '|' + el.classe] || (el.ct && O[id + '|' + el.ct])); }
+  function bilanEleve(def, pub){          // la définition sans les réponses (avec, une fois la note publiée)
+    var d = JSON.parse(JSON.stringify(def));
+    (d.ex || []).forEach(function(x){ (x.res || []).forEach(function(r){ if (!pub) { delete r.ans; delete r.tol; delete r.alt; } }); if (!pub) delete x.place; });
+    return d;
+  }
+  function bilanRepKey(id, mail){ return 'bilanrep:' + id + '|' + mail; }
+  function bilanData(d){                  // la copie envoyée par l'élève, nettoyée et bornée
+    var o = {}; if (!d || typeof d !== 'object') return o;
+    Object.keys(d).slice(0, 40).forEach(function(k){ var x = d[k] || {}, y = {};
+      ['d', 'i', 'f', 's'].forEach(function(c){ y[c] = str(x[c], 400); });
+      y.r = (Array.isArray(x.r) ? x.r : []).slice(0, 12).map(function(v){ return str(v, 40); });
+      y.pl = {}; if (x.pl && typeof x.pl === 'object') Object.keys(x.pl).slice(0, 20).forEach(function(s){ y.pl[str(s, 4)] = Number(x.pl[s]); });
+      o[str(k, 4)] = y; });
+    return o;
+  }
+
   /* ---------- démarrage : tout ce qu'il faut à l'écran ---------- */
   function boot(me){
     var out = { me: me, cfg: { open: cfg().open !== false }, modes: doc('modes', {}), affect: doc('affect', []), pdfs: doc('pdfs', {}), ouv: doc('ouv', {}) };
@@ -123,6 +147,8 @@ function makeApi(store, deps) {
       out.stage.lieux = out.stage.lieux.filter(function(l){ return Object.keys(out.stage.mine).some(function(k){ return out.stage.mine[k].lieu === l.id; }); });
       out.stage.tel = (doc('stage:tel', {}))[me.mail] || '';
       out.fcor = fcorList(me);
+      out.bilans = bilanMeta().map(function(b){ var R = doc(bilanRepKey(b.id, me.mail), null) || {};
+        b.open = bilanOuvert(b.id, me); b.remis = R.remis || 0; b.pub = R.pub || 0; return b; });
       return out;
     }
     out.profs = profs(); out.access = { open: cfg().open !== false, blocked: cfg().blocked || [] };
@@ -137,6 +163,7 @@ function makeApi(store, deps) {
     out.stage.tel = doc('stage:tel', {});
     out.stage.journal = listDocs('journal:');
     out.fcor = fcorList(me);
+    out.bilans = bilanMeta(); out.bilanouv = doc('bilanouv', {});
     var mp = doc('profprog:' + me.mail, null);                 // la progression du prof dans les capsules, remise à zéro chaque année scolaire
     out.myProg = mp && mp.annee === anneeSco(deps.now()) ? mp.prog : null;
     return out;
@@ -201,7 +228,20 @@ function makeApi(store, deps) {
       a.lieu = id; A[me.mail] = a; put(k, A, me.mail);
       return { ok: true, lieu: lieu };
     },
-    fcor: fcorGet
+    fcor: fcorGet,
+    bilan: function(me, p){
+      var id = str(p.id, 40), def = doc('bilan:' + id, null); need(def, 'Bilan inconnu.');
+      var R = doc(bilanRepKey(id, me.mail), null) || {};
+      need(bilanOuvert(id, me) || R.pub, 'Ce bilan est verrouillé : ton prof l’ouvrira le moment venu.');
+      var pub = !!R.pub;
+      return { ok: true, def: bilanEleve(def, pub), rep: { d: R.d || {}, remis: R.remis || 0, pub: R.pub || 0, note: pub ? R.note || null : null } };
+    },
+    bilanSave: function(me, p){
+      var id = str(p.id, 40); need(doc('bilan:' + id, null), 'Bilan inconnu.'); need(bilanOuvert(id, me), 'Ce bilan est verrouillé.');
+      var k = bilanRepKey(id, me.mail), R = doc(k, null) || {}; need(!R.remis, 'Ta copie est déjà remise.');
+      R.d = bilanData(p.d); R.maj = deps.now(); if (p.remettre) R.remis = deps.now();
+      put(k, R, me.mail); return { ok: true, remis: R.remis || 0 };
+    }
   };
   var LIEU_F = ['nom', 'adresse', 'localite', 'secteur', 'tuteur', 'tel', 'mail'];
   function norm(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ''); }
@@ -292,6 +332,27 @@ function makeApi(store, deps) {
       put('ouv', O, me.mail); return { ok: true, chaps: O[key] };
     },
     fcor: fcorGet,
+    bilanOuvrir: function(me, p){
+      var id = str(p.id, 40), cl = str(p.cl, 20); need(doc('bilan:' + id, null), 'Bilan inconnu.');
+      need(PLAT.CLASSES.concat(PLAT.CT).indexOf(cl) >= 0, 'Classe inconnue.'); need(isProfOf(me, cl), 'Tu ne donnes pas cours dans cette classe.');
+      var O = doc('bilanouv', {}); if (p.open) O[id + '|' + cl] = deps.now(); else delete O[id + '|' + cl];
+      put('bilanouv', O, me.mail); return { ok: true, ouv: O };
+    },
+    bilanCopies: function(me, p){
+      var id = str(p.id, 40), def = doc('bilan:' + id, null); need(def, 'Bilan inconnu.');
+      return { ok: true, def: def, reps: listDocs('bilanrep:' + id + '|') };
+    },
+    bilanNoter: function(me, p){
+      var id = str(p.id, 40), mail = str(p.mail, 120), k = bilanRepKey(id, mail), R = doc(k, null); need(R, 'Pas de copie pour cet élève.');
+      var el = doc('eleve:' + mail, {}) || {}; need(isProfOf(me, el.classe) || (el.ct && isProfOf(me, el.ct)), 'Cet élève n’est pas dans ta classe.');
+      if (p.rouvrir) { R.remis = 0; R.pub = 0; }
+      else {
+        var pts = {}; if (p.pts && typeof p.pts === 'object') Object.keys(p.pts).slice(0, 40).forEach(function(x){ var v = Number(p.pts[x]); if (isFinite(v)) pts[str(x, 4)] = v; });
+        R.note = { pts: pts, com: str(p.com, 1000), at: deps.now(), by: me.nom };
+        if ('pub' in p) R.pub = p.pub ? deps.now() : 0;
+      }
+      put(k, R, me.mail); return { ok: true, rep: R };
+    },
     setPdf: function(me, p){ var P = doc('pdfs', {}); var c = str(p.course, 40); if (!p.url) delete P[c]; else P[c] = { url: str(p.url, 500), name: str(p.name, 120) }; put('pdfs', P, me.mail); return { ok: true }; }
   };
 
@@ -314,6 +375,12 @@ function makeApi(store, deps) {
         put('fcor:' + ch, { ch: ch, titre: str(x.titre, 200), ev: str(x.ev, 20000), cor: str(x.cor, 20000) }, me.mail);
       });
       return { ok: true, n: L.length };
+    },
+    bilanSet: function(me, p){
+      var d = p.def; need(d && typeof d === 'object' && /^[a-z0-9-]{3,40}$/.test(d.id || ''), 'Définition invalide.');
+      need(Array.isArray(d.ex) && d.ex.length, 'Aucun exercice.');
+      if (p.del) { store.del('bilan:' + d.id); return { ok: true }; }
+      put('bilan:' + d.id, d, me.mail); return { ok: true, n: d.ex.length };
     },
     setAccess: function(me, p){ var c = cfg(); if ('open' in p) c.open = !!p.open; if (Array.isArray(p.blocked)) c.blocked = p.blocked.map(function(x){ return String(x).toLowerCase(); }); put('cfg', c, me.mail); return { ok: true }; }
   };

@@ -179,7 +179,7 @@ function pageCourseGen(c, plan){
     if(CH && !open) st=`<span class="chip warn">🔒 pas encore ouvert</span>`;
     else if(CH){ const d=chapCapsDone(k); st=`<span class="chip ${d===CH.caps.length?'ok':'elec'}">${d===CH.caps.length?'✓ ':''}${d}/${CH.caps.length} capsules</span>`; }
     else st=`<span class="chip">En préparation</span>`;
-    return `<div class="chap ${open?'avail':''} ${CH&&!open?'locked':''}"><span class="num">${lbl}</span><div class="ti"><b>${t}</b>${info?`<span class="tiny muted">${info}</span>`:''}</div>${st}${open?`<button class="btn sm primary" data-cap="${chapResume(k)}">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}`;
+    return `<div class="chap ${open?'avail':''} ${CH&&!open?'locked':''}"><span class="num">${lbl}</span><div class="ti"><b>${t}</b>${info?`<span class="tiny muted">${info}</span>`:''}</div>${st}${open?`<button class="btn sm primary" data-cap="${chapResume(k)}">Ouvrir</button>`:''}</div>`; }).join('')}</div></div>`).join('')}${typeof bilanBlock==='function'?bilanBlock(c.id):''}`;
 }
 
 /* ---------------- Lecteur de chapitre ---------------- */

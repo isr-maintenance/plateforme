@@ -29,7 +29,7 @@ function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{
 /* Les enregistrements partent en arrière-plan : l'écran est déjà à jour, l'indicateur en haut
    passe à « enregistrement… » puis au vert quand tout est arrivé. On peut donc enchaîner plusieurs
    changements sans attendre. Deux changements de la même donnée partent l'un après l'autre, dans l'ordre. */
-const LECTURES = ['fcor','checkMail','boot','ssoTicket'];
+const LECTURES = ['fcor','checkMail','boot','ssoTicket','bilan','bilanCopies'];
 let PENDING = 0, PEND_ERR = '';
 const CHAINS = {};
 async function act(a, p, okMsg){
@@ -135,7 +135,7 @@ async function boot(){
   if(!r.ok){ S.error=r.msg; S.booted=false; render(); return; }
   const d=r.data; S.me=d.me; ME=d.me.nom; S.booted=true; S.error=null;
   S.modes=Object.assign({}, ...CLASSES.map(c=>({[c.id]:c.mode})), d.modes||{});
-  AFFECT=d.affect||[]; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[]; S.ouv=d.ouv||{};
+  AFFECT=d.affect||[]; S.bilans=d.bilans||[]; S.bilanouv=d.bilanouv||{}; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[]; S.ouv=d.ouv||{};
   S.stage.periodes = d.stage.periodes || JSON.parse(JSON.stringify(STAGE_PER_DEF));
   S.stage.lieux = d.stage.lieux || [];
   if(S.me.role==='eleve'){
@@ -288,6 +288,7 @@ function render(){
     if(S.view.page==='course') m.innerHTML=pageCourse();
     else if(S.view.page==='player') { m.innerHTML=pagePlayer(); afterPlayer(); return; }
     else if(S.view.page==='tp') m.innerHTML=pageTP();
+    else if(S.view.page==='bilan') { m.innerHTML=pageBilan(); bindCommon(m); bindBilan(m); return; }
   } else m.innerHTML = pages[S.tab]();
   bindCommon(m);
 }
@@ -299,6 +300,7 @@ function bindCommon(m){
   m.querySelectorAll('[data-fcor]').forEach(b=>b.onclick=()=>openFcor(b.dataset.fcor));
   m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
   m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap));
+  m.querySelectorAll('[data-bilan]').forEach(b=>b.onclick=()=>openBilan(b.dataset.bilan));
   m.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{ const v=b.dataset.back; S.view = v==='home'?{page:'home'}:{page:v,course:S.view.course||'4-elec'}; render(); window.scrollTo(0,0); });
   m.querySelectorAll('[data-module]').forEach(b=>b.onclick=()=>moduleInfo(b.dataset.module));
   m.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app, b.dataset.defi?{defi:b.dataset.defi}:{}));
