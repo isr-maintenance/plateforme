@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr-BE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atelier de dessin technique – Plateforme technique</title>
+<!--
+  Atelier de dessin technique : outil autonome (HTML + CSS + modules JavaScript, sans compilation).
+  Dessiner les vues d'une pièce, les coupes, les sections, les perspectives et la cotation,
+  avec correction automatique. Code : js/main.js (navigation), js/vues/ (pages), js/dao/ (dessin).
+  Le travail de l'élève reste dans son navigateur (pas de compte, pas de serveur).
+-->
+<script>try { var t = localStorage.getItem('atelier-dessin.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="stylesheet" href="css/styles.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#/dessin" aria-label="Atelier de dessin"><span class="txt">Atelier de dessin technique</span></a>
+  <span style="flex:1"></span>
+  <div class="top-actions"><button class="btn" id="btn-theme" type="button" aria-label="Changer de thème"></button></div>
+</header>
+<main id="vue" tabindex="-1"><div class="loading">Chargement…</div></main>
+<div id="toasts" aria-live="polite"></div>
+</body>
+</html>
