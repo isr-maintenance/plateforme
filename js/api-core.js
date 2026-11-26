@@ -114,19 +114,19 @@ function makeApi(store, deps) {
      « bilanouv » = { '<id>|<classe>': date d'ouverture } : le prof déverrouille pour sa classe.
      « bilanrep:<id>|<mail> » = la copie de l'élève { d, remis, note:{pts, com, at, by}, pub }.
      L'élève ne reçoit jamais les réponses ; il voit sa note et la correction quand le prof publie. */
-  function bilanMeta(){ return store.list('bilan:').map(function(r){ var v = r.value || {}; return { id: v.id, titre: v.titre, course: v.course }; }); }
+  function bilanMeta(){ return store.list('bilan:').map(function(r){ var v = r.value || {}; return { id: v.id, titre: v.titre, course: v.course, kind: v.kind || 'bilan', ch: v.ch || '' }; }); }
   function bilanOuvert(id, me){ var O = doc('bilanouv', {}), el = doc('eleve:' + me.mail, {}) || {};
     return !!(O[id + '|' + el.classe] || (el.ct && O[id + '|' + el.ct])); }
   function bilanEleve(def, pub){          // la définition sans les réponses (avec, une fois la note publiée)
     var d = JSON.parse(JSON.stringify(def));
-    (d.ex || []).forEach(function(x){ (x.res || []).forEach(function(r){ if (!pub) { delete r.ans; delete r.tol; delete r.alt; } }); if (!pub) delete x.place; });
+    (d.ex || []).forEach(function(x){ (x.res || []).forEach(function(r){ if (!pub) { delete r.ans; delete r.tol; delete r.alt; } }); if (!pub) { delete x.place; delete x.cor; } });
     return d;
   }
   function bilanRepKey(id, mail){ return 'bilanrep:' + id + '|' + mail; }
   function bilanData(d){                  // la copie envoyée par l'élève, nettoyée et bornée
     var o = {}; if (!d || typeof d !== 'object') return o;
     Object.keys(d).slice(0, 40).forEach(function(k){ var x = d[k] || {}, y = {};
-      ['d', 'i', 'f', 's'].forEach(function(c){ y[c] = str(x[c], 400); });
+      ['d', 'i', 'f', 's'].forEach(function(c){ y[c] = str(x[c], c === 's' ? 1500 : 400); });
       y.r = (Array.isArray(x.r) ? x.r : []).slice(0, 12).map(function(v){ return str(v, 40); });
       y.pl = {}; if (x.pl && typeof x.pl === 'object') Object.keys(x.pl).slice(0, 20).forEach(function(s){ y.pl[str(s, 4)] = Number(x.pl[s]); });
       o[str(k, 4)] = y; });
@@ -239,7 +239,11 @@ function makeApi(store, deps) {
     bilanSave: function(me, p){
       var id = str(p.id, 40); need(doc('bilan:' + id, null), 'Bilan inconnu.'); need(bilanOuvert(id, me), 'Ce bilan est verrouillé.');
       var k = bilanRepKey(id, me.mail), R = doc(k, null) || {}; need(!R.remis, 'Ta copie est déjà remise.');
-      R.d = bilanData(p.d); R.maj = deps.now(); if (p.remettre) R.remis = deps.now();
+      if (p.d) R.d = bilanData(p.d);
+      if (p.sortie && typeof p.sortie === 'object') {      // l'élève a quitté la page pendant l'évaluation : on le note, le prof le voit
+        R.sorties = (R.sorties || []).concat([{ t: Number(p.sortie.t) || deps.now(), dur: Math.max(0, Math.round(Number(p.sortie.dur) || 0)), quoi: str(p.sortie.quoi, 20) }]).slice(-60);
+      }
+      R.maj = deps.now(); if (p.remettre) R.remis = deps.now();
       put(k, R, me.mail); return { ok: true, remis: R.remis || 0 };
     }
   };
@@ -341,6 +345,11 @@ function makeApi(store, deps) {
     bilanCopies: function(me, p){
       var id = str(p.id, 40), def = doc('bilan:' + id, null); need(def, 'Bilan inconnu.');
       return { ok: true, def: def, reps: listDocs('bilanrep:' + id + '|') };
+    },
+    bilanReps: function(me, p){             // toutes les copies des évaluations d'un cours (Suivi, carnet)
+      var co = str(p.course, 40), out = {};
+      store.list('bilan:').forEach(function(r){ var v = r.value || {}; if (v.course === co) out[v.id] = listDocs('bilanrep:' + v.id + '|'); });
+      return { ok: true, reps: out };
     },
     bilanNoter: function(me, p){
       var id = str(p.id, 40), mail = str(p.mail, 120), k = bilanRepKey(id, mail), R = doc(k, null); need(R, 'Pas de copie pour cet élève.');

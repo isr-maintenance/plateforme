@@ -252,7 +252,7 @@ console.log(`✓ ${n} vérifications réussies`);
   ok(r.ok && r.def.ex[0].res[0].ans === undefined && r.def.ex[0].place === undefined, 'l’élève reçoit les énoncés sans les réponses');
   ok(H(e2, 'bilan', { id: 'test-bilan' }).ok === false, 'une autre classe reste verrouillée');
   ok(H(e1, 'bilanSave', { id: 'test-bilan', d: { 0: { d: 'D = 95 mm', i: 'D’ = ?', f: 'D’ = D . N / N’', s: '503', r: ['503'], pl: { 1: 0 } } } }).ok, 'copie enregistrée');
-  ok(H(e1, 'bilanSave', { id: 'test-bilan', d: { 0: { s: 'x'.repeat(5000) } }, remettre: true }).ok && st9.get('bilanrep:test-bilan|' + e1).d[0].s.length === 400, 'copie remise, cases bornées');
+  ok(H(e1, 'bilanSave', { id: 'test-bilan', d: { 0: { s: 'x'.repeat(5000) } }, remettre: true }).ok && st9.get('bilanrep:test-bilan|' + e1).d[0].s.length === 1500, 'copie remise, cases bornées');
   ok(H(e1, 'bilanSave', { id: 'test-bilan', d: {} }).ok === false, 'copie remise : plus modifiable');
   r = H(co, 'bilanCopies', { id: 'test-bilan' }); ok(r.ok && r.def.ex[0].res[0].ans === 503.3 && r.reps[e1].remis, 'le prof voit les réponses et la copie');
   ok(H(e1, 'bilanNoter', { id: 'test-bilan', mail: e1, pts: { 0: 2 } }).ok === false, 'l’élève ne se note pas');
@@ -265,3 +265,20 @@ console.log(`✓ ${n} vérifications réussies`);
   ok(H(co, 'bilanNoter', { id: 'test-bilan', mail: e1, rouvrir: true }).ok && !st9.get('bilanrep:test-bilan|' + e1).remis, 'le prof peut rendre la copie');
   ok(H(co, 'boot').data.bilanouv && H(co, 'boot').data.bilans.length === 1, 'le prof reçoit la liste et les ouvertures');
   console.log(`✓ ${n} vérifications réussies (avec bilan verrouillé)`); }
+
+// Formatives en ligne : corrigé caché, réponse longue, sorties de page notées, copies par cours
+{ const s10 = memStore(), a10 = ctx.makeApi(s10, deps); a10.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a10.handle({ t: a10.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', e1 = 'zoe.c.student@elmarche.be';
+  H(e1, 'setClasse', { classe: '4eqmm' });
+  const def = { id: 'f4e-2-1', course: '4-elec', kind: 'formative', ch: '2.1', titre: 'Formative 2.1', ex: [{ kind: 'texte', enonce: 'Q ?', pts: 4, cor: 'Le corrigé' }, { kind: 'calc', enonce: 'Calcule', pts: 3, res: [{ lbl: 'I', unit: 'A', ans: 0.153 }] }] };
+  H(co, 'bilanSet', { def }); H(co, 'bilanOuvrir', { id: 'f4e-2-1', cl: '4eqmm', open: true });
+  let r = H(e1, 'bilan', { id: 'f4e-2-1' }); ok(r.ok && r.def.ex[0].cor === undefined && r.def.ex[1].res[0].ans === undefined, 'formative : ni corrigé ni réponses avant publication');
+  ok(H(e1, 'boot').data.bilans[0].kind === 'formative' && H(e1, 'boot').data.bilans[0].ch === '2.1', 'la liste dit que c’est une formative et son chapitre');
+  H(e1, 'bilanSave', { id: 'f4e-2-1', d: { 0: { s: 'y'.repeat(2000) } } }); ok(s10.get('bilanrep:f4e-2-1|' + e1).d[0].s.length === 1500, 'réponse ouverte jusqu’à 1 500 caractères');
+  ok(H(e1, 'bilanSave', { id: 'f4e-2-1', sortie: { t: clock, dur: 12, quoi: 'onglet' } }).ok, 'sortie de page envoyée');
+  ok(s10.get('bilanrep:f4e-2-1|' + e1).sorties.length === 1 && s10.get('bilanrep:f4e-2-1|' + e1).d[0].s.length === 1500, 'sortie notée, copie intacte');
+  r = H(co, 'bilanReps', { course: '4-elec' }); ok(r.ok && r.reps['f4e-2-1'][e1].sorties[0].dur === 12, 'le prof voit les copies du cours et les sorties');
+  ok(H(e1, 'bilanReps', { course: '4-elec' }).ok === false, 'un élève ne voit pas les copies');
+  H(co, 'bilanNoter', { id: 'f4e-2-1', mail: e1, pts: { 0: 3, 1: 3 }, pub: true });
+  ok(H(e1, 'bilan', { id: 'f4e-2-1' }).def.ex[0].cor === 'Le corrigé', 'après publication : le corrigé est visible');
+  console.log(`✓ ${n} vérifications réussies (avec formatives en ligne)`); }

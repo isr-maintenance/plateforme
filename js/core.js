@@ -29,7 +29,7 @@ function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(PREF_KEY)||'{
 /* Les enregistrements partent en arrière-plan : l'écran est déjà à jour, l'indicateur en haut
    passe à « enregistrement… » puis au vert quand tout est arrivé. On peut donc enchaîner plusieurs
    changements sans attendre. Deux changements de la même donnée partent l'un après l'autre, dans l'ordre. */
-const LECTURES = ['fcor','checkMail','boot','ssoTicket','bilan','bilanCopies'];
+const LECTURES = ['fcor','checkMail','boot','ssoTicket','bilan','bilanCopies','bilanReps'];
 let PENDING = 0, PEND_ERR = '';
 const CHAINS = {};
 async function act(a, p, okMsg){
