@@ -120,8 +120,8 @@ function bindBiblio(m){
 /* ---------------- Mes cours (élève) ---------------- */
 function pageCours(){
   const c=cls(S.eleveClass), f=fil(c.fil), list=coursFor(c.fil,c.annee);
-  return `<div class="page-head"><div><div class="kicker">${c.nom} · ${f.nom}</div><h1>Mes cours</h1></div>
-    ${isProf()?`<label class="small row" style="gap:8px"><span class="muted">Aperçu comme un élève de</span><select data-eclass>${CLASSES.map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${x.nom}</option>`).join('')}</select></label>`:''}</div>
+  return `<div class="page-head"><div><div class="kicker">${c.nom} · ${f.nom}</div><h1>${isInvite()?'Les cours':'Mes cours'}</h1></div>
+    ${isProf()||isInvite()?`<label class="small row" style="gap:8px"><span class="muted">${isInvite()?'Les cours de la classe':'Aperçu comme un élève de'}</span><select data-eclass>${CLASSES.map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${x.nom}</option>`).join('')}</select></label>`:''}</div>
   <div class="grid g3">${list.map(courseCard).join('')}</div>
   ${list.every(x=>!x.statut.startsWith('demo')&&x.statut!=='app')?`<div class="note" style="margin-top:18px"><b>Le contenu arrive bientôt.</b>Tes cours sont en place : les chapitres seront ajoutés au fil de l'année. En attendant, les PDF sont dans la Bibliothèque.</div>`:''}`;
 }
@@ -314,7 +314,7 @@ async function openApp(k, opts={}){
   if(A.panel){
     const pan=openPanel((MODULES[k]||{}).t||'App', null, k);
     let u=A.url+'#plateforme&embed'+extra;
-    if(A.sso && !LOCAL){
+    if(A.sso && !LOCAL && !isInvite()){
       const r=await API.call('ssoTicket',{app:k});
       if(r.ok) u+='&pt='+r.ticket;
       else if(!A.ssoOpt){ closePanel(); toast(r.msg||'Ouverture impossible'); return; }

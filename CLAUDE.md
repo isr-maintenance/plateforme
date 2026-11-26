@@ -98,6 +98,12 @@ Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec
 - **Colonne « Capsules »** du carnet : `{caps:[de, à], src:'capsules'}`, moyenne des notes formatives des capsules de ces chapitres (pas validée = 0), sur 10, ramenée au total choisi.
 - **Mécanique 4e** : `js/meca4-ent.js` construit les exercices du bilan (`BILEX`) et les met en entraînement, avec des valeurs propres à chaque élève, dans la capsule « Comme au bilan » des chapitres 6, 7 et 9 (`M6z`, `M7z`, `M9z`). Les valeurs du bilan n'y figurent pas.
 
+## Les personnes extérieures (invitations)
+
+- Profs d'autres écoles, maîtres de stage, invités : le coordinateur crée une invitation dans **Accès** (`invitesCard`, actions `inviteSet` / `inviteDel`). La personne entre avec un lien personnel `#invite=<code>` ; le serveur ne garde que la signature du code (`inviteLogin` le change en jeton au nom `invite:<id>`).
+- Rôle `invite` : **consultation seule** (cours, capsules, outils, Bibliothèque élèves), progression propre (`saveMyProg`). Aucune donnée d'élève, de cote ni de stage ; toute autre action est refusée par le serveur (`INVITE_OK`). Désactivée, supprimée ou expirée : accès fermé tout de suite.
+- Côté client : `isInvite()`. Les apps séparées s'ouvrent sans connexion automatique pour un invité.
+
 ## L'historique des versions (Olivier seul)
 
 - Onglet « Historique » (`js/historique.js`) : chaque commit de `main` lu dans l'API publique de GitHub, avec qui (auteur de la pull request, sinon le compte qui a envoyé), quoi (message, fichiers avec un nom parlant dans `histFichier`) et quand. Les pull requests ouvertes sont en tête.

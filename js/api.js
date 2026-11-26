@@ -44,12 +44,20 @@ const API = (() => {
     if (!res.ok && res.code === 'auth') { logout(true); }
     return res;
   }
+  let inviteCode = null;
   function readHash() {
+    const iv = location.hash.match(/[#&]invite=([A-Za-z0-9_-]+)/);
+    if (iv) { inviteCode = iv[1]; history.replaceState(null, '', location.pathname + location.search); return; }
     const m = location.hash.match(/[#&]t=([^&]+)/);
     if (m) { token = decodeURIComponent(m[1]); try { localStorage.setItem(TK, token); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
   }
   function loginGoogle() { location.href = CONFIG.LOGIN_URL + '?ret=' + encodeURIComponent(location.href.split('#')[0]); }
+  /* lien d'invitation d'une personne extérieure : échangé contre un jeton */
+  async function useInvite() { const code = inviteCode; inviteCode = null; if (!code) return null;
+    const r = LOCAL ? localApi().handle({ a: 'inviteLogin', p: { code } }) : await fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ a: 'inviteLogin', p: { code } }) }).then(x => x.json()).catch(() => ({ ok: false, msg: 'Pas de connexion au serveur.' }));
+    if (r.ok) { token = r.t; try { localStorage.setItem(TK, token); } catch (e) {} }
+    return r; }
   function loginLocal(mail) { token = localApi().makeToken(mail.trim().toLowerCase()); try { localStorage.setItem(TK, token); } catch (e) {} }
   function logout(silent) { token = null; try { localStorage.removeItem(TK); } catch (e) {} if (!silent) location.reload(); }
-  return { call, readHash, loginGoogle, loginLocal, logout, hasToken: () => !!token, resetLocal: () => localApi()._reset() };
+  return { call, readHash, useInvite, hasInvite: () => !!inviteCode, loginGoogle, loginLocal, logout, hasToken: () => !!token, resetLocal: () => localApi()._reset() };
 })();

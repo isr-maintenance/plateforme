@@ -62,6 +62,7 @@ function makeApi(store, deps) {
   /* ---------- qui est-ce ? ---------- */
   function identify(mail){
     mail = String(mail || '').trim().toLowerCase();
+    if (/^invite:[a-z0-9]{4,20}$/.test(mail)) return inviteMe(mail.slice(7));
     if (!/^[^@\s]+@[^@\s]+$/.test(mail)) throw err('denied', 'Adresse invalide.');
     if (mail.slice(-(PLAT.DOMAIN.length + 1)) !== '@' + PLAT.DOMAIN) throw err('denied', 'Seules les adresses @' + PLAT.DOMAIN + ' peuvent se connecter.');
     var c = cfg();
@@ -75,6 +76,30 @@ function makeApi(store, deps) {
     }
     throw err('denied', 'Adresse de professeur non enregistrée : le coordinateur doit l’ajouter dans « Accès ».');
   }
+  /* ---------- personnes extérieures à l'école (invitations) ----------
+     Le coordinateur crée une invitation ; la personne reçoit de lui un lien personnel (#invite=code).
+     Le code n'est gardé que signé (on ne peut pas le relire). En entrant par le lien, la personne reçoit un jeton
+     au nom « invite:<id> » ; elle consulte les cours et les outils, sans aucune donnée d'élève ni de cote.
+     Désactiver, supprimer ou laisser expirer l'invitation lui ferme l'accès tout de suite. */
+  var INV_TYPES = ['prof', 'stage', 'invite'];
+  function invites(){ return doc('invites', []); }
+  function inviteMe(id){
+    var v = invites().filter(function(x){ return x.id === id; })[0];
+    if (!v || !v.actif) throw err('denied', 'Cette invitation n’est plus active. Demande un nouveau lien à l’école.');
+    if (v.expire && v.expire < deps.now()) throw err('denied', 'Cette invitation a expiré. Demande un nouveau lien à l’école.');
+    return { mail: 'invite:' + id, role: 'invite', nom: v.nom, org: v.org || '', type: v.type };
+  }
+  function inviteLogin(p){
+    try {
+      var code = String(p.code || ''); need(/^[A-Za-z0-9_-]{16,64}$/.test(code), 'Lien d’invitation incomplet.');
+      var h = deps.hmac('inv.' + code), L = invites(), v = L.filter(function(x){ return x.h === h; })[0];
+      if (!v) throw err('denied', 'Lien d’invitation inconnu ou remplacé. Demande un nouveau lien à l’école.');
+      inviteMe(v.id);                                         // active, pas expirée
+      v.vu = deps.now(); put('invites', L, 'invite:' + v.id);
+      return { ok: true, t: makeToken('invite:' + v.id) };
+    } catch (e) { return { ok: false, code: e.code || 'error', msg: e.message || String(e) }; }
+  }
+  var INVITE_OK = ['boot', 'saveMyProg'];
   function nameOf(mail){
     var parts = mail.split('@')[0].replace(/\.student$/, '').split('.');
     return parts.map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
@@ -135,6 +160,13 @@ function makeApi(store, deps) {
 
   /* ---------- démarrage : tout ce qu'il faut à l'écran ---------- */
   function boot(me){
+    if (me.role === 'invite') {
+      var pd = doc('pdfs', {}), pdfs = {};
+      Object.keys(pd).forEach(function(k){ if (!/prof|cor|eval/i.test(k)) pdfs[k] = pd[k]; });   // seulement les versions élèves
+      var mp0 = doc('profprog:' + me.mail, null);
+      return { me: me, cfg: { open: true }, modes: {}, affect: [], pdfs: pdfs, ouv: {}, stage: { periodes: null, lieux: [] }, bilans: [], fcor: [],
+        myProg: mp0 && mp0.annee === anneeSco(deps.now()) ? mp0.prog : null };
+    }
     var out = { me: me, cfg: { open: cfg().open !== false }, modes: doc('modes', {}), affect: doc('affect', []), pdfs: doc('pdfs', {}), ouv: doc('ouv', {}) };
     out.stage = { periodes: doc('stage:periodes', null), lieux: doc('stage:lieux', []) };
     if (me.role === 'eleve') {
@@ -164,6 +196,7 @@ function makeApi(store, deps) {
     out.stage.journal = listDocs('journal:');
     out.fcor = fcorList(me);
     out.bilans = bilanMeta(); out.bilanouv = doc('bilanouv', {});
+    if (me.coord) out.invites = invites().map(function(x){ var y = {}; Object.keys(x).forEach(function(k){ if (k !== 'h') y[k] = x[k]; }); return y; });
     var mp = doc('profprog:' + me.mail, null);                 // la progression du prof dans les capsules, remise à zéro chaque année scolaire
     out.myProg = mp && mp.annee === anneeSco(deps.now()) ? mp.prog : null;
     return out;
@@ -391,6 +424,21 @@ function makeApi(store, deps) {
       if (p.del) { store.del('bilan:' + d.id); return { ok: true }; }
       put('bilan:' + d.id, d, me.mail); return { ok: true, n: d.ex.length };
     },
+    inviteSet: function(me, p){
+      var x = p.inv || {}, L = invites(), id = str(x.id, 20);
+      var v = L.filter(function(y){ return y.id === id; })[0];
+      if (!v) { need(/^[a-z0-9]{4,20}$/.test(id), 'Identifiant invalide.'); need(x.code, 'Code manquant.'); v = { id: id, cree: deps.now(), par: me.nom, actif: true }; L.push(v); }
+      if ('nom' in x) { v.nom = str(x.nom, 80).trim(); need(v.nom, 'Nom manquant.'); }
+      if ('org' in x) v.org = str(x.org, 120);
+      if ('mail' in x) v.mail = str(x.mail, 120).toLowerCase();
+      if ('type' in x) v.type = INV_TYPES.indexOf(x.type) >= 0 ? x.type : 'invite';
+      if ('expire' in x) v.expire = +x.expire || 0;
+      if ('actif' in x) v.actif = !!x.actif;
+      if (x.code) { need(/^[A-Za-z0-9_-]{16,64}$/.test(String(x.code)), 'Code invalide.'); v.h = deps.hmac('inv.' + x.code); v.lien = deps.now(); }
+      need(L.length <= 200, 'Trop d’invitations.');
+      put('invites', L, me.mail); return { ok: true };
+    },
+    inviteDel: function(me, p){ put('invites', invites().filter(function(x){ return x.id !== p.id; }), me.mail); store.del('profprog:invite:' + str(p.id, 20)); return { ok: true }; },
     setAccess: function(me, p){ var c = cfg(); if ('open' in p) c.open = !!p.open; if (Array.isArray(p.blocked)) c.blocked = p.blocked.map(function(x){ return String(x).toLowerCase(); }); put('cfg', c, me.mail); return { ok: true }; }
   };
 
@@ -398,7 +446,9 @@ function makeApi(store, deps) {
   function handle(req){
     try {
       if (req && req.a === 'ssoCheck') return ssoCheck(req.p || {});     // appelé par le script d'une autre app, sans jeton
+      if (req && req.a === 'inviteLogin') return inviteLogin(req.p || {}); // lien d'invitation d'une personne extérieure, sans jeton
       var mail = readToken(req && req.t), me = identify(mail), a = req.a, p = req.p || {};
+      if (me.role === 'invite') { need(INVITE_OK.indexOf(a) >= 0, 'Action non autorisée pour une personne invitée.'); if (a === 'boot') return { ok: true, data: boot(me) }; return PROF[a](me, p); }
       if (a === 'ssoTicket') { need(SSO_APPS.indexOf(p.app) >= 0, 'Application inconnue.'); return { ok: true, ticket: makeTicket(me.mail, p.app) }; }
       if (a === 'boot') return { ok: true, data: boot(me) };
       if (a === 'checkMail') { try { var who = identify(p.mail); return { ok: true, res: { ok: true, role: who.role, nom: who.nom } }; } catch (e) { return { ok: true, res: { ok: false, msg: e.message } }; } }

@@ -61,7 +61,7 @@ function classeDuCours(course){
 }
 const ouvKey = (cl, course='4-elec') => (cl||classeDuCours(course))+'|'+course;
 function chapsOuverts(cl, course='4-elec'){ const o=(S.ouv||{})[ouvKey(cl,course)]; return Array.isArray(o)?o:(OUV_DEF[course]||[]); }
-function chapOpen(num){ return S.role==='prof' || chapsOuverts(null, courseOfChap(num)).includes(num); }
+function chapOpen(num){ return S.role==='prof' || isInvite() || chapsOuverts(null, courseOfChap(num)).includes(num); }
 const chapNums = (course='4-elec') => Object.keys(CHAPTERS).filter(k=>CHAPTERS[k].course===course).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
 /* cours dont les chapitres sont dans la plateforme */
 const courseHasChaps = id => Object.values(CHAPTERS).some(ch=>ch.course===id);

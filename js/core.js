@@ -18,6 +18,7 @@ const S = {
 };
 let ME='';
 const isProf = () => S.me && S.me.role==='prof';
+const isInvite = () => !!(S.me && S.me.role==='invite');   // personne extérieure : consultation seule
 const isCoord = () => S.me && S.me.coord;
 
 /* ---------- préférences d'affichage (propres à ce navigateur) ---------- */
@@ -106,16 +107,16 @@ async function pushProg(){
   clearTimeout(saveTimer); saveTimer=null;
   if(resyncing){ PENDING++; setSync('cours'); try{ await resyncing; } finally { PENDING--; } }   // d'abord la progression des autres onglets
   PENDING++; setSync('cours');
-  const taille=JSON.stringify(isProf()?(previewProg||S.prog):S.prog).length;   // le serveur refuse au-delà de 45 000 caractères
+  const taille=JSON.stringify(isProf()||isInvite()?(previewProg||S.prog):S.prog).length;   // le serveur refuse au-delà de 45 000 caractères
   if(taille>40000 && !pushProg.averti){ pushProg.averti=true; toast('Ta progression est presque pleine : préviens ton prof.'); }
   let r;
-  if(isProf()) r = await API.call('saveMyProg', { prog: previewProg||S.prog });
+  if(isProf()||isInvite()) r = await API.call('saveMyProg', { prog: previewProg||S.prog });
   else { r = await API.call('saveProg', { prog: S.prog }); if(r.ok){ S.prog.test.open = r.open || S.prog.test.open; S.prog.banc = r.banc; S.prog.atel = r.atel || {}; } }
   PENDING--;
   if(!r.ok) PEND_ERR = r.msg || 'Non enregistré';
   if(saveTimer || PENDING > 0) setSync('cours'); else setSync(r.ok && !PEND_ERR ? 'ok' : 'err', PEND_ERR);
 }
-window.addEventListener('beforeunload', ()=>{ if(saveTimer && !LOCAL){ navigator.sendBeacon && navigator.sendBeacon(CONFIG.API_URL, JSON.stringify({ t: (()=>{try{return localStorage.getItem('plateforme-jeton')}catch(e){return null}})(), a:isProf()?'saveMyProg':'saveProg', p:{ prog:isProf()?(previewProg||S.prog):S.prog } })); } });
+window.addEventListener('beforeunload', ()=>{ if(saveTimer && !LOCAL){ navigator.sendBeacon && navigator.sendBeacon(CONFIG.API_URL, JSON.stringify({ t: (()=>{try{return localStorage.getItem('plateforme-jeton')}catch(e){return null}})(), a:isProf()||isInvite()?'saveMyProg':'saveProg', p:{ prog:isProf()||isInvite()?(previewProg||S.prog):S.prog } })); } });
 let SYNC_ST = { st:'ok', msg:'' };
 function syncHTML(){ const {st,msg}=SYNC_ST;
   const txt = st==='ok' ? '✓ enregistré' : st==='cours' ? `⏳ enregistrement…${PENDING>1?' ('+PENDING+')':''}` : '⚠ non enregistré';
@@ -140,7 +141,11 @@ async function boot(){
   AFFECT=d.affect||[]; S.bilans=d.bilans||[]; S.bilanouv=d.bilanouv||{}; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[]; S.ouv=d.ouv||{};
   S.stage.periodes = d.stage.periodes || JSON.parse(JSON.stringify(STAGE_PER_DEF));
   S.stage.lieux = d.stage.lieux || [];
-  if(S.me.role==='eleve'){
+  if(isInvite()){
+    S.role='eleve'; S.eleveClass = S.eleveClass || '4eqmm';
+    previewProg = normProg(d.myProg); S.prog = previewProg;
+    if(!['presentation','cours','biblio','outils'].includes(S.tab)) S.tab='presentation';
+  } else if(S.me.role==='eleve'){
     S.role='eleve'; S.eleveClass=S.me.classe; S.prog=normProg(d.prog);
     S.stage.mine=d.stage.mine||{}; S.stage.tel={ [S.me.mail]: d.stage.tel||'' };
     S.stage.journal={}; Object.keys(d.stage.journal||{}).forEach(per=>S.stage.journal[ck(per,S.me.mail)]=d.stage.journal[per]);
@@ -150,7 +155,7 @@ async function boot(){
     S.access={ profs:d.profs||[], open:d.access.open, blocked:d.access.blocked||[] };
     S.carnet.periodes = d.periodes || JSON.parse(JSON.stringify(PERIODES_DEF));
     S.carnet.evals = d.evals||{}; S.notes=d.notes||{}; S.carnet.som=d.som||{}; S.signal=d.signal||[];
-    S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{};
+    S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{}; S.invites=d.invites||[];
     S.eleveClass = S.eleveClass || '4eqmm';
     previewProg = normProg(d.myProg); S.prog = previewProg;   // une seule progression pour le prof, en vue prof et en aperçu élève
     if(S.tab==='cours') S.tab='dash';
@@ -255,13 +260,14 @@ function openCap(cap){ const och=chapOf(cap); if(S.role==='eleve' && och && !cha
 function render(){
   if(!S.booted){ renderLogin(); return; }
   if(S.me.role==='eleve' && !S.me.classe){ renderChooseClass(); return; }
-  const tabs = S.role==='eleve'
+  const tabs = isInvite() ? [['presentation','Accueil'],['cours','Les cours'],['biblio','Bibliothèque'],['outils','Outils']]
+    : S.role==='eleve'
     ? [['presentation','Accueil'],['cours','Mes cours'],['monstage','Mon stage'],['biblio','Bibliothèque'],['outils','Outils']]
     : [['presentation','Accueil'],['agenda','Agenda'],['dash','Suivi'],['carnet','Cotes'],['stages','Stages'],['contenus','Contenus'],['biblio','Bibliothèque'],['outils','Outils']].concat(isCoord()?[['acces','Accès'],['admin','Admin']]:[]).concat(typeof histOk==='function'&&histOk()?[['histo','Historique']]:[]);
   if(S.view.page==='journal') S.tab = S.role==='prof'?'stages':'monstage';
   if(!tabs.some(t=>t[0]===S.tab)) S.tab='presentation';
   const ini = S.me.nom.split(/[\s.]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const sub = S.me.role==='eleve' ? cls(S.me.classe).nom+(S.me.ct?' · '+cls(S.me.ct).nom.replace('3QEM ',''):'') : (isCoord()?'coordinateur':'professeur');
+  const sub = isInvite() ? (S.me.org||'invité') : S.me.role==='eleve' ? cls(S.me.classe).nom+(S.me.ct?' · '+cls(S.me.ct).nom.replace('3QEM ',''):'') : (isCoord()?'coordinateur':'professeur');
   $('#top').innerHTML = `<div class="topbar-in">
     <div class="brand"><div class="brand-mark"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#fff"/></svg></div><div>Plateforme technique<small>${esc(CONFIG.ECOLE)}</small></div></div>
     ${LOCAL?'<span class="demo-badge" title="Les données restent dans ce navigateur">test local</span>':''}
@@ -277,7 +283,7 @@ function render(){
     S.role=b.dataset.role;
     S.prog=previewProg||S.prog; if(S.role==='eleve'){ S.tab='cours'; } else { S.tab='dash'; }
     S.view={page:'home'}; render(); });
-  $('#top').querySelector('[data-menu]').onclick=()=>{ const md=modal('Mon compte', `<p><b>${esc(S.me.nom)}</b><br><span class="small muted">${esc(S.me.mail)}</span></p>
+  $('#top').querySelector('[data-menu]').onclick=()=>{ const md=modal('Mon compte', `<p><b>${esc(S.me.nom)}</b><br><span class="small muted">${isInvite()?'Accès invité · consultation des cours et des outils':esc(S.me.mail)}</span></p>
       <div class="row wrap"><button class="btn" data-refresh>↻ Recharger les données</button><button class="btn" data-logout>Se déconnecter</button>${LOCAL?'<button class="btn ghost" data-reset>Effacer les données de test</button>':''}</div>`);
     md.querySelector('[data-logout]').onclick=()=>API.logout();
     md.querySelector('[data-refresh]').onclick=()=>{ closeModal(); refresh(); };
@@ -353,6 +359,8 @@ function init(){
     if(k==='tp'){ S.tab='cours'; S.view={page:'tp',course:'4eqem-tpe'}; render(); window.scrollTo(0,0); }
     if(k==='dash'||k==='carnet'||k==='stages'){ S.role='prof'; go(k); }
   });
-  if(API.hasToken()) { $('#main').innerHTML='<p class="muted" style="text-align:center;margin-top:20vh">Chargement…</p>'; boot(); } else render();
+  if(API.hasInvite()) { $('#main').innerHTML='<p class="muted" style="text-align:center;margin-top:20vh">Ouverture de ton invitation…</p>';
+    API.useInvite().then(r=>{ if(r && r.ok){ S.tab='presentation'; boot(); } else { S.error=(r&&r.msg)||'Invitation refusée'; render(); } }); }
+  else if(API.hasToken()) { $('#main').innerHTML='<p class="muted" style="text-align:center;margin-top:20vh">Chargement…</p>'; boot(); } else render();
   if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 }

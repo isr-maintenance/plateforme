@@ -282,3 +282,23 @@ console.log(`✓ ${n} vérifications réussies`);
   H(co, 'bilanNoter', { id: 'f4e-2-1', mail: e1, pts: { 0: 3, 1: 3 }, pub: true });
   ok(H(e1, 'bilan', { id: 'f4e-2-1' }).def.ex[0].cor === 'Le corrigé', 'après publication : le corrigé est visible');
   console.log(`✓ ${n} vérifications réussies (avec formatives en ligne)`); }
+
+// Personnes extérieures : lien d'invitation, consultation seule, accès fermé dès la désactivation
+{ const s11 = memStore(), a11 = ctx.makeApi(s11, deps); a11.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a11.handle({ t: a11.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', e1 = 'zoe.c.student@elmarche.be';
+  H(e1, 'setClasse', { classe: '4eqmm' });
+  const code = 'Abcdefghijklmnop1234_-xyz';
+  ok(H(e1, 'inviteSet', { inv: { id: 'x1y2', nom: 'J. Dupont', code } }).ok === false, 'un élève ne crée pas d’invitation');
+  ok(H(co, 'inviteSet', { inv: { id: 'x1y2', nom: 'J. Dupont', org: 'Entreprise X', type: 'stage', code } }).ok, 'le coordinateur crée l’invitation');
+  ok(!('h' in H(co, 'boot').data.invites[0]) && H(co, 'boot').data.invites[0].nom === 'J. Dupont', 'la liste du coordinateur ne contient pas le code');
+  ok(a11.handle({ a: 'inviteLogin', p: { code: 'mauvaiscodemauvaiscode' } }).ok === false, 'mauvais code refusé');
+  let r = a11.handle({ a: 'inviteLogin', p: { code } }); ok(r.ok && r.t, 'le lien donne un jeton');
+  const I = (a, p) => a11.handle({ t: r.t, a, p });
+  let b = I('boot'); ok(b.ok && b.data.me.role === 'invite' && !b.data.eleves && !b.data.progs && !b.data.notes && b.data.stage.lieux.length === 0, 'l’invité ne reçoit aucune donnée d’élève, de cote ni de stage');
+  ok(I('saveMyProg', { prog: { visited: ['a1'] } }).ok && I('boot').data.myProg.visited[0] === 'a1', 'l’invité garde sa propre progression');
+  ok(I('checkMail', { mail: co }).ok === false && I('bilanReps', { course: '4-elec' }).ok === false && I('ssoTicket', { app: 'banc' }).ok === false && I('saveProg', { prog: {} }).ok === false, 'toute autre action est refusée');
+  H(co, 'inviteSet', { inv: { id: 'x1y2', actif: false } }); ok(I('boot').ok === false && a11.handle({ a: 'inviteLogin', p: { code } }).ok === false, 'désactivée : accès fermé tout de suite');
+  H(co, 'inviteSet', { inv: { id: 'x1y2', actif: true, expire: clock - 1000 } }); ok(I('boot').ok === false, 'expirée : accès fermé');
+  H(co, 'inviteSet', { inv: { id: 'x1y2', expire: 0, code: 'Nouveau_code_1234567890' } }); ok(a11.handle({ a: 'inviteLogin', p: { code } }).ok === false && a11.handle({ a: 'inviteLogin', p: { code: 'Nouveau_code_1234567890' } }).ok, 'nouveau lien : l’ancien ne marche plus');
+  H(co, 'inviteDel', { id: 'x1y2' }); ok(I('boot').ok === false && H(co, 'boot').data.invites.length === 0, 'invitation supprimée');
+  console.log(`✓ ${n} vérifications réussies (avec invitations)`); }

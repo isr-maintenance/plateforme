@@ -248,6 +248,7 @@ function pageAcces(){
       <div class="row" style="align-items:flex-start"><span class="chip elec">Élève</span><span>Toute adresse <b>prenom.nom.student@${D}</b>. À la première connexion, l'élève choisit sa classe ; un prof peut la changer ci-dessous.</span></div>
       <div class="row" style="align-items:flex-start"><span class="chip meca">Prof</span><span>Une adresse <b>prenom.nom@${D}</b> enregistrée ci-dessous.</span></div>
       <div class="row" style="align-items:flex-start"><span class="chip amber">Coordinateur</span><span>Un prof qui gère en plus les accès, les classes et les attributions.</span></div>
+      <div class="row" style="align-items:flex-start"><span class="chip">Invité</span><span>Une personne extérieure à l’école, avec un lien personnel créé plus bas : consultation des cours et des outils seulement.</span></div>
       <div class="row" style="align-items:flex-start"><span class="chip bad">Refusé</span><span>Toute autre adresse, un prof non enregistré ou une adresse bloquée.</span></div></div>
       <label class="toggle ${S.access.open?'on':''}" data-aopen style="margin-top:14px;cursor:pointer"><span class="sw"></span>Ouvert à tous les élèves @${D}</label>
       <p class="tiny muted" style="margin-top:6px">${S.access.open?'Tout élève de l’école peut se connecter et choisir sa classe.':'Seuls les élèves déjà inscrits peuvent se connecter.'}</p></div>
@@ -262,6 +263,7 @@ function pageAcces(){
       <td class="small muted">${AFFECT.filter(x=>x.profs.includes(p.nom)).map(x=>`${cls(x.cl).nom} ${(COURS.find(c=>c.id===x.c)||{titre:''}).titre}`).join(' · ')||'—'}</td>
       <td>${p.mail===S.me.mail?'':`<button class="btn sm ghost" data-pdel="${i}">Retirer</button>`}</td></tr>`).join('')}
     </table></div></div>
+  ${invitesCard()}
   <div class="card"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Élèves (${all.length})</h3><p class="small muted" style="margin:4px 0 0">Ils apparaissent à leur première connexion. Tu peux changer leur classe ou bloquer une adresse. En 3QEM, la classe est le groupe de TP ; le groupe de CT se règle dans sa colonne.</p></div>
     ${all.length?`<div class="scroll-x"><table class="t"><tr><th>Élève</th><th>Classe</th><th>Groupe de CT</th><th>Dernière connexion</th><th>Statut</th><th></th></tr>
     ${all.map(e=>{ const b=S.access.blocked.includes(e.mail);
@@ -271,8 +273,59 @@ function pageAcces(){
       <td class="small muted">${fmtAgo(e.last)}</td><td>${b?'<span class="chip bad">Bloqué</span>':'<span class="chip ok">Actif</span>'}</td><td><button class="btn sm ghost" data-block="${esc(e.mail)}">${b?'Débloquer':'Bloquer'}</button></td></tr>`; }).join('')}
     </table></div>`:'<div class="pad"><p class="small muted" style="margin:0">Aucun élève connecté pour l’instant.</p></div>'}</div>`;
 }
+/* ---------- personnes extérieures à l'école : invitations (consultation seule) ---------- */
+const INV_TYPES = { prof:'Prof d’une autre école', stage:'Maître de stage', invite:'Invité (formateur, inspecteur…)' };
+function invFinAnnee(){ const d=new Date(), y=d.getMonth()>=7?d.getFullYear()+1:d.getFullYear(); return `${y}-06-30`; }
+function invAlea(n, alpha){ const a=new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b=>alpha[b%alpha.length]).join(''); }
+const invCode = () => invAlea(24, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_');
+const invLien = code => location.origin + location.pathname.replace(/index\.html$/,'') + '#invite=' + code;
+function invitesCard(){
+  const L=(S.invites||[]).slice().sort((a,b)=>(b.cree||0)-(a.cree||0)), now=Date.now();
+  const etat=v=> !v.actif ? '<span class="chip bad">Désactivée</span>' : v.expire && v.expire<now ? '<span class="chip warn">Expirée</span>' : '<span class="chip ok">Active</span>';
+  return `<div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>Personnes extérieures à l’école</h3>
+      <p class="small muted" style="margin:4px 0 0">Profs d’autres écoles, maîtres de stage, invités : ils <b>consultent</b> les cours, les capsules et les outils, sans aucune donnée d’élève ni cote. Chacun entre avec un <b>lien personnel</b>, que tu lui envoies toi-même. Désactive-le quand tu veux : l’accès se ferme tout de suite.</p>
+      <div class="row wrap" style="gap:6px;margin-top:10px"><input type="text" data-inom placeholder="Nom (ex. J. Dupont)" style="min-width:160px"><input type="text" data-iorg placeholder="École ou entreprise" style="min-width:170px">
+        <select data-itype>${Object.entries(INV_TYPES).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
+        <input type="email" data-imail placeholder="Adresse (facultatif, pour mémoire)" style="min-width:200px">
+        <label class="small row" style="gap:6px">jusqu’au <input type="date" data-iexp value="${invFinAnnee()}" style="padding:5px 6px"></label>
+        <button class="btn primary" data-iadd>Créer l’invitation</button></div></div>
+    ${L.length?`<div class="scroll-x"><table class="t"><tr><th>Personne</th><th>Type</th><th>Accès jusqu’au</th><th>Dernière visite</th><th>Statut</th><th></th></tr>
+    ${L.map(v=>`<tr><td><b>${esc(v.nom)}</b>${v.org?`<div class="tiny muted">${esc(v.org)}</div>`:''}${v.mail?`<div class="tiny muted mono">${esc(v.mail)}</div>`:''}</td>
+      <td class="small">${INV_TYPES[v.type]||'Invité'}</td>
+      <td><input type="date" data-iexpv="${esc(v.id)}" value="${v.expire?new Date(v.expire).toISOString().slice(0,10):''}" style="padding:4px 6px" title="Vide : sans limite"></td>
+      <td class="small muted">${v.vu?fmtAgo(v.vu):'pas encore venu'}</td><td>${etat(v)}</td>
+      <td><div class="row wrap" style="gap:4px;justify-content:flex-end"><button class="btn sm" data-ilien="${esc(v.id)}" title="Crée un nouveau lien ; l’ancien ne marche plus">Nouveau lien</button>
+        <button class="btn sm ghost" data-iact="${esc(v.id)}">${v.actif?'Désactiver':'Réactiver'}</button><button class="btn sm ghost" data-idel="${esc(v.id)}">Supprimer</button></div></td></tr>`).join('')}
+    </table></div>`:'<div class="pad"><p class="small muted" style="margin:0">Aucune invitation pour l’instant.</p></div>'}</div>`;
+}
+function invMontrerLien(v, code){
+  const lien=invLien(code);
+  const msg=`Bonjour,\n\nVoici votre accès à la plateforme des cours techniques de la section maintenance industrielle de l’Institut Saint-Roch (Marche-en-Famenne) :\n${lien}\n\nVous pourrez y consulter les cours, les capsules et les outils. Ce lien est personnel : merci de ne pas le transférer.${v.expire?`\nIl est valable jusqu’au ${new Date(v.expire).toLocaleDateString('fr-BE')}.`:''}\n\nBien à vous,\n${S.me.nom}`;
+  const md=modal('Lien personnel de '+esc(v.nom), `<p class="small" style="margin-top:0">Envoie ce lien à <b>${esc(v.nom)}</b> (par mail, par exemple). <b>Copie-le maintenant</b> : pour des raisons de sécurité, la plateforme ne le garde pas. Si tu le perds, crée un nouveau lien.</p>
+    <div class="row" style="gap:6px"><input type="text" readonly value="${esc(lien)}" style="flex:1;font-size:13px" data-ilienv><button class="btn primary" data-icopy>Copier le lien</button></div>
+    <p class="small" style="margin:14px 0 4px"><b>Message prêt à envoyer</b> (à adapter)</p><textarea readonly rows="9" style="width:100%;font-size:13px" data-imsgv>${esc(msg)}</textarea>
+    <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" data-imcopy>Copier le message</button></div>`);
+  const cp=(t,b)=>{ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copié')).catch(()=>{ const i=md.querySelector(b); i.select(); document.execCommand('copy'); toast('Copié'); }); };
+  md.querySelector('[data-icopy]').onclick=()=>cp(lien,'[data-ilienv]'); md.querySelector('[data-imcopy]').onclick=()=>cp(msg,'[data-imsgv]');
+}
+function bindInvites(m, rer){
+  const add=m.querySelector('[data-iadd]'); if(!add) return;
+  add.onclick=async()=>{ const nom=m.querySelector('[data-inom]').value.trim(); if(!nom){ toast('Indique le nom de la personne'); return; }
+    const e=m.querySelector('[data-iexp]').value, v={ id:invAlea(8,'abcdefghijklmnopqrstuvwxyz0123456789'), nom, org:m.querySelector('[data-iorg]').value.trim(), type:m.querySelector('[data-itype]').value, mail:m.querySelector('[data-imail]').value.trim(), expire:e?new Date(e+'T23:59:59').getTime():0 };
+    const code=invCode(); add.disabled=true;
+    const r=await act('inviteSet',{inv:Object.assign({code},v)}, 'Invitation créée'); add.disabled=false; if(!r) return;
+    S.invites=(S.invites||[]).concat([Object.assign({cree:Date.now(), par:S.me.nom, actif:true, lien:Date.now()},v)]); rer(); invMontrerLien(v, code); };
+  const find=id=>(S.invites||[]).find(x=>x.id===id);
+  m.querySelectorAll('[data-ilien]').forEach(b=>b.onclick=async()=>{ const v=find(b.dataset.ilien); if(!confirm(`Créer un nouveau lien pour ${v.nom} ? L’ancien lien ne marchera plus.`)) return;
+    const code=invCode(); const r=await act('inviteSet',{inv:{id:v.id, code}}); if(r){ v.lien=Date.now(); invMontrerLien(v, code); } });
+  m.querySelectorAll('[data-iact]').forEach(b=>b.onclick=async()=>{ const v=find(b.dataset.iact); v.actif=!v.actif; rer(); const r=await act('inviteSet',{inv:{id:v.id, actif:v.actif}}, v.actif?'Invitation réactivée':'Invitation désactivée : l’accès est fermé'); if(!r){ v.actif=!v.actif; rer(); } });
+  m.querySelectorAll('[data-iexpv]').forEach(i=>i.onchange=async()=>{ const v=find(i.dataset.iexpv); v.expire=i.value?new Date(i.value+'T23:59:59').getTime():0; rer(); await act('inviteSet',{inv:{id:v.id, expire:v.expire}}, 'Date enregistrée'); });
+  m.querySelectorAll('[data-idel]').forEach(b=>b.onclick=async()=>{ const v=find(b.dataset.idel); if(!confirm(`Supprimer l’invitation de ${v.nom} ? Son accès sera fermé.`)) return;
+    S.invites=S.invites.filter(x=>x!==v); rer(); await act('inviteDel',{id:v.id}, 'Invitation supprimée'); });
+}
 function bindAcces(m){
   const rer=()=>{ const y=window.scrollY; render(); window.scrollTo(0,y); };
+  bindInvites(m, rer);
   const go=m.querySelector('[data-atestgo]'), inp=m.querySelector('[data-atest]');
   const test=async()=>{ const r=await act('checkMail',{mail:inp.value}); if(!r) return; const x=r.res; m.querySelector('#atestres').innerHTML=`<div class="note ${x.ok?'ok':'bad'}"><b>${x.ok?'Accès accordé':'Accès refusé'}</b>${x.ok?(x.role==='prof'?'Professeur : '+esc(x.nom):'Élève : '+esc(x.nom)):esc(x.msg)}</div>`; };
   go.onclick=test; inp.onkeydown=e=>{ if(e.key==='Enter') test(); };
