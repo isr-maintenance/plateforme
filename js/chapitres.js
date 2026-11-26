@@ -28,10 +28,26 @@ function chapOf(capId){
   return Object.values(CHAPTERS).find(ch=>ch.caps.some(c=>c.id===capId))||null;
 }
 function capById(id){ for(const ch of Object.values(CHAPTERS)){ const c=ch.caps.find(x=>x.id===id); if(c) return c; } return null; }
+/* note formative d'une capsule validée, sur 10 : chaque question et chaque exercice réussi du premier coup = 1,
+   au 2e ou 3e essai = ½, plus tard = ¼ (les exercices sans essai enregistré comptent comme réussis du premier coup) */
+const essaiPts = n => n<=0 ? 1 : n<=2 ? 0.5 : 0.25;
+function capDetail(cap){
+  const p=P(), tr=p.tr||{}, q=(cap.quiz||[]).map(id=>{ const a=p.quiz[id]||{}; return { id, ok:!!a.ok, essais:a.ok?(a.first?0:Math.max(1,(a.tries||2)-1)):null }; });
+  const ex=(cap.ex&&cap.ex.keys?cap.ex.keys:[]).map(k=>({ k, ok:!!p.ex[k], essais:p.ex[k]?(tr[k]||0):(tr[k]||null) }));
+  return { q, ex };
+}
+function capNote(cap){
+  if(!capDone(cap)) return null;
+  const d=capDetail(cap), pts=d.q.concat(d.ex).map(x=>essaiPts(x.essais||0));
+  return pts.length ? Math.round(pts.reduce((a,b)=>a+b,0)/pts.length*20)/2 : null;
+}
+function chapNote(num){ const ch=CHAPTERS[num]; if(!ch) return null; const n=ch.caps.map(capNote).filter(x=>x!=null); return n.length ? Math.round(n.reduce((a,b)=>a+b,0)/n.length*2)/2 : null; }
 function chapCapsDone(num){ const ch=CHAPTERS[num]; return ch ? ch.caps.filter(capDone).length : 0; }
 function chapResume(num){ const ch=CHAPTERS[num]; const c=ch.caps.find(x=>!capDone(x)); return c?c.id:(ch.legacy?'test':'syn:'+num); }
 /* point « à l'atelier » : coché par le prof (stocké côté serveur, l'élève ne peut pas le changer) */
 const atelOk = x => !!(x.atel && P().atel && P().atel[x.atel]);
+/* un essai raté sur un exercice : sert à la note formative de la capsule (vue prof) */
+function exRate(k){ const p=P(); if(p.ex[k]) return; if(!p.tr||typeof p.tr!=='object') p.tr={}; p.tr[k]=(p.tr[k]||0)+1; save(); }
 function exSet(k){ const p=P(); if(!p.ex[k]){ p.ex[k]=true; save(); } updateTocChecks(); }
 function DR(){ const p=P(); if(!p.dr||typeof p.dr!=='object') p.dr={}; return p.dr; }
 
@@ -94,7 +110,7 @@ function mountOrderW(box, key, cfg){
     const ck=box.querySelector('[data-ock]'); ck.onclick=()=>{
       const bad=st.slots.map((v,i)=>v===i?null:i+1).filter(x=>x!=null);
       if(!bad.length){ exSet(key); }
-      else st.fb=`<span style="color:var(--bad)">${bad.length} position${bad.length>1?'s':''} à revoir (n° ${bad.join(', ')}). ${cfg.hint||''}</span>`;
+      else exRate(key), st.fb=`<span style="color:var(--bad)">${bad.length} position${bad.length>1?'s':''} à revoir (n° ${bad.join(', ')}). ${cfg.hint||''}</span>`;
       draw(); };
   };
   draw();
@@ -116,7 +132,7 @@ function mountSortW(box, key, cfg){
     box.querySelector('[data-sck]').onclick=()=>{
       const bad=cfg.items.filter(([,g],i)=>st.sel[i]!==g).length;
       if(!bad){ exSet(key); draw(); return; }
-      st.checked=true; draw(); box.querySelector('[data-sfb]').innerHTML=`<span style="color:var(--bad)">${bad} réponse${bad>1?'s':''} à revoir (en rouge). ${cfg.hint||''}</span>`; };
+      exRate(key); st.checked=true; draw(); box.querySelector('[data-sfb]').innerHTML=`<span style="color:var(--bad)">${bad} réponse${bad>1?'s':''} à revoir (en rouge). ${cfg.hint||''}</span>`; };
   };
   draw();
 }
@@ -142,7 +158,7 @@ function mountDrillW(box, key, cfg){
     box.querySelector('[data-dck]').onclick=()=>{
       const n=cfg.rows.filter(okRow).length; save();
       if(n===cfg.rows.length){ exSet(key); draw(); return; }
-      st.checked=true; draw(); box.querySelector('[data-dfb]').innerHTML=`<b>${n}/${cfg.rows.length}</b> juste${n>1?'s':''}. <span style="color:var(--bad)">Corrige les lignes en rouge.</span> ${cfg.hint||''}`; };
+      exRate(key); st.checked=true; draw(); box.querySelector('[data-dfb]').innerHTML=`<b>${n}/${cfg.rows.length}</b> juste${n>1?'s':''}. <span style="color:var(--bad)">Corrige les lignes en rouge.</span> ${cfg.hint||''}`; };
   };
   draw();
 }

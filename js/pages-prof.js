@@ -112,7 +112,7 @@ function pageDash(){
     ${estMien?'':`<div class="note warn" style="margin:0 0 16px"><b>Consultation : ce n’est pas ton cours${profsOf(cl,co).length?` (${esc(profsOf(cl,co).join(', '))})`:''}.</b>Comme coordinateur, tu peux aussi ouvrir des chapitres ou cocher : fais-le seulement en accord avec le collègue.</div>`}${body}`;
 }
 function rowOf(mail){ const pr=progOf(mail); return withProg(pr, ()=>({ mail, caps:capsDoneCount(), test:liveTest(), min:Math.round((pr.sec||0)/60), fv:FEUVERT.map(x=>feuVert(x.k)?1:0) })); }
-function chapRow(mail, co='4-elec'){ const pr=progOf(mail); return withProg(pr, ()=>{ const o={}; chapNums(co).forEach(k=>o[k]=chapCapsDone(k)); return { chaps:o, test:co==='4-elec'?liveTest():null, min:Math.round((pr.sec||0)/60) }; }); }
+function chapRow(mail, co='4-elec'){ const pr=progOf(mail); return withProg(pr, ()=>{ const o={}, nt={}; chapNums(co).forEach(k=>{ o[k]=chapCapsDone(k); nt[k]=chapNote(k); }); return { chaps:o, notes:nt, test:co==='4-elec'?liveTest():null, min:Math.round((pr.sec||0)/60) }; }); }
 function dashChap(cl, studs, co='4-elec'){
   const e4=co==='4-elec', plan=COURSE_PLANS[co]||{court:'Électricité 4e'};
   const ON=chapsOuverts(cl,co), NUMS=chapNums(co), OPEN=NUMS.filter(k=>ON.includes(k));
@@ -125,7 +125,7 @@ function dashChap(cl, studs, co='4-elec'){
   const errs=Object.keys(Q).filter(id=>{ const c=capById(Q[id].r); return c && ON.includes(c.chap); }).map(id=>{ const ans=studs.map(s=>(progOf(s.mail).quiz||{})[id]).filter(Boolean); return [id, ans.length? Math.round(ans.filter(a=>!a.first).length/ans.length*100):null, ans.length]; })
     .filter(x=>x[1]!=null && x[2]>=1).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const toGrade=e4?studs.filter(s=>{ const t=progOf(s.mail).test; return t.submitted && TEST.some(q=>q.type==='open' && (t.open||{})[q.id]==null); }):[];
-  const cell=(d,n)=> !d?`<span class="cell none" style="min-width:0">·</span>`:d>=n?`<span class="cell ok" style="min-width:0">✓</span>`:`<span class="cell run" style="min-width:0">${d}/${n}</span>`;
+  const cell=(d,n,nt)=> !d?`<span class="cell none" style="min-width:0">·</span>`:d>=n?`<span class="cell ok" style="min-width:0" title="Note formative moyenne des capsules">✓${nt!=null?` ${fr(nt,1)}`:''}</span>`:`<span class="cell run" style="min-width:0" title="${nt!=null?'Note des capsules validées : '+fr(nt,1)+' / 10':''}">${d}/${n}</span>`;
   return `${typeof bilanDash==='function'?bilanDash(cl, co, studs):''}<div class="card pad" style="margin-bottom:16px"><h3 style="margin:0">Chapitres ouverts pour ${cls(cl).nom}</h3>
     <p class="small muted" style="margin:4px 0 10px">${e4?'Ouvre chaque chapitre au moment du TP correspondant':'Ouvre chaque chapitre quand vous y arrivez en classe'} : tes élèves ne voient pas les chapitres fermés. Clique pour ouvrir ou fermer.</p>
     <div class="chipset">${NUMS.map(k=>`<button class="chtog ${ON.includes(k)?'on':''}" data-ouv="${k}" data-ouvco="${co}" title="${esc(CHAPTERS[k].titre)}"><b>${chapLbl(k)}</b><span>${ON.includes(k)?'ouvert':'fermé'}</span></button>`).join('')}</div></div>
@@ -136,9 +136,9 @@ function dashChap(cl, studs, co='4-elec'){
     <div class="card kpi"><div class="v" style="color:var(--warn)">${toGrade.length}</div><div class="l">évaluation(s) à corriger</div></div>`
     :`<div class="card kpi"><div class="v">${rows.reduce((a,r)=>a+exDoneOf(r.mail,co),0)}</div><div class="l">exercices réussis par la classe</div></div>
     <div class="card kpi"><div class="v">${OPEN.length}/${NUMS.length}</div><div class="l">chapitres ouverts</div></div>`}</div>
-  <div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>${esc(plan.court)} — capsules validées par chapitre</h3>${e4?'':'<p class="small muted" style="margin:4px 0 0">Clique sur un élève pour voir ses tableaux d’exercices (données, inconnue, formule, solution).</p>'}</div>
+  <div class="card" style="margin-bottom:16px"><div class="pad" style="border-bottom:1px solid var(--line)"><h3>${esc(plan.court)} — capsules validées par chapitre</h3><p class="small muted" style="margin:4px 0 0">Clique sur un élève pour voir son parcours capsule par capsule, avec sa note formative sur 10. Un chapitre terminé affiche sa note moyenne à côté du ✓.</p></div>
   <div class="scroll-x"><table class="t"><tr><th>Élève</th>${OPEN.map(k=>`<th title="${esc(CHAPTERS[k].titre)}">${chapLbl(k)}</th>`).join('')}${e4?'<th>Formative 2.3</th>':''}<th>Temps</th><th>Dernière connexion</th></tr>
-    ${rows.map(r=>`<tr><td>${e4?esc(r.nom):`<button class="linkbtn" data-voirex="${esc(r.mail)}|${co}" title="Voir ses tableaux d’exercices">${esc(r.nom)}</button>`}</td>${OPEN.map(k=>`<td>${cell(r.chaps[k],CHAPTERS[k].caps.length)}</td>`).join('')}${e4?`<td>${scoreCell(r.test,TOTAL,SEUIL)}</td>`:''}<td class="small muted">${r.min} min</td><td class="small muted">${fmtAgo(r.last)}</td></tr>`).join('')}
+    ${rows.map(r=>`<tr><td><button class="linkbtn" data-parcours="${esc(r.mail)}|${co}" title="Voir son parcours, capsule par capsule">${esc(r.nom)}</button></td>${OPEN.map(k=>`<td>${cell(r.chaps[k],CHAPTERS[k].caps.length,r.notes[k])}</td>`).join('')}${e4?`<td>${scoreCell(r.test,TOTAL,SEUIL)}</td>`:''}<td class="small muted">${r.min} min</td><td class="small muted">${fmtAgo(r.last)}</td></tr>`).join('')}
   </table></div><p class="tiny muted" style="padding:0 16px 12px;margin:0">✓ chapitre terminé · 3/8 capsules validées · « · » pas commencé.${e4?' Les formatives sur papier s’encodent dans le carnet de cotes.':''}</p></div>
   ${e4?'':atelCard(rows, OPEN)}
   <div class="grid g2">
@@ -152,6 +152,38 @@ function dashChap(cl, studs, co='4-elec'){
       <h3 style="${e4?'margin-top:16px':'margin-top:0'}">Signalements</h3>
       ${S.signal.length? S.signal.slice(0,10).map(s=>`<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line-2)"><b>${esc(s.cap)}</b> — ${esc(s.txt)} <span class="tiny muted">· ${esc(s.who)}</span></div>`).join('') : `<p class="small muted">Aucun. Chaque capsule a un bouton « Signaler une erreur » pour les profs.</p>`}
     </div></div>`;
+}
+/* le parcours d'un élève dans un cours : chapitre par chapitre, capsule par capsule, avec la note formative */
+function voirParcours(mail, co){
+  const pr=progOf(mail), el=S.eleves[mail]||{}, ON=chapsOuverts(el.ct||el.classe, co), NUMS=chapNums(co);
+  const ess = n => n==null?'—':n===0?'du 1<sup>er</sup> coup':`${n+1} essais`;
+  const body=withProg(pr, ()=>{
+    let nCaps=0, nDone=0; const notes=[];
+    const chs=NUMS.filter(k=>ON.includes(k) || CHAPTERS[k].caps.some(c=>capDone(c)||capPart(c))).map(k=>{ const CH=CHAPTERS[k];
+      const lignes=CH.caps.map(c=>{ nCaps++; const done=capDone(c), part=capPart(c), nt=capNote(c), d=capDetail(c); if(done) nDone++; if(nt!=null) notes.push(nt);
+        const qOk=d.q.filter(x=>x.essais===0).length, eOk=d.ex.filter(x=>x.ok&&x.essais===0).length;
+        const dets=[d.q.length?`questions : ${qOk}/${d.q.length} du 1<sup>er</sup> coup`:'', d.ex.length?`exercices : ${d.ex.filter(x=>x.ok).length}/${d.ex.length} réussis${d.ex.some(x=>x.ok)?`, ${eOk} du 1<sup>er</sup> coup`:''}`:''].filter(Boolean).join(' · ');
+        const detEx=d.ex.map((x,i)=>({x,i})).filter(({x})=>x.ok||x.essais).map(({x,i})=>`exercice ${i+1} : ${x.ok?ess(x.essais):`pas encore (${x.essais} essai${x.essais>1?'s':''})`}`).join(' · ');
+        return `<tr><td><span class="tiny muted">${esc(c.sec||'')}</span> ${esc(c.t)}${detEx?`<div class="tiny muted">${detEx}</div>`:''}</td>
+          <td>${done?'<span class="cell ok" style="min-width:0">✓ validée</span>':part?'<span class="cell run" style="min-width:0">en cours</span>':'<span class="cell none" style="min-width:0">·</span>'}</td>
+          <td class="small">${(done||part)&&dets||'—'}</td><td>${nt!=null?`<b style="color:${nt>=8?'var(--ok)':nt>=5?'var(--amber, #b7791f)':'var(--bad)'}">${fr(nt,1)}</b><span class="tiny muted"> / 10</span>`:'—'}</td></tr>`; }).join('');
+      const cn=chapNote(k);
+      return `<h3 style="margin:14px 0 4px">Chapitre ${chapLbl(k)} — ${esc(CH.titre)} ${ON.includes(k)?'':'<span class="chip warn">fermé pour la classe</span>'} ${cn!=null?`<span class="chip ok">note ${fr(cn,1)} / 10</span>`:''}</h3>
+        <div class="scroll-x"><table class="t"><tr><th>Capsule</th><th>État</th><th>Détail</th><th>Note formative</th></tr>${lignes}</table></div>`; }).join('');
+    const moy=notes.length?Math.round(notes.reduce((a,b)=>a+b,0)/notes.length*2)/2:null;
+    const t=co==='4-elec'?liveTest():null;
+    return `<div class="grid g4" style="margin-bottom:10px">
+        <div class="card kpi"><div class="v">${nDone}/${nCaps}</div><div class="l">capsules validées (chapitres vus)</div></div>
+        <div class="card kpi"><div class="v">${moy!=null?fr(moy,1):'—'}<span class="muted" style="font-size:16px">/10</span></div><div class="l">note formative moyenne</div></div>
+        <div class="card kpi"><div class="v">${Math.round((pr.sec||0)/60)} min</div><div class="l">temps dans les capsules</div></div>
+        <div class="card kpi"><div class="v" style="font-size:18px">${fmtAgo(el.last)}</div><div class="l">dernière connexion</div></div></div>
+      ${t!=null?`<p class="small">Évaluation formative 2.3 en ligne : <b>${t==='wait'?'à corriger':t+' / '+TOTAL}</b></p>`:''}
+      <p class="tiny muted" style="margin:0 0 6px">Note formative d’une capsule validée : chaque question et chaque exercice réussi du premier coup vaut 1, au 2<sup>e</sup> ou 3<sup>e</sup> essai ½, plus tard ¼ ; ramené sur 10. Les essais sont comptés depuis le 26 novembre 2026 : avant, un exercice réussi compte comme réussi du premier coup.</p>
+      ${chs||'<p class="muted">Aucun chapitre commencé.</p>'}`; });
+  fillDIFS(co, mail);
+  const aTableaux=Object.keys(DIFS_REG).some(k=>DIFS_REG[k].course===co);
+  const md=modal(`Parcours — ${esc(nomEl(mail))}`, `<div class="vx-sheet">${aTableaux?`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn sm" data-vxt>Voir ses tableaux d’exercices</button></div>`:''}${body}</div>`, {wide:true});
+  const b=md.querySelector('[data-vxt]'); if(b) b.onclick=()=>voirExercices(mail, co);
 }
 /* points « à l'atelier » des chapitres ouverts : le prof coche quand il a vu l'élève faire */
 function atelCard(rows, OPEN){
@@ -183,6 +215,7 @@ function bindDash(m){
     if(v) pr.atel[k]=Date.now(); else delete pr.atel[k];
     const r=await act('setAtelier',{mail,k,v}); if(!r){ if(v) delete pr.atel[k]; else pr.atel[k]=Date.now(); const y=window.scrollY; render(); window.scrollTo(0,y); } });
   if(typeof bindBilanDash==='function') bindBilanDash(m);
+  m.querySelectorAll('[data-parcours]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.parcours.split('|'); voirParcours(mail,co); });
   m.querySelectorAll('[data-voirex]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.voirex.split('|'); voirExercices(mail,co); });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };
   m.querySelectorAll('[data-dmode]').forEach(b=>b.onclick=()=>{ S.dashMode=b.dataset.dmode; savePrefs(); render(); window.scrollTo(0,0); });

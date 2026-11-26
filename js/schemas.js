@@ -148,7 +148,7 @@ function mountPlaceW(box, key, cfg){
     const b=box.querySelector('[data-plck]'); if(b) b.onclick=()=>{
       const bad=S.ids.filter(({id})=>val[id]!==cfg.place[id]).map(x=>x.n);
       if(!bad.length){ exSet(key); draw(); return; }
-      st.checked=true; draw(); box.querySelector('[data-plfb]').innerHTML=`<span style="color:var(--bad)">${bad.length} emplacement${bad.length>1?'s':''} à revoir (n° ${bad.join(', ')}).</span> ${cfg.hint||'Relis l’énoncé : qui est la roue menante, qui est la menée ?'}`; };
+      exRate(key); st.checked=true; draw(); box.querySelector('[data-plfb]').innerHTML=`<span style="color:var(--bad)">${bad.length} emplacement${bad.length>1?'s':''} à revoir (n° ${bad.join(', ')}).</span> ${cfg.hint||'Relis l’énoncé : qui est la roue menante, qui est la menée ?'}`; };
   };
   draw();
 }

@@ -6,7 +6,7 @@ const $ = (sel,root=document)=>root.querySelector(sel);
 const ck=(...a)=>a.join('|');
 
 const DEF_PROG = ()=>({ quiz:{}, ex:{}, steps:[], ohm:{}, visited:[], banc:false, atel:{}, test:{submitted:false, ans:{}, pts:{}, open:{}, texts:{}}, sec:0 });
-function normProg(p){ const d=DEF_PROG(); p=p||{}; const o=Object.assign(d,p); o.test=Object.assign(DEF_PROG().test, p.test||{}); ['quiz','ex','ohm','atel'].forEach(k=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; }); ['steps','visited'].forEach(k=>{ if(!Array.isArray(o[k])) o[k]=[]; }); return o; }
+function normProg(p){ const d=DEF_PROG(); p=p||{}; const o=Object.assign(d,p); o.test=Object.assign(DEF_PROG().test, p.test||{}); ['quiz','ex','ohm','atel','tr'].forEach(k=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; }); ['steps','visited'].forEach(k=>{ if(!Array.isArray(o[k])) o[k]=[]; }); return o; }
 
 const S = {
   me:null, booted:false, error:null,
@@ -73,6 +73,8 @@ function mergeInto(a, b){   // a : progression locale (modifiée sur place), b :
   if(!b || typeof b!=='object') return false;
   b = normProg(JSON.parse(JSON.stringify(b))); let ch=false;
   ['quiz','ex','ohm','atel'].forEach(k=>{ Object.keys(b[k]).forEach(x=>{ if(b[k][x] && !a[k][x]){ a[k][x]=b[k][x]; ch=true; } }); });
+  if(!a.tr||typeof a.tr!=='object') a.tr={};
+  Object.keys(b.tr||{}).forEach(x=>{ if((b.tr[x]||0) > (a.tr[x]||0)){ a.tr[x]=b.tr[x]; ch=true; } });
   ['steps','visited'].forEach(k=>{ b[k].forEach(x=>{ if(!a[k].includes(x)){ a[k].push(x); ch=true; } }); });
   if((b.sec||0) > (a.sec||0)){ a.sec=b.sec; ch=true; }
   if(b.dr && typeof b.dr==='object'){ if(!a.dr||typeof a.dr!=='object') a.dr={};

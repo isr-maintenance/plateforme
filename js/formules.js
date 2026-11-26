@@ -256,7 +256,7 @@ function mountDIFS(box, key){
       if(!auto){ exSet(key); save(); draw(); return; }
       const n=cfg.res.filter((r,i)=>okVal(r,d.r[i])).length; save();
       if(n===cfg.res.length){ exSet(key); draw(); return; }
-      st.checked=true; draw();
+      exRate(key); st.checked=true; draw();
       box.querySelector('[data-dfb]').innerHTML = `<b>${n}/${cfg.res.length}</b> juste${n>1?'s':''}. <span style="color:var(--bad)">Revois ${cfg.res.length-n>1?'les résultats':'le résultat'} en rouge : une unité à convertir ? une formule retournée ?</span> ${cfg.hint||''}`;
     };
   };
