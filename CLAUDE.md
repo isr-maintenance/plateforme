@@ -98,6 +98,11 @@ Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec
 - **Colonne « Capsules »** du carnet : `{caps:[de, à], src:'capsules'}`, moyenne des notes formatives des capsules de ces chapitres (pas validée = 0), sur 10, ramenée au total choisi.
 - **Mécanique 4e** : `js/meca4-ent.js` construit les exercices du bilan (`BILEX`) et les met en entraînement, avec des valeurs propres à chaque élève, dans la capsule « Comme au bilan » des chapitres 6, 7 et 9 (`M6z`, `M7z`, `M9z`). Les valeurs du bilan n'y figurent pas.
 
+## L'historique des versions (Olivier seul)
+
+- Onglet « Historique » (`js/historique.js`) : chaque commit de `main` lu dans l'API publique de GitHub, avec qui (auteur de la pull request, sinon le compte qui a envoyé), quoi (message, fichiers avec un nom parlant dans `histFichier`) et quand. Les pull requests ouvertes sont en tête.
+- Visible seulement pour le compte dont l'empreinte SHA-256 est `HIST_OWNER` (pas d'adresse en clair dans le dépôt). Un nouveau fichier important : ajoute son nom parlant dans `histFichier`.
+
 ## Règles de rédaction
 
 - **Langue** : français de Belgique. Écris « septante » et « nonante », pas « soixante-dix » ni « quatre-vingt-dix ».

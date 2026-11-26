@@ -257,7 +257,7 @@ function render(){
   if(S.me.role==='eleve' && !S.me.classe){ renderChooseClass(); return; }
   const tabs = S.role==='eleve'
     ? [['presentation','Accueil'],['cours','Mes cours'],['monstage','Mon stage'],['biblio','Bibliothèque'],['outils','Outils']]
-    : [['presentation','Accueil'],['agenda','Agenda'],['dash','Suivi'],['carnet','Cotes'],['stages','Stages'],['contenus','Contenus'],['biblio','Bibliothèque'],['outils','Outils']].concat(isCoord()?[['acces','Accès'],['admin','Admin']]:[]);
+    : [['presentation','Accueil'],['agenda','Agenda'],['dash','Suivi'],['carnet','Cotes'],['stages','Stages'],['contenus','Contenus'],['biblio','Bibliothèque'],['outils','Outils']].concat(isCoord()?[['acces','Accès'],['admin','Admin']]:[]).concat(typeof histOk==='function'&&histOk()?[['histo','Historique']]:[]);
   if(S.view.page==='journal') S.tab = S.role==='prof'?'stages':'monstage';
   if(!tabs.some(t=>t[0]===S.tab)) S.tab='presentation';
   const ini = S.me.nom.split(/[\s.]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -284,7 +284,7 @@ function render(){
     const rs=md.querySelector('[data-reset]'); if(rs) rs.onclick=()=>{ if(confirm('Effacer toutes les données de test de ce navigateur ?')){ API.resetLocal(); API.logout(); } };
   };
   const m=$('#main');
-  const pages = { presentation:pagePresentation, cours:pageCours, monstage:pageMonStage, biblio:pageBiblio, outils:pageOutils, dash:pageDash, contenus:pageContenus, admin:pageAdmin, carnet:pageCarnet, acces:pageAcces, stages:pageStages, agenda:pageAgenda };
+  const pages = { presentation:pagePresentation, cours:pageCours, monstage:pageMonStage, biblio:pageBiblio, outils:pageOutils, dash:pageDash, contenus:pageContenus, admin:pageAdmin, carnet:pageCarnet, acces:pageAcces, stages:pageStages, agenda:pageAgenda, histo:pageHisto };
   if(S.view.page==='journal'){ m.innerHTML=pageJournal(); bindCommon(m); bindJournal(m); return; }
   if((S.tab==='cours'||S.tab==='contenus') && S.view.page!=='home'){
     if(S.view.page==='course') m.innerHTML=pageCourse();
@@ -307,7 +307,7 @@ function bindCommon(m){
   m.querySelectorAll('[data-module]').forEach(b=>b.onclick=()=>moduleInfo(b.dataset.module));
   m.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>openApp(b.dataset.app, b.dataset.defi?{defi:b.dataset.defi}:{}));
   m.querySelectorAll('[data-journal]').forEach(b=>b.onclick=()=>{ const [per,...st]=b.dataset.journal.split('|'); openJournal(per, st.join('|')||S.me.mail); });
-  const pageHooks = { cours:bindCours, biblio:bindBiblio, dash:bindDash, contenus:bindContenus, admin:bindAdmin, carnet:bindCarnet, acces:bindAcces, stages:bindStages, monstage:bindMonStage, agenda:bindAgenda };
+  const pageHooks = { cours:bindCours, biblio:bindBiblio, dash:bindDash, contenus:bindContenus, admin:bindAdmin, carnet:bindCarnet, acces:bindAcces, stages:bindStages, monstage:bindMonStage, agenda:bindAgenda, histo:bindHisto };
   if(S.view.page==='home' && pageHooks[S.tab]) pageHooks[S.tab](m);
   if(S.view.page==='tp') bindTP(m);
 }
