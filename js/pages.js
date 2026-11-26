@@ -294,16 +294,16 @@ const MODULES = {
   dessin:{t:'Atelier de dessin technique',k:'Labo en ligne · ouvert à tous',d:'Une vraie planche en mm (A4 ou A3, cadre et cartouche, échelle au choix) : vues d’une pièce en projection européenne, coupes, demi-coupes, sections, perspectives isométrique et cavalière, cotation. 85 exercices du plus simple au plus difficile, pièces au hasard et mode examen, avec correction automatique, solution et impression à l’échelle.',c:'var(--meca)',url:'outils/atelier-dessin/index.html'},
   banc:{t:'Banc de câblage',k:'App · connexion automatique',d:'Simulateur de câblage : l’élève câble un schéma et le teste. Tu entres avec ton compte de la plateforme ; l’accès d’un élève reste à autoriser par son prof dans le Banc.',c:'var(--amber)',app:'banc'},
   dossier:{t:'Dossier TP',k:'App · 3QEM · connexion automatique',d:'Schéma de principe, unifilaire et de câblage, bon de commande avec catalogue, liste d’outillage, photo du schéma fait à la main.',c:'var(--tp)',app:'dossier',pour:cl=>/^3qem/.test(cl)},
-  arduino:{t:'Labo Arduino',k:'App · ouverte à tous',d:'Simulateur d’électronique et d’Arduino : montages sur platine, programmation en blocs ou en code, défis par niveaux.',c:'var(--meca)',app:'arduino'},
+  arduino:{t:'Labo Arduino',k:'App · ouverte à tous · connexion automatique',d:'Simulateur d’électronique et d’Arduino : montages sur platine, programmation en blocs ou en code, défis par niveaux. Tu entres avec ton compte de la plateforme : ton prof suit tes défis.',c:'var(--meca)',app:'arduino'},
 };
-/* les apps séparées : chacune garde son adresse et son propre serveur. Pour Dossier TP et le Banc,
+/* les apps séparées : chacune garde son adresse et son propre serveur. Pour Dossier TP, le Banc et le Labo Arduino,
    la plateforme remet un ticket de 2 minutes que l'app échange contre sa propre connexion.
    panel:true → l'app s'ouvre DANS la plateforme (panneau plein écran), sinon dans un nouvel onglet.
    Seules les apps qui savent parler à la plateforme (bouton retour, défis réussis) ont panel:true. */
 const APPS = {
   banc:{url:'https://olivier7887.github.io/banc-de-cablage/', sso:true, panel:true},
   dossier:{url:'https://olivier7887.github.io/dossier-tp/', sso:true, panel:true},
-  arduino:{url:'https://olivier7887.github.io/Labo-Arduino/', sso:false, panel:true},
+  arduino:{url:'https://olivier7887.github.io/Labo-Arduino/', sso:true, ssoOpt:true, panel:true},
 };
 const appOrigin = k => { try{ return new URL(APPS[k].url, location.href).origin; }catch(e){ return ''; } };
 /* opts.defi : 'clé:niveau' d'un défi à ouvrir directement (Banc) */
@@ -315,8 +315,8 @@ async function openApp(k, opts={}){
     let u=A.url+'#plateforme&embed'+extra;
     if(A.sso && !LOCAL){
       const r=await API.call('ssoTicket',{app:k});
-      if(!r.ok){ closePanel(); toast(r.msg||'Ouverture impossible'); return; }
-      u+='&pt='+r.ticket;
+      if(r.ok) u+='&pt='+r.ticket;
+      else if(!A.ssoOpt){ closePanel(); toast(r.msg||'Ouverture impossible'); return; }
     }
     if(pan.isConnected) pan.querySelector('iframe').src=u;
     return;
@@ -325,6 +325,7 @@ async function openApp(k, opts={}){
   const to=u=>{ if(w) w.location.href=u; else location.href=u; };
   if(!A.sso || LOCAL){ to(A.url+'#plateforme'+extra); return; }
   const r=await API.call('ssoTicket',{app:k});
+  if(!r.ok && A.ssoOpt){ to(A.url+'#plateforme'+extra); return; }   // app ouverte à tous : sans ticket, elle s'ouvre quand même
   if(!r.ok){ if(w) w.close(); toast(r.msg||'Ouverture impossible'); return; }
   to(A.url+'#plateforme&pt='+r.ticket+extra);
 }

@@ -29,11 +29,11 @@ function makeApi(store, deps) {
   }
   function err(code, msg){ var e = new Error(msg); e.code = code; return e; }
 
-  /* ---------- connexion unique vers les autres apps (Dossier TP, Banc de câblage) ----------
+  /* ---------- connexion unique vers les autres apps (Dossier TP, Banc de câblage, Labo Arduino) ----------
      La plateforme remet un ticket valable 2 minutes, pour une app précise. L'app l'envoie à son propre
      script, qui le fait vérifier ici (ssoCheck) avant de délivrer sa clé habituelle. Le ticket est signé
      différemment des jetons : il ne peut pas servir à se connecter à la plateforme. */
-  var SSO_APPS = ['dossier', 'banc'], SSO_MS = 120000;
+  var SSO_APPS = ['dossier', 'banc', 'arduino'], SSO_MS = 120000;
   function makeTicket(mail, app){
     var body = b64(JSON.stringify({ s: 'sso', e: mail, app: app, x: deps.now() + SSO_MS }));
     return body + '.' + deps.hmac('sso.' + body);

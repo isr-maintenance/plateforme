@@ -211,7 +211,9 @@ console.log(`✓ ${n} vérifications réussies`);
   ok(!a7.handle({ a: 'ssoCheck', p: { ticket: tk.slice(0, -2) + 'xx', app: 'dossier' } }).ok, 'ticket falsifié refusé');
   ok(!a7.handle({ a: 'ssoCheck', p: { ticket: a7.makeToken(e7), app: 'dossier' } }).ok, 'un jeton de plateforme n’est pas un ticket');
   const save = clock; clock += 121000; ok(/expiré/.test(a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'dossier' } }).msg), 'ticket expiré après 2 minutes'); clock = save;
-  ok(H(co, 'ssoTicket', { app: 'arduino' }).ok === false, 'app inconnue refusée');
+  ok(H(co, 'ssoTicket', { app: 'inconnue' }).ok === false, 'app inconnue refusée');
+  const ta = H(co, 'ssoTicket', { app: 'arduino' }).ticket; ok(a7.handle({ a: 'ssoCheck', p: { ticket: ta, app: 'arduino' } }).ok === true, 'Labo Arduino : ticket accepté');
+  ok(!a7.handle({ a: 'ssoCheck', p: { ticket: ta, app: 'banc' } }).ok, 'ticket du Labo refusé pour le Banc');
   const tp = H(co, 'ssoTicket', { app: 'banc' }).ticket; ok(a7.handle({ a: 'ssoCheck', p: { ticket: tp, app: 'banc' } }).role === 'prof', 'prof : rôle prof');
   H(co, 'setAccess', { blocked: [e7] }); ok(!a7.handle({ a: 'ssoCheck', p: { ticket: tk, app: 'dossier' } }).ok, 'élève bloqué entre-temps : refusé');
   console.log(`✓ ${n} vérifications réussies (avec connexion unique)`); }
