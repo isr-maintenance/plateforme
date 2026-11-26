@@ -124,7 +124,10 @@ async function ajouterColonneApp(ev, date, apres, co){
   const ajouter=(lib, app)=>{ ev.push({ id:'Ap'+Date.now().toString(36).slice(-4), lib, app, src:'app', orig:100, total:20, seuil:10, poids:1, date }); closeModal(); apres(); toast('Colonne ajoutée : règle la date, les points et le poids'); };
   md.querySelector('[data-capp="dessin"]').onclick=()=>{ closeModal(); ajouterColonneDessin(ev, date, apres); };
   md.querySelector('[data-capp="dossier"]').onclick=async()=>{ z.innerHTML='<p class="small muted">Lecture de la liste des TP…</p>';
-    let L=[]; try{ L=await dossierTPs(); }catch(e){}
+    let L=[]; try{ L=(await dossierTPs()).slice(); }catch(e){}
+    await appCharger('dossier', true);   // + les TP créés dans l'app (onglet Exercices), vus dans les dossiers des élèves
+    const vus=new Set(); ((AN.data.dossier||{}).eleves||[]).forEach(el=>Object.keys(el.ex||{}).forEach(id=>vus.add(id)));
+    vus.forEach(id=>{ if(!L.some(t=>t.id===id)) L.push({ id, num:id.replace(/^tp/,''), titre:'(TP créé dans l’app)' }); });
     z.innerHTML=`<label class="row small" style="gap:8px;margin:6px 0"><input type="radio" name="dk" value="tp" checked> <b>Un TP</b> : la note de sa correction publiée</label>
       <select data-dtp style="width:100%;margin:0 0 10px 24px;max-width:calc(100% - 24px)">${L.map(t=>`<option value="${esc(t.id)}">TP ${esc(t.num)} · ${esc(t.titre)}</option>`).join('')||'<option value="">liste indisponible</option>'}</select>
       <label class="row small" style="gap:8px;margin:6px 0"><input type="radio" name="dk" value="moy"> <b>La moyenne des TP remis pendant la période</b> de la colonne (comme la colonne Moyenne de Dossier TP)</label>
