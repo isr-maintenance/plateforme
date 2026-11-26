@@ -25,7 +25,7 @@ import { toucher, dansRectangle, translater, symetrie, distanceA } from './editi
 import { svgCote } from './cotes.js';
 import { ajuster, prolonger, chanfrein, conge } from './construction.js';
 import { regionAutour, svgHachure, svgTexte } from './hachures.js';
-import { tousLesPoints, accrocher, ortho, lireSaisie, angleDe, surCercle, arcNormal, dist, arrondi, mesure, EPS } from './geom.js';
+import { tousLesPoints, accrocher, intersections, ortho, lireSaisie, angleDe, surCercle, arcNormal, dist, arrondi, mesure, EPS } from './geom.js';
 
 export const STYLES = {
   v: { nom: 'Fort', titre: 'Trait fort : arête vue (F)', touche: 'f' },
@@ -128,6 +128,12 @@ function svgAccroche(p, q, t) {
   return q[2] === 'cen' ? `<circle class="dao-acc" cx="${f2(x)}" cy="${f2(y)}" r="${f2(s * 1.1)}"/>` : `<path class="dao-acc" d="${d}"/>`;
 }
 const NOM_ACC = { ext: 'extrémité', mil: 'milieu', cen: 'centre', qua: 'quadrant', int: 'intersection' };
+/* Repérage des accroches (comme le « repérage d'accrochage aux objets » d'AutoCAD / BricsCAD) :
+   rester 1 s sur une accroche sans cliquer la mémorise (petite croix) ; la souris s'aligne ensuite
+   à l'horizontale ou à la verticale de ce point (ligne pointillée), pour reporter le point ailleurs.
+   Rester 1 s sur un point repéré l'oublie. Échap, le clic droit ou un changement d'outil les effacent tous. */
+const DELAI_REPERE = 1000;   // ms
+const MAX_REPERES = 7;
 
 /**
  * @param {object} o
@@ -149,6 +155,9 @@ export function creerTraceur(o) {
     ecartCote: null,              // écart tapé pour la ligne de cote (mm papier)
     param: { chanfrein: 5, conge: 5, texte: '', h: 3.5, pas: 3 }, choix: null,   // chanfrein, congé, texte, hachures
     cadre: null, survol: -1,      // cadre de sélection, trait sous la gomme
+    reperes: [],                  // points repérés (accroches mémorisées) : [x, y]
+    suivi: null,                  // alignement en cours sur un point repéré : {p, lignes:[[point, 'h'|'v']], nom}
+    guetK: null, guetT: 0,        // accroche survolée et minuterie de repérage
   };
   const P = () => o.planche();
   const entites = () => P().entites || [];
@@ -170,18 +179,78 @@ export function creerTraceur(o) {
       const dx = q[0] - origine[0], dy = q[1] - origine[1];
       const s = Math.sign(dx) === Math.sign(dy) ? 1 : -1;
       const m = (dx + s * dy) / 2;
+      st.suivi = null;
       return [arrondi(origine[0] + m, 3), arrondi(origine[1] + s * m, 3)];
     }
     const pts = [...pointsDuDessin(), ...st.pts.map((x) => [x[0], x[1], 'ext'])];
     if (orth) q = ortho(origine, q);
     let a = accrocher(q, orth ? pts.filter((x) => Math.abs(x[0] - origine[0]) < EPS || Math.abs(x[1] - origine[1]) < EPS) : pts, tol);
-    if (a) { st.acc = a; return [a[0], a[1]]; }
+    if (a) { st.acc = a; st.suivi = null; return [a[0], a[1]]; }
     st.acc = null;
     const pas = p.grille ? pasGrille(p) / 5 : 1;   // accroche tous les 1 mm (1:1) : la grille affichée (5 mm) n'est qu'un repère visuel
     const g = (v) => Math.round(v / pas) * pas;
+    st.suivi = suivre(q, origine, orth, tol, g);
+    if (st.suivi) return st.suivi.p;
     if (orth) return Math.abs(q[0] - origine[0]) < EPS ? [q[0], g(q[1])] : [g(q[0]), q[1]];
     return [g(q[0]), g(q[1])];
   }
+
+  /**
+   * Alignement sur les points repérés : à moins de tol de leur verticale ou de leur horizontale.
+   * Deux alignements (deux points, ou un point et le départ du trait en cours) : leur croisement.
+   * Un seul : le point de la prolongation qui tombe sur un trait du dessin s'il est proche, sinon la grille.
+   */
+  function suivre(q, origine, orth, tol, g) {
+    if (!st.reperes.length) return null;
+    let v = null, h = null;        // v : même x qu'un point repéré (prolongation verticale) ; h : même y
+    for (const r of st.reperes) {
+      const dx = Math.abs(q[0] - r[0]), dy = Math.abs(q[1] - r[1]);
+      if (dx < tol && (!v || dx < v.d)) v = { d: dx, r };
+      if (dy < tol && (!h || dy < h.d)) h = { d: dy, r };
+    }
+    if (orth) {                    // trait contraint (Ortho, Maj, rappel) : il garde sa direction
+      if (Math.abs(q[1] - origine[1]) < EPS) h = null; else v = null;
+      if (!v && !h) return null;
+      return v ? { p: [v.r[0], origine[1]], lignes: [[v.r, 'v']], nom: 'prolongation verticale' }
+        : { p: [origine[0], h.r[1]], lignes: [[h.r, 'h']], nom: 'prolongation horizontale' };
+    }
+    if (!v && !h) return null;
+    // le départ du trait en cours compte comme un repère, mais seulement pour croiser une prolongation
+    if (origine && v && !h && Math.abs(q[1] - origine[1]) < tol) h = { r: origine, d: 0 };
+    if (origine && h && !v && Math.abs(q[0] - origine[0]) < tol) v = { r: origine, d: 0 };
+    if (v && h) {
+      const lignes = [[v.r, 'v'], [h.r, 'h']].filter(([r]) => r !== origine);
+      return { p: [v.r[0], h.r[1]], lignes, nom: v.r === h.r ? 'point repéré' : 'croisement des prolongations' };
+    }
+    const L = v ? { r: v.r, dir: 'v' } : { r: h.r, dir: 'h' };
+    const G = 1e6;
+    const droite = L.dir === 'v' ? { t: 'l', x1: L.r[0], y1: q[1] - G, x2: L.r[0], y2: q[1] + G } : { t: 'l', x1: q[0] - G, y1: L.r[1], x2: q[0] + G, y2: L.r[1] };
+    let best = null, bd = tol;
+    for (const e of entites()) {
+      if (e.t !== 'l' && e.t !== 'c' && e.t !== 'a') continue;
+      for (const x of intersections(droite, e)) { const d = dist(x, q); if (d < bd) { bd = d; best = x; } }
+    }
+    const lignes = [[L.r, L.dir]];
+    if (best) return { p: L.dir === 'v' ? [L.r[0], arrondi(best[1], 4)] : [arrondi(best[0], 4), L.r[1]], lignes, nom: 'prolongation × trait' };
+    return { p: L.dir === 'v' ? [L.r[0], g(q[1])] : [g(q[0]), L.r[1]], lignes, nom: L.dir === 'v' ? 'prolongation verticale' : 'prolongation horizontale' };
+  }
+  /** Survol d'une accroche : après DELAI_REPERE sans changer d'accroche, elle est repérée (ou oubliée si elle l'était). */
+  function guetter() {
+    const a = st.acc;
+    const k = a ? `${arrondi(a[0], 4)};${arrondi(a[1], 4)}` : null;
+    if (k === st.guetK) return;
+    clearTimeout(st.guetT);
+    st.guetK = k;
+    if (!k) return;
+    st.guetT = setTimeout(() => {
+      if (st.guetK !== k) return;
+      const i = st.reperes.findIndex((r) => dist(r, a) < EPS);
+      if (i >= 0) st.reperes.splice(i, 1);
+      else { st.reperes.push([a[0], a[1]]); if (st.reperes.length > MAX_REPERES) st.reperes.shift(); }
+      apercu();
+    }, DELAI_REPERE);
+  }
+  function oublierReperes() { clearTimeout(st.guetT); st.guetK = null; st.reperes = []; st.suivi = null; }
 
   /* ----- historique ----- */
   function changer(nouvelles) {
@@ -424,7 +493,7 @@ export function creerTraceur(o) {
     }
     apercu();
   }
-  function finir() { st.pts = []; st.cElem = []; st.coteForce = null; st.saisie = ''; st.op = null; st.cible = null; st.choix = null; apercu(); }
+  function finir() { st.pts = []; st.cElem = []; st.coteForce = null; st.saisie = ''; st.op = null; st.cible = null; st.choix = null; oublierReperes(); apercu(); }
 
   /** Applique la saisie clavier (Entrée). */
   function appliquerSaisie() {
@@ -597,6 +666,23 @@ export function creerTraceur(o) {
       svg += `<rect class="dao-cadre-sel${fen ? '' : ' dao-cadre-tch'}" x="${f2(Math.min(a[0], b[0]))}" y="${f2(Math.min(a[1], b[1]))}" width="${f2(Math.abs(b[0] - a[0]))}" height="${f2(Math.abs(b[1] - a[1]))}"/>`;
     }
     for (const q of st.pts) { const [x, y] = versPapier(p, q[0], q[1]); svg += `<circle class="dao-pt" cx="${f2(x)}" cy="${f2(y)}" r="${f2(t * 0.45)}"/>`; }
+    if (st.suivi && st.cur) {   // prolongations depuis les points repérés, jusqu'un peu au-delà du curseur
+      const [bx, by] = versPapier(p, st.suivi.p[0], st.suivi.p[1]);
+      for (const [r] of st.suivi.lignes) {
+        const [ax, ay] = versPapier(p, r[0], r[1]);
+        const L = Math.hypot(bx - ax, by - ay);
+        if (L < EPS) continue;
+        const k = (L + t * 6) / L;
+        svg += `<line class="dao-suivi" x1="${f2(ax)}" y1="${f2(ay)}" x2="${f2(ax + (bx - ax) * k)}" y2="${f2(ay + (by - ay) * k)}"/>`;
+      }
+      const s = t * 1.1;
+      svg += `<path class="dao-acc" d="M${f2(bx - s)} ${f2(by - s)}L${f2(bx + s)} ${f2(by + s)}M${f2(bx + s)} ${f2(by - s)}L${f2(bx - s)} ${f2(by + s)}"/>`;
+      svg += `<text class="dao-acc-t" x="${f2(bx + t * 2.2)}" y="${f2(by - t * 1.8)}" style="font-size:${f2(t * 2.4)}px">${st.suivi.nom}</text>`;
+    }
+    for (const r of st.reperes) {   // points repérés : petite croix droite
+      const [x, y] = versPapier(p, r[0], r[1]), s = t * 1.5;
+      svg += `<path class="dao-repere" d="M${f2(x - s)} ${f2(y)}H${f2(x + s)}M${f2(x)} ${f2(y - s)}V${f2(y + s)}"/>`;
+    }
     if (st.acc) {   // accroche : symbole + son nom à côté
       svg += svgAccroche(p, st.acc, t * 1.4);
       const [x, y] = versPapier(p, st.acc[0], st.acc[1]);
@@ -613,7 +699,7 @@ export function creerTraceur(o) {
     if (st.outil === 'cote' && st.cible) info = 'cercle choisi';
     o.surEtat({
       aide: message || (Array.isArray(aide) ? aide[Math.min(etape, aide.length - 1)] : aide),
-      saisie: st.saisie, mesure: info, accroche: st.acc ? NOM_ACC[st.acc[2]] : '', ortho: st.ortho,
+      saisie: st.saisie, mesure: info, accroche: st.acc ? NOM_ACC[st.acc[2]] : st.suivi ? st.suivi.nom : '', ortho: st.ortho,
       annuler: st.hist.length > 0 || st.pts.length > 0, retablir: st.refaire.length > 0,
       sel: st.sel.size, op: st.op, coteK: st.coteK, param: st.param,
       dim: dimSelection(),
@@ -625,12 +711,13 @@ export function creerTraceur(o) {
   /* ----- événements venant de la feuille ----- */
   function surPointeur(type, ev, pp) {
     if (st.outil === 'main') return pp;
-    if (type === 'annule') { st.bas = null; st.cadre = null; apercu(); return null; }
+    if (type === 'annule') { st.bas = null; st.cadre = null; clearTimeout(st.guetT); st.guetK = null; apercu(); return null; }
     if (type === 'droit') { finir(); return pp; }
     st.maj = !!ev?.shiftKey;
     if (['gomme', 'ajuster', 'prolonger', 'chanfrein', 'conge', 'hachures'].includes(st.outil) || (st.outil === 'selection' && !st.op)) return pointerSansAccroche(type, ev, pp);
     const q = viser(pp);
     st.cur = q;
+    guetter();
     // cote linéaire / alignée : élément visé (arête, cercle, point) pour coter ENTRE deux éléments
     st.survol = -1; st.cVise = null;
     if (st.outil === 'cote' && (st.coteK === 'lin' || st.coteK === 'al') && st.pts.length < 2) {
@@ -653,7 +740,7 @@ export function creerTraceur(o) {
     const p = P();
     const q = versReel(p, pp[0], pp[1]);
     const tol = toleranceReel(9);
-    st.acc = null; st.cur = q;
+    st.acc = null; st.suivi = null; st.cur = q;
     const es = entites();
     if (st.outil === 'gomme') {
       st.survol = toucher(es, q, tol);
@@ -779,6 +866,7 @@ export function creerTraceur(o) {
 
   function choisirOutil(t) {
     st.outil = t; st.pts = []; st.cElem = []; st.coteForce = null; st.saisie = ''; st.acc = null; st.op = null; st.survol = -1; st.cadre = null; st.cible = null; st.choix = null;
+    oublierReperes();
     if (t !== 'selection') st.sel.clear();
     o.surOutil?.(t); apercu();
   }

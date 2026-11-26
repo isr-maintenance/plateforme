@@ -534,7 +534,7 @@ function monterPage(el, remonter) {
         </div>
         <div class="dao-aide muted">
           <span class="dao-aide-t"></span>
-          <span class="dao-astuce">Molette ou 2 doigts : zoom · clic du milieu ou Espace + glisser : déplacer</span>
+          <span class="dao-astuce">Molette ou 2 doigts : zoom · clic du milieu ou Espace + glisser : déplacer · reste 1 s sur une accroche : elle est repérée (prolongations)</span>
         </div>
       </div>
     </div>`;

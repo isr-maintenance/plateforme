@@ -1041,6 +1041,9 @@ label.cgu-ok input{margin-top:3px}
 .dao-svg .dao-ap{stroke:var(--accent)}
 .dao-svg .dao-ap-aide{stroke-dasharray:1.5 1.5;stroke-width:.2}
 .dao-svg .dao-acc{fill:none;stroke:#e07b00;stroke-width:1.6;vector-effect:non-scaling-stroke}
+/* repérage des accroches : points mémorisés et prolongations */
+.dao-svg .dao-repere{fill:none;stroke:#1d8a3a;stroke-width:2.2;vector-effect:non-scaling-stroke}
+.dao-svg .dao-suivi{fill:none;stroke:#1d8a3a;stroke-width:1;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
 .dao-svg .dao-pt{fill:var(--accent)}
 @media (max-width:640px){.dao-b span{display:none}.dao-groupe{border-right:0}}
 
