@@ -111,6 +111,12 @@ Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec
 - Côté prof (`js/dessins.js`) : colonne « Dessin » du carnet (cours de type mécanique : un exercice, une série ou un examen ; `e.dessin`, sur 100 à l'origine), planches dans le parcours de l'élève, « Voir » ouvre une copie dans l'atelier (`#/dessin/voir/<adresse>/<planche>`, `dessinVoir`).
 - Le score vient de la correction automatique de l'atelier, calculée dans le navigateur de l'élève.
 
+## Les notes des applications dans le carnet (en direct)
+
+- Bouton « + Note d'une application » du carnet (`js/appnotes.js`) : **Dossier TP** (la correction publiée d'un TP, ou la moyenne des TP remis pendant la période), **Banc de câblage** (un ou plusieurs défis : réussi = 100 %, essayé sans réussir = 0, pannes = note /20) et **Atelier de dessin** (`js/dessins.js`). Colonne `e.app = {a, k, id|ids}`, sur 100 à l'origine.
+- Le navigateur du prof lit les apps lui-même : `ssoTicket` → action `sso` de l'app (clé de l'app) → `profEleves` (Dossier TP) ou `profDonnees` (Banc). Rien n'est recopié sur le serveur de la plateforme ; relu à l'ouverture du carnet puis chaque minute (`AN_FRAIS`). Atelier : action `dessinRes`.
+- Le prof doit être dans l'onglet **Profs** du Google Sheet de chaque app, sinon l'app le voit comme élève (message dans le carnet). La grille de Dossier TP est recopiée dans `DOSSIER_GRILLE` : à tenir à jour si elle change dans `correction.js` de l'app.
+
 ## L'historique des versions (Olivier seul)
 
 - Onglet « Historique » (`js/historique.js`) : chaque commit de `main` lu dans l'API publique de GitHub, avec qui (auteur de la pull request, sinon le compte qui a envoyé), quoi (message, fichiers avec un nom parlant dans `histFichier`) et quand. Les pull requests ouvertes sont en tête.

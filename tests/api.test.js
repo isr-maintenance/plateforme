@@ -320,5 +320,6 @@ console.log(`✓ ${n} vérifications réussies`);
   const ex = { v: 1, entites: [], exo: { piece: 'x', mode: 'vues', examen: { fini: true, fin: clock, note: 64, temps: 40, duree: 50 } }, maj: clock };
   H(e1, 'dessinPut', { id: 'pexam', pl: ex }); ok(s12.get('dessinres:' + e1).pexam.ex.note === 64, 'note d’examen dans le résumé');
   ok(H(e1, 'dessinPut', { id: 'pbig', pl: { v: 1, entites: [{ t: 'x'.repeat(46000) }] } }).ok === false, 'planche trop grande refusée');
+  ok(H(co, 'dessinRes').dessins[e1].pexam.ex.note === 64 && H(e1, 'dessinRes').ok === false, 'le carnet relit les résumés (prof seulement)');
   ok(H(e1, 'dessinDel', { id: 'pabc1' }).ok && !d12.get('dessin:' + e1 + '|pabc1') && !s12.get('dessinres:' + e1).pabc1, 'planche supprimée partout');
   console.log(`✓ ${n} vérifications réussies (avec Atelier de dessin)`); }

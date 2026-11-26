@@ -338,6 +338,7 @@ function makeApi(store, deps) {
   /* ---------- actions prof ---------- */
   var PROF = {
     /* le prof qui fait les capsules (aperçu élève) retrouve où il s'est arrêté ; rien ne va dans le suivi ni dans le carnet */
+    dessinRes: function(me){ return { ok: true, dessins: listDocs('dessinres:') }; },   // relu par le carnet de cotes (en direct)
     dessinVoir: function(me, p){
       var v = D().get(dKey(str(p.mail, 120).toLowerCase(), str(p.id, 40))); need(v, 'Planche introuvable.');
       return { ok: true, pl: v };
