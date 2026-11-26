@@ -29,8 +29,11 @@ function installer() {
 }
 
 /* ---------- stockage clé / valeur dans l'onglet « donnees » ---------- */
-function sheetStore_() {
-  var sh = SpreadsheetApp.getActive().getSheetByName(SHEET);
+function sheetStore_(nom) {
+  var ss = SpreadsheetApp.getActive(), sh = ss.getSheetByName(nom || SHEET);
+  if (!sh && nom) {   // onglet secondaire (« dessins ») : créé à la première planche
+    sh = ss.insertSheet(nom); sh.getRange(1, 1, 1, 4).setValues([['cle', 'valeur (JSON)', 'mis à jour', 'par']]); sh.setFrozenRows(1);
+  }
   if (!sh) throw new Error('Onglet « ' + SHEET + ' » introuvable : lance d’abord la fonction « installer ».');
   var n = sh.getLastRow(), rows = n > 1 ? sh.getRange(2, 1, n - 1, 2).getValues() : [], idx = {}, val = {};
   rows.forEach(function(r, i){ if (r[0]) { idx[r[0]] = i + 2; try { val[r[0]] = JSON.parse(r[1]); } catch (e) { val[r[0]] = null; } } });
@@ -51,6 +54,7 @@ function api_() {
   var secret = PropertiesService.getScriptProperties().getProperty('SECRET');
   return makeApi(sheetStore_(), {
     now: function(){ return Date.now(); },
+    dessins: function(){ return sheetStore_('dessins'); },   // les planches de l'Atelier de dessin, à part (lourdes)
     hmac: function(s){ return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(s, secret)).replace(/=+$/, ''); },
     b64: function(s){ return Utilities.base64EncodeWebSafe(s, Utilities.Charset.UTF_8).replace(/=+$/, ''); },
     unb64: function(s){ while (s.length % 4) s += '='; return Utilities.newBlob(Utilities.base64DecodeWebSafe(s)).getDataAsString('UTF-8'); }

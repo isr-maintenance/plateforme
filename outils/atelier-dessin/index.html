@@ -8,10 +8,15 @@
   Atelier de dessin technique : outil autonome (HTML + CSS + modules JavaScript, sans compilation).
   Dessiner les vues d'une pièce, les coupes, les sections, les perspectives et la cotation,
   avec correction automatique. Code : js/main.js (navigation), js/vues/ (pages), js/dao/ (dessin).
-  Le travail de l'élève reste dans son navigateur (pas de compte, pas de serveur).
+  Le travail de l'élève reste dans son navigateur ; connecté avec son adresse de l'école,
+  il est aussi enregistré sur le serveur de la plateforme (js/plateforme.js).
 -->
 <script>try { var t = localStorage.getItem('atelier-dessin.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <link rel="stylesheet" href="css/styles.css">
+<!-- connexion et serveur de la plateforme (même adresse) -->
+<script src="../../js/config.js?v=2"></script>
+<script src="../../js/api-core.js?v=7"></script>
+<script src="../../js/api.js?v=2"></script>
 <script type="module" src="js/main.js"></script>
 </head>
 <body>

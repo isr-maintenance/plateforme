@@ -179,11 +179,12 @@ function voirParcours(mail, co){
         <div class="card kpi"><div class="v" style="font-size:18px">${fmtAgo(el.last)}</div><div class="l">dernière connexion</div></div></div>
       ${t!=null?`<p class="small">Évaluation formative 2.3 en ligne : <b>${t==='wait'?'à corriger':t+' / '+TOTAL}</b></p>`:''}
       <p class="tiny muted" style="margin:0 0 6px">Note formative d’une capsule validée : chaque question et chaque exercice réussi du premier coup vaut 1, au 2<sup>e</sup> ou 3<sup>e</sup> essai ½, plus tard ¼ ; ramené sur 10. Les essais sont comptés depuis le 26 novembre 2026 : avant, un exercice réussi compte comme réussi du premier coup.</p>
-      ${chs||'<p class="muted">Aucun chapitre commencé.</p>'}`; });
+      ${chs||'<p class="muted">Aucun chapitre commencé.</p>'}${typeof dessinsBlock==='function'?dessinsBlock(mail):''}`; });
   fillDIFS(co, mail);
   const aTableaux=Object.keys(DIFS_REG).some(k=>DIFS_REG[k].course===co);
   const md=modal(`Parcours — ${esc(nomEl(mail))}`, `<div class="vx-sheet">${aTableaux?`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn sm" data-vxt>Voir ses tableaux d’exercices</button></div>`:''}${body}</div>`, {wide:true});
   const b=md.querySelector('[data-vxt]'); if(b) b.onclick=()=>voirExercices(mail, co);
+  if(typeof bindDessins==='function') bindDessins(md);
 }
 /* points « à l'atelier » des chapitres ouverts : le prof coche quand il a vu l'élève faire */
 function atelCard(rows, OPEN){

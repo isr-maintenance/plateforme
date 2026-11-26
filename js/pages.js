@@ -396,7 +396,8 @@ function rawAuto(key, ep, stud){
   const co=key.split('|')[1];
   if(co==='4-elec' && ep==='F2.3') return withProg(progOf(stud), liveTest);   // la formative 2.3, faite dans le chapitre du relais
   const e=evalsOf(key).find(x=>x.id===ep);
-  if(e && e.caps) return capsScore(co, e.caps, stud);                          // colonne « Capsules » : moyenne des notes formatives
+  if(e && e.caps) return capsScore(co, e.caps, stud);
+  if(e && e.dessin) return typeof dessinScore==='function' ? dessinScore(e, stud) : null;   // Atelier de dessin technique                          // colonne « Capsules » : moyenne des notes formatives
   const b=(S.bilans||[]).find(x=>x.course===co && x.kind==='formative' && 'F'+x.ch===ep);   // formative faite en ligne
   if(b){ if(!BIL.reps[co]) bilChargerReps(co); return bilanScore(b.id, stud, co); }
   return null;
@@ -469,7 +470,7 @@ function pageCarnet(){
   </table></div>`:`<div class="pad"><p class="muted small" style="margin:0">Aucune évaluation datée dans cette période. Ajoute-en une ou change les dates dans « Évaluations et barème » ci-dessous.</p></div>`}</div>
 
   <div class="card" style="margin-top:16px"><div class="pad row between wrap" style="border-bottom:1px solid var(--line)"><div><h3>Évaluations et barème — ${cls(cl).nom} ${COURS.find(x=>x.id===co).titre}</h3><p class="small muted" style="margin:4px 0 0">La date range chaque évaluation dans sa période. Si tu changes les points d'une évaluation faite sur la plateforme, les notes sont recalculées à la même proportion.</p></div>
-    <div class="row wrap" style="gap:6px">${chapNums(co).length?`<button class="btn" data-ecaps>+ Colonne « Capsules »</button>`:''}<button class="btn" data-eadd>+ Ajouter une évaluation</button></div></div>
+    <div class="row wrap" style="gap:6px">${chapNums(co).length?`<button class="btn" data-ecaps>+ Colonne « Capsules »</button>`:''}${(COURS.find(x=>x.id===co)||{}).type==='meca'?`<button class="btn" data-edessin>+ Colonne « Dessin »</button>`:''}<button class="btn" data-eadd>+ Ajouter une évaluation</button></div></div>
     <div class="scroll-x"><table class="t"><tr><th>Évaluation</th><th>Date</th><th>Période</th><th>Points</th><th>Seuil</th><th>Poids</th><th>Origine</th><th></th></tr>
     ${all.map((e,i)=>{ const p=perOf(e.date); return `<tr><td><input type="text" data-ev="${i}|lib" value="${esc(e.lib)}" style="width:190px"></td>
       <td><input type="date" data-ev="${i}|date" value="${e.date||''}" style="padding:5px 6px"></td>
@@ -477,7 +478,7 @@ function pageCarnet(){
       <td><input type="text" data-ev="${i}|total" value="${String(e.total).replace('.',',')}" style="width:56px;text-align:center"></td>
       <td><input type="text" data-ev="${i}|seuil" value="${String(e.seuil).replace('.',',')}" style="width:56px;text-align:center"></td>
       <td><input type="text" data-ev="${i}|poids" value="${String(e.poids).replace('.',',')}" style="width:48px;text-align:center"></td>
-      <td class="small">${e.caps?`<span class="chip meca">capsules</span> <select data-ecap="${i}|0" style="padding:3px 4px">${chapNums(co).map(k=>`<option value="${k}" ${k===e.caps[0]?'selected':''}>${chapLbl(k)}</option>`).join('')}</select> à <select data-ecap="${i}|1" style="padding:3px 4px">${chapNums(co).map(k=>`<option value="${k}" ${k===e.caps[1]?'selected':''}>${chapLbl(k)}</option>`).join('')}</select><div class="tiny muted">moyenne des notes formatives sur 10 ; capsule pas validée = 0</div>`
+      <td class="small">${e.dessin?`<span class="chip meca">atelier de dessin</span><div class="tiny muted">${esc(dessinDesc(e))}</div>`:e.caps?`<span class="chip meca">capsules</span> <select data-ecap="${i}|0" style="padding:3px 4px">${chapNums(co).map(k=>`<option value="${k}" ${k===e.caps[0]?'selected':''}>${chapLbl(k)}</option>`).join('')}</select> à <select data-ecap="${i}|1" style="padding:3px 4px">${chapNums(co).map(k=>`<option value="${k}" ${k===e.caps[1]?'selected':''}>${chapLbl(k)}</option>`).join('')}</select><div class="tiny muted">moyenne des notes formatives sur 10 ; capsule pas validée = 0</div>`
         :e.src==='plateforme'?`<span class="chip elec">plateforme</span>${e.orig&&+e.orig!==+e.total?`<div class="tiny muted">sur ${e.orig} à l'origine</div>`:''}${(S.bilans||[]).some(b=>b.course===co&&b.kind==='formative'&&'F'+b.ch===e.id)?'<div class="tiny muted">faite en ligne</div>':''}`:'<span class="chip">encodée par le prof</span>'}</td>
       <td>${e.src==='plateforme'?'':`<button class="btn sm ghost" data-edel="${i}">Supprimer</button>`}</td></tr>`; }).join('')}
     </table></div></div>
@@ -530,6 +531,8 @@ function bindCarnet(m){
     const P=periodes().find(x=>x.id===S.carnet.per), today=new Date().toISOString().slice(0,10), d = P && today>=P.debut && today<=P.fin ? today : (P?P.fin:today);
     const a=ON[0]||N[0], z=ON[ON.length-1]||N[0];
     ev.push({ id:'Cap'+Date.now().toString(36).slice(-4), lib:`Capsules ${chapLbl(a)}${a!==z?' à '+chapLbl(z):''}`, caps:[a,z], src:'capsules', orig:10, total:10, seuil:5, poids:1, date:d }); rer(); pushEvals(); toast('Colonne « Capsules » ajoutée : choisis les chapitres et le poids'); };
+  const edb=m.querySelector('[data-edessin]'); if(edb) edb.onclick=()=>{ const P=periodes().find(x=>x.id===S.carnet.per), today=new Date().toISOString().slice(0,10), d = P && today>=P.debut && today<=P.fin ? today : (P?P.fin:today);
+    ajouterColonneDessin(ev, d, ()=>{ rer(); pushEvals(); }); };
   m.querySelector('[data-eadd]').onclick=()=>{ const P=periodes().find(x=>x.id===S.carnet.per); const today=new Date().toISOString().slice(0,10);
     const d = P && today>=P.debut && today<=P.fin ? today : (P?P.debut:today);
     ev.push({ id:'Év'+Date.now().toString(36).slice(-4), lib:'Nouvelle évaluation', total:20, seuil:10, poids:1, date:d, src:'manuel' }); rer(); pushEvals(); toast('Évaluation ajoutée : encode les notes dans le tableau'); };

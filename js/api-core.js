@@ -100,6 +100,48 @@ function makeApi(store, deps) {
     } catch (e) { return { ok: false, code: e.code || 'error', msg: e.message || String(e) }; }
   }
   var INVITE_OK = ['boot', 'saveMyProg'];
+
+  /* ---------- Atelier de dessin technique : les planches de chacun ----------
+     Les planches (lourdes) vont dans un onglet à part (« dessins », deps.dessins) pour ne pas ralentir le reste.
+     Le résumé de chaque planche (exercice, meilleur score, note d'examen) va dans « dessinres:<mail> » :
+     c'est lui que le prof reçoit pour le carnet de cotes. Le score est calculé par l'atelier, dans le navigateur. */
+  var dstore = null;
+  function D(){ if (!dstore) dstore = deps.dessins ? deps.dessins() : store; return dstore; }
+  function dKey(mail, id){ return 'dessin:' + mail + '|' + id; }
+  function dResume(pl){
+    var e = pl.exo || {}, x = e.examen || null, c = pl.cartouche || {};
+    var r = { t: str(e.titre || c.titre || 'Sans titre', 80), maj: +pl.maj || deps.now() };
+    if (e.cat) r.cat = str(e.cat, 40);
+    if (e.mode || e.piece) r.mode = str(e.mode || 'vues', 20);
+    if (typeof e.score === 'number') r.score = Math.max(0, Math.min(100, Math.round(e.score)));
+    if (x) r.ex = { fini: !!x.fini, fin: +x.fin || 0, note: typeof x.note === 'number' ? Math.round(x.note) : null, temps: +x.temps || 0, duree: +x.duree || 0 };
+    return r;
+  }
+  var DESSIN = {
+    dessinListe: function(me){
+      var o = {}; D().list('dessin:' + me.mail + '|').forEach(function(r){ o[r.key.slice(('dessin:' + me.mail + '|').length)] = (r.value && r.value.maj) || 0; });
+      return { ok: true, me: { mail: me.mail, nom: me.nom, role: me.role, classe: me.classe || '' }, planches: o };
+    },
+    dessinGet: function(me, p){
+      need(Array.isArray(p.ids) && p.ids.length <= 40, 'Liste invalide.'); var o = {};
+      p.ids.forEach(function(id){ var v = D().get(dKey(me.mail, str(id, 40))); if (v) o[id] = v; });
+      return { ok: true, planches: o };
+    },
+    dessinPut: function(me, p){
+      var id = str(p.id, 40), pl = p.pl; need(/^[A-Za-z0-9_-]{2,40}$/.test(id), 'Planche invalide.'); need(pl && typeof pl === 'object' && Array.isArray(pl.entites), 'Planche invalide.');
+      var n = JSON.stringify(pl).length; if (n > PLAT.MAX_DOC) throw err('size', 'Planche trop grande pour être enregistrée en ligne (' + Math.round(n / 1000) + ' 000 caractères) : elle reste dans ce navigateur.');
+      D().set(dKey(me.mail, id), pl, me.mail);
+      var R = doc('dessinres:' + me.mail, {}) || {}; R[id] = dResume(pl);
+      if (JSON.stringify(R).length > PLAT.MAX_DOC) { var ks = Object.keys(R).sort(function(a, b){ return (R[a].maj || 0) - (R[b].maj || 0); }); while (ks.length && JSON.stringify(R).length > PLAT.MAX_DOC) { var k = ks.shift(); if (!R[k].cat && !R[k].ex && k !== id) delete R[k]; else break; } }
+      put('dessinres:' + me.mail, R, me.mail);
+      return { ok: true, maj: R[id].maj };
+    },
+    dessinDel: function(me, p){
+      var id = str(p.id, 40); D().del(dKey(me.mail, id));
+      var R = doc('dessinres:' + me.mail, null); if (R && R[id]) { delete R[id]; put('dessinres:' + me.mail, R, me.mail); }
+      return { ok: true };
+    }
+  };
   function nameOf(mail){
     var parts = mail.split('@')[0].replace(/\.student$/, '').split('.');
     return parts.map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
@@ -196,6 +238,7 @@ function makeApi(store, deps) {
     out.stage.journal = listDocs('journal:');
     out.fcor = fcorList(me);
     out.bilans = bilanMeta(); out.bilanouv = doc('bilanouv', {});
+    out.dessins = listDocs('dessinres:');
     if (me.coord) out.invites = invites().map(function(x){ var y = {}; Object.keys(x).forEach(function(k){ if (k !== 'h') y[k] = x[k]; }); return y; });
     var mp = doc('profprog:' + me.mail, null);                 // la progression du prof dans les capsules, remise à zéro chaque année scolaire
     out.myProg = mp && mp.annee === anneeSco(deps.now()) ? mp.prog : null;
@@ -295,6 +338,10 @@ function makeApi(store, deps) {
   /* ---------- actions prof ---------- */
   var PROF = {
     /* le prof qui fait les capsules (aperçu élève) retrouve où il s'est arrêté ; rien ne va dans le suivi ni dans le carnet */
+    dessinVoir: function(me, p){
+      var v = D().get(dKey(str(p.mail, 120).toLowerCase(), str(p.id, 40))); need(v, 'Planche introuvable.');
+      return { ok: true, pl: v };
+    },
     saveMyProg: function(me, p){
       need(p.prog && typeof p.prog === 'object', 'Progression manquante.');
       var n = p.prog; n.maj = deps.now();
@@ -452,6 +499,7 @@ function makeApi(store, deps) {
       if (a === 'ssoTicket') { need(SSO_APPS.indexOf(p.app) >= 0, 'Application inconnue.'); return { ok: true, ticket: makeTicket(me.mail, p.app) }; }
       if (a === 'boot') return { ok: true, data: boot(me) };
       if (a === 'checkMail') { try { var who = identify(p.mail); return { ok: true, res: { ok: true, role: who.role, nom: who.nom } }; } catch (e) { return { ok: true, res: { ok: false, msg: e.message } }; } }
+      if (DESSIN[a]) return DESSIN[a](me, p);
       if (me.role === 'eleve') { need(ELEVE[a], 'Action non autorisée.'); return ELEVE[a](me, p); }
       if (PROF[a]) return PROF[a](me, p);
       if (COORD[a]) { need(me.coord, 'Réservé au coordinateur.'); return COORD[a](me, p); }

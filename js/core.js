@@ -155,7 +155,7 @@ async function boot(){
     S.access={ profs:d.profs||[], open:d.access.open, blocked:d.access.blocked||[] };
     S.carnet.periodes = d.periodes || JSON.parse(JSON.stringify(PERIODES_DEF));
     S.carnet.evals = d.evals||{}; S.notes=d.notes||{}; S.carnet.som=d.som||{}; S.signal=d.signal||[];
-    S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{}; S.invites=d.invites||[];
+    S.stage.aff=d.stage.aff||{}; S.stage.tel=d.stage.tel||{}; S.stage.journal=d.stage.journal||{}; S.invites=d.invites||[]; S.dessins=d.dessins||{};
     S.eleveClass = S.eleveClass || '4eqmm';
     previewProg = normProg(d.myProg); S.prog = previewProg;   // une seule progression pour le prof, en vue prof et en aperçu élève
     if(S.tab==='cours') S.tab='dash';

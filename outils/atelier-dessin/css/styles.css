@@ -1211,3 +1211,10 @@ label.cgu-ok input{margin-top:3px}
 .rt-svg{display:block;width:100%;height:min(70vh,640px);touch-action:none;cursor:crosshair}
 .rt-obj{cursor:move}.rt-sel path,.rt-sel text{stroke:#e11d48!important}.rt-sel text{fill:#e11d48!important;stroke:none!important}.rt-sel path[fill="#1d5fd1"]{fill:#e11d48!important}
 .rt-prov{opacity:.6}
+
+/* connexion à la plateforme (js/plateforme.js) */
+.pf-compte{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.pf-compte .pf-nom{font-weight:600}
+.pf-compte .pf-etat{color:var(--muted,#667);font-size:12px}
+.pf-compte .pf-etat.err{color:#c0392b}
+@media (max-width:600px){.pf-compte .pf-nom{display:none}}

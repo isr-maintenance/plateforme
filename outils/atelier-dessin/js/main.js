@@ -2,8 +2,10 @@
    ATELIER DE DESSIN TECHNIQUE — démarrage et navigation (#/dessin…)
    ---------------------------------------------------------------------
    Outil autonome de la Plateforme technique (outils/atelier-dessin/).
-   Pas de compte ni de serveur : le travail de l'élève reste dans son
-   navigateur (localStorage, préfixe « atelier-dessin. », js/utils.js).
+   Le travail de l'élève est dans son navigateur (localStorage, préfixe
+   « atelier-dessin. », js/utils.js) et, s'il est connecté avec son adresse
+   de l'école, enregistré aussi sur le serveur de la plateforme
+   (js/plateforme.js : autre appareil, carnet de cotes du prof).
      #/dessin            catalogue des exercices (js/vues/atelier.js)
      #/dessin/libre[/…]  planche de dessin (js/vues/planche-libre.js)
    Le dessin lui-même (pièces, vues, coupes, perspectives, cotation,
@@ -14,6 +16,7 @@ import { esc } from './utils.js';
 import { definirRetouches } from './dao/retouches.js';
 import { RETOUCHES } from './dao/retouches-data.js';
 import { vueAtelier } from './vues/atelier.js';
+import { demarrerPlateforme } from './plateforme.js';
 
 definirRetouches(RETOUCHES);
 const vue = document.getElementById('vue');
@@ -36,7 +39,7 @@ async function router() {
   window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', router);
-router();
+demarrerPlateforme().catch((e) => console.warn(e)).finally(router);   // d'abord la connexion et les planches en ligne
 
 /* thème : clair / sombre / automatique (bouton en haut à droite) */
 const CLE = 'atelier-dessin.theme';

@@ -302,3 +302,23 @@ console.log(`✓ ${n} vérifications réussies`);
   H(co, 'inviteSet', { inv: { id: 'x1y2', expire: 0, code: 'Nouveau_code_1234567890' } }); ok(a11.handle({ a: 'inviteLogin', p: { code } }).ok === false && a11.handle({ a: 'inviteLogin', p: { code: 'Nouveau_code_1234567890' } }).ok, 'nouveau lien : l’ancien ne marche plus');
   H(co, 'inviteDel', { id: 'x1y2' }); ok(I('boot').ok === false && H(co, 'boot').data.invites.length === 0, 'invitation supprimée');
   console.log(`✓ ${n} vérifications réussies (avec invitations)`); }
+
+// Atelier de dessin : planches à part, résumé pour le carnet, prof qui regarde
+{ const s12 = memStore(), d12 = memStore(), a12 = ctx.makeApi(s12, Object.assign({}, deps, { dessins: () => d12 })); a12.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a12.handle({ t: a12.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', e1 = 'zoe.c.student@elmarche.be', e2 = 'max.d.student@elmarche.be';
+  H(e1, 'setClasse', { classe: '4eqmm' }); H(e2, 'setClasse', { classe: '4eqmm' });
+  const pl = { v: 1, entites: [{ t: 'l', x1: 0, y1: 0, x2: 10, y2: 0, s: 'f' }], cartouche: { titre: 'Ma pièce' }, exo: { cat: 'coupes-1', mode: 'coupe', titre: 'Semelle percée', score: 87.4 }, maj: clock };
+  ok(H(e1, 'dessinPut', { id: 'pabc1', pl }).ok, 'l’élève enregistre sa planche');
+  ok(d12.get('dessin:' + e1 + '|pabc1') && !s12.get('dessin:' + e1 + '|pabc1'), 'la planche va dans l’onglet des dessins, pas dans les données');
+  ok(s12.get('dessinres:' + e1).pabc1.score === 87 && s12.get('dessinres:' + e1).pabc1.cat === 'coupes-1', 'résumé : exercice et score');
+  let r = H(e1, 'dessinListe'); ok(r.ok && r.planches.pabc1 === clock && r.me.classe === '4eqmm', 'liste de ses planches');
+  ok(H(e1, 'dessinGet', { ids: ['pabc1'] }).planches.pabc1.exo.score === 87.4, 'il retrouve sa planche (autre appareil)');
+  ok(Object.keys(H(e2, 'dessinGet', { ids: ['pabc1'] }).planches).length === 0, 'un autre élève ne la voit pas');
+  ok(H(e2, 'dessinVoir', { mail: e1, id: 'pabc1' }).ok === false, 'un élève ne regarde pas la planche d’un autre');
+  ok(H(co, 'dessinVoir', { mail: e1, id: 'pabc1' }).pl.cartouche.titre === 'Ma pièce', 'le prof regarde la planche');
+  ok(H(co, 'boot').data.dessins[e1].pabc1.score === 87, 'le prof reçoit les résumés (carnet)');
+  const ex = { v: 1, entites: [], exo: { piece: 'x', mode: 'vues', examen: { fini: true, fin: clock, note: 64, temps: 40, duree: 50 } }, maj: clock };
+  H(e1, 'dessinPut', { id: 'pexam', pl: ex }); ok(s12.get('dessinres:' + e1).pexam.ex.note === 64, 'note d’examen dans le résumé');
+  ok(H(e1, 'dessinPut', { id: 'pbig', pl: { v: 1, entites: [{ t: 'x'.repeat(46000) }] } }).ok === false, 'planche trop grande refusée');
+  ok(H(e1, 'dessinDel', { id: 'pabc1' }).ok && !d12.get('dessin:' + e1 + '|pabc1') && !s12.get('dessinres:' + e1).pabc1, 'planche supprimée partout');
+  console.log(`✓ ${n} vérifications réussies (avec Atelier de dessin)`); }

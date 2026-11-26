@@ -104,6 +104,13 @@ Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec
 - Rôle `invite` : **consultation seule** (cours, capsules, outils, Bibliothèque élèves), progression propre (`saveMyProg`). Aucune donnée d'élève, de cote ni de stage ; toute autre action est refusée par le serveur (`INVITE_OK`). Désactivée, supprimée ou expirée : accès fermé tout de suite.
 - Côté client : `isInvite()`. Les apps séparées s'ouvrent sans connexion automatique pour un invité.
 
+## L'Atelier de dessin technique (Logan Degossely)
+
+- Outil `outils/atelier-dessin/` (modules ES, sans compilation). Il charge `js/config.js`, `js/api-core.js` et `js/api.js` de la plateforme : même adresse, donc même connexion (jeton « plateforme-jeton »). Bouton « Se connecter » s'il est ouvert seul.
+- `js/plateforme.js` de l'atelier : connecté, chaque planche est enregistrée en ligne (`dessinListe`, `dessinGet`, `dessinPut`, `dessinDel`), retrouvée sur un autre appareil ; sur un ordinateur partagé, les planches d'un autre compte sont mises de côté (`archive.<adresse>`). Les planches vont dans l'onglet « dessins » du Sheet (`deps.dessins`, `Code.gs`), le résumé (exercice, meilleur score, note d'examen) dans `dessinres:<adresse>`.
+- Côté prof (`js/dessins.js`) : colonne « Dessin » du carnet (cours de type mécanique : un exercice, une série ou un examen ; `e.dessin`, sur 100 à l'origine), planches dans le parcours de l'élève, « Voir » ouvre une copie dans l'atelier (`#/dessin/voir/<adresse>/<planche>`, `dessinVoir`).
+- Le score vient de la correction automatique de l'atelier, calculée dans le navigateur de l'élève.
+
 ## L'historique des versions (Olivier seul)
 
 - Onglet « Historique » (`js/historique.js`) : chaque commit de `main` lu dans l'API publique de GitHub, avec qui (auteur de la pull request, sinon le compte qui a envoyé), quoi (message, fichiers avec un nom parlant dans `histFichier`) et quand. Les pull requests ouvertes sont en tête.
