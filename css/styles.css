@@ -493,3 +493,13 @@ body.panel-open{overflow:hidden}
 .bil-ex{border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;background:var(--surface)}
 .bil-ex h3{margin:0 0 6px}
 .bil-lock{display:flex;gap:12px;align-items:center}
+
+/* rapports de TP */
+.rap-champ{padding:10px 0;border-bottom:1px solid var(--line-2,#eee)}
+.rap-champ:last-child{border-bottom:0}
+.rap-l{display:block;font-weight:700;margin-bottom:4px}
+.rap-ro{white-space:pre-wrap;padding:4px 0;min-height:1.4em}
+.rap-joints{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.rap-joint{margin:0;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface,#fff)}
+.rap-img{min-height:90px;display:grid;place-items:center;background:#fff;border-radius:6px;overflow:hidden}
+.rap-img img{max-width:100%;max-height:320px;display:block}

@@ -138,7 +138,7 @@ async function boot(){
   if(!r.ok){ S.error=r.msg; S.booted=false; render(); return; }
   const d=r.data; S.me=d.me; ME=d.me.nom; S.booted=true; S.error=null;
   S.modes=Object.assign({}, ...CLASSES.map(c=>({[c.id]:c.mode})), d.modes||{});
-  AFFECT=d.affect||[]; S.bilans=d.bilans||[]; S.bilanouv=d.bilanouv||{}; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[]; S.ouv=d.ouv||{};
+  AFFECT=d.affect||[]; S.rapports=d.rapports||{}; S.bilans=d.bilans||[]; S.bilanouv=d.bilanouv||{}; S.pdfs=d.pdfs||{}; S.fcor=d.fcor||[]; S.ouv=d.ouv||{};
   S.stage.periodes = d.stage.periodes || JSON.parse(JSON.stringify(STAGE_PER_DEF));
   S.stage.lieux = d.stage.lieux || [];
   if(isInvite()){
@@ -244,6 +244,7 @@ function openCourse(id){
   const c=COURS.find(x=>x.id===id);
   const viewTab = S.role==='prof'?'contenus':'cours';
   if(c.statut==='demo'){ S.tab=viewTab; S.view={page:'course',course:id}; render(); window.scrollTo(0,0); return; }
+  if(c.type==='tp' && c.statut==='attente' && S.role==='eleve' && typeof RAP_COURS==='function' && RAP_COURS().includes(id)){ S.tab='cours'; S.view={page:'rapports',course:id}; render(); window.scrollTo(0,0); return; }   // TP de 4e : les rapports
   if(c.statut==='demo-tp'){ S.tab=viewTab; S.view={page:'tp',course:id}; render(); window.scrollTo(0,0); return; }
   if(c.statut==='app'){ openApp(c.module); return; }   // ouvre l'app (connexion automatique), dans un nouvel onglet
   const filtxt = c.pour.map(([f,a])=>clsCode(f,a)).join(' · ');
@@ -297,6 +298,8 @@ function render(){
     else if(S.view.page==='player') { m.innerHTML=pagePlayer(); afterPlayer(); return; }
     else if(S.view.page==='tp') m.innerHTML=pageTP();
     else if(S.view.page==='bilan') { m.innerHTML=pageBilan(); bindCommon(m); bindBilan(m); return; }
+    else if(S.view.page==='rapports') { m.innerHTML=pageRapports(); bindCommon(m); bindRapportsListe(m); return; }
+    else if(S.view.page==='rapport') { m.innerHTML=pageRapport(); bindCommon(m); bindRapport(m); return; }
   } else m.innerHTML = pages[S.tab]();
   bindCommon(m);
 }

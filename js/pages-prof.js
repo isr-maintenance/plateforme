@@ -107,6 +107,7 @@ function pageDash(){
   else if(co==='4eqem-tpe') body=dashTP(cl, studs);
   else if((COURS.find(x=>x.id===co)||{}).statut==='app'){ const M=MODULES[(COURS.find(x=>x.id===co)||{}).module]||{}; body=`<div class="card pad"><h3>${studs.length} élève(s) en ${c.nom}</h3><p class="muted">Ce cours se fait dans l’app ${esc(M.t||'')} : les énoncés, les rapports et leur suivi sont là-bas.</p><button class="btn primary" data-app="${M.app||''}" type="button">Ouvrir ${esc(M.t||'l’app')} ↗</button></div>`; }
   else body=`<div class="card pad"><h3>${studs.length} élève(s) en ${c.nom}</h3><p class="muted">Le contenu de ce cours n'est pas encore sur la plateforme : le suivi détaillé apparaîtra avec les premiers chapitres. En attendant, encode tes évaluations dans le carnet de cotes.</p></div>`;
+  if(studs.length && typeof RAP_COURS==='function' && RAP_COURS().includes(co)) body=rapportsDash(cl, co, studs)+body;   // TP de 4e : les rapports
   return `<div class="page-head"><div><div class="kicker">Suivi</div><h1>${c.nom}${co?' — '+(COURS.find(x=>x.id===co)||{titre:co}).titre:''}</h1>${co&&profsOf(cl,co).length>1?`<p class="small muted" style="margin-top:4px">Cours partagé : ${profsOf(cl,co).join(' et ')} voient le même suivi.</p>`:''}</div>
     <div class="row wrap">${sel}${estMien?'<button class="btn" data-go="carnet">Carnet de cotes →</button>':''}</div></div>${dashTabs()}
     ${estMien?'':`<div class="note warn" style="margin:0 0 16px"><b>Consultation : ce n’est pas ton cours${profsOf(cl,co).length?` (${esc(profsOf(cl,co).join(', '))})`:''}.</b>Comme coordinateur, tu peux aussi ouvrir des chapitres ou cocher : fais-le seulement en accord avec le collègue.</div>`}${body}`;
@@ -216,6 +217,7 @@ function bindDash(m){
     if(v) pr.atel[k]=Date.now(); else delete pr.atel[k];
     const r=await act('setAtelier',{mail,k,v}); if(!r){ if(v) delete pr.atel[k]; else pr.atel[k]=Date.now(); const y=window.scrollY; render(); window.scrollTo(0,y); } });
   if(typeof bindBilanDash==='function') bindBilanDash(m);
+  if(typeof bindRapportsDash==='function') bindRapportsDash(m);
   m.querySelectorAll('[data-parcours]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.parcours.split('|'); voirParcours(mail,co); });
   m.querySelectorAll('[data-voirex]').forEach(b=>b.onclick=()=>{ const [mail,co]=b.dataset.voirex.split('|'); voirExercices(mail,co); });
   const s=m.querySelector('[data-dkey]'); if(s) s.onchange=()=>{ S.dashKey=s.value; savePrefs(); render(); };

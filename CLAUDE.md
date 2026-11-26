@@ -117,6 +117,12 @@ Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec
 - Le navigateur du prof lit les apps lui-même : `ssoTicket` → action `sso` de l'app (clé de l'app) → `profEleves` (Dossier TP) ou `profDonnees` (Banc). Rien n'est recopié sur le serveur de la plateforme ; relu à l'ouverture du carnet puis chaque minute (`AN_FRAIS`). Atelier : action `dessinRes`.
 - Le prof doit être dans l'onglet **Profs** du Google Sheet de chaque app, sinon l'app le voit comme élève (message dans le carnet). La grille de Dossier TP est recopiée dans `DOSSIER_GRILLE` : à tenir à jour si elle change dans `correction.js` de l'app.
 
+## Les rapports de TP (4e)
+
+- `js/rapports.js` : les trois feuilles papier de l'atelier (rapport de travail, fiche de fabrication, fiche de dépannage), définies dans `RAP_TYPES` (titres et points repris des documents de l'atelier). Cours concernés : les TP de 4e (`RAP_COURS`). L'élève les ouvre depuis la carte du cours de TP (ou la page TP électricité) ; le prof dans Suivi (carte « Rapports de TP »).
+- Serveur : `rapportSave` (remise), `rapportJoindre` / `rapportJoint` (annexes découpées en morceaux de 40 000 caractères), `rapportProf`, `rapportNoter` (remarques, NA/EV/ATT par objectif, critères, total /100, publication, « rendre à l'élève »). Textes et annexes dans l'onglet « dessins », résumé dans `rapres:<adresse>`. Carnet : « + Note d'une application » › Rapports de TP.
+- Annexes : dessin 3 vues de l'Atelier (`#/dessin/rapport/<id>/<titre>` : planche vierge liée au rapport, bouton « Joindre au rapport », SVG autonome), capture du Banc de câblage (ouvert avec `&rapport`, bouton « Joindre au rapport de TP » dans sa capture, JPEG), photo. Les deux apps envoient l'image par `postMessage` `{src, type:'joindre', t, data}`.
+
 ## L'historique des versions (Olivier seul)
 
 - Onglet « Historique » (`js/historique.js`) : chaque commit de `main` lu dans l'API publique de GitHub, avec qui (auteur de la pull request, sinon le compte qui a envoyé), quoi (message, fichiers avec un nom parlant dans `histFichier`) et quand. Les pull requests ouvertes sont en tête.

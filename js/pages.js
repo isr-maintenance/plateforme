@@ -65,6 +65,7 @@ function pageTP(){
   const fvN=FEUVERT.filter(x=>feuVert(x.k)).length;
   return `<div class="crumbs"><button data-back="home">${S.role==='prof'?'Contenus':'Mes cours'}</button> › TP électricité</div>
   <div class="page-head"><div><div class="kicker">4EQEM · 4 p./sem.</div><h1>TP électricité</h1><p class="muted small">Chaque TP a son feu vert : les prérequis de théorie sont vérifiés avant d'entrer à l'atelier.</p></div></div>
+  ${S.role==='eleve'&&typeof rapportsBlock==='function'?rapportsBlock('4eqem-tpe'):''}
   <div class="chapters">${TP_E.map(([k,t])=>{
     const demo=k==='É03';
     return `<div class="chap ${demo?'avail':''}"><span class="num">${k}</span><div class="ti"><b>${t}</b><span class="tiny muted">${demo?'Théorie : chapitre 2.3 du cours d’Électricité':'Feu vert en préparation'}</span></div>
@@ -73,7 +74,7 @@ function pageTP(){
     <div class="card pad"><div class="kicker" style="color:var(--tp)">Banc de câblage</div><h3 style="margin:6px 0">Câbler avant l'atelier</h3><p class="small muted">Les exercices du TP peuvent d'abord être câblés et testés sur le simulateur.</p><button class="btn sm primary" data-app="banc">Ouvrir le Banc ↗</button></div>
   </div>`;
 }
-function bindTP(m){ m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap)); }
+function bindTP(m){ m.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>openCap(b.dataset.cap)); if(typeof bindRapportsListe==='function') bindRapportsListe(m); }
 
 /* ---------------- Bibliothèque ---------------- */
 function libGroups(){
@@ -310,7 +311,7 @@ const appOrigin = k => { try{ return new URL(APPS[k].url, location.href).origin;
 /* opts.defi : 'clé:niveau' d'un défi à ouvrir directement (Banc) */
 async function openApp(k, opts={}){
   const A=APPS[k]; if(!A) return;
-  const extra = opts.defi ? '&defi='+encodeURIComponent(opts.defi) : '';
+  const extra = (opts.defi ? '&defi='+encodeURIComponent(opts.defi) : '') + (opts.rapport ? '&rapport' : '');   // rapport : bouton « Joindre au rapport de TP » dans la capture du Banc
   if(A.panel){
     const pan=openPanel((MODULES[k]||{}).t||'App', null, k);
     let u=A.url+'#plateforme&embed'+extra;

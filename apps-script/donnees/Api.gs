@@ -117,6 +117,71 @@ function makeApi(store, deps) {
     if (x) r.ex = { fini: !!x.fini, fin: +x.fin || 0, note: typeof x.note === 'number' ? Math.round(x.note) : null, temps: +x.temps || 0, duree: +x.duree || 0 };
     return r;
   }
+  /* ---------- Rapports de TP (4e : rapport de travail, fiche de fabrication, fiche de dépannage) ----------
+     Le rapport (textes) et ses annexes (dessin de l'atelier, schéma du Banc) vont dans l'onglet « dessins » (D()).
+     Une annexe est une image (data URL) ou un SVG, découpé en morceaux de 40 000 caractères.
+     Le résumé de chaque rapport (« rapres:<mail> ») sert à la liste et au carnet de cotes du prof. */
+  var RAP_TYPES = ['travail', 'fabrication', 'depannage'], RAP_CH = 40000;
+  function rKey(mail, id){ return 'rapport:' + mail + '|' + id; }
+  function rjKey(mail, id, j, k){ return 'rapjoint:' + mail + '|' + id + '|' + j + '|' + k; }
+  function rapNettoye(r){            // les champs de l'élève, bornés ; la partie du prof n'est jamais prise chez l'élève
+    var o = { type: RAP_TYPES.indexOf(r.type) >= 0 ? r.type : 'travail', course: str(r.course, 40) };
+    ['num', 'du', 'au', 'heures'].forEach(function(k){ o[k] = str(r[k], 40); });
+    ['sujet', 'objectifs', 'competences', 'outillage', 'materiel', 'problemes', 'annexe', 'description', 'utilite', 'lieu', 'panne', 'solution', 'pieces'].forEach(function(k){ if (r[k] != null) o[k] = str(r[k], 3000); });
+    o.joints = (Array.isArray(r.joints) ? r.joints : []).slice(0, 8).map(function(j){ return { id: str(j.id, 20), t: str(j.t, 80), src: str(j.src, 20), n: +j.n || 1, mime: str(j.mime, 40) }; });
+    return o;
+  }
+  function rapResume(r){
+    var x = { type: r.type, course: r.course, num: r.num || '', t: str(r.sujet || r.description || r.panne || '', 80), maj: r.maj || 0, remis: r.remis || 0, pub: r.pub || 0 };
+    if (r.prof && r.prof.total != null && r.prof.total !== '') x.note = +r.prof.total;
+    return x;
+  }
+  function rapMaj(mail, id, r){
+    D().set(rKey(mail, id), r, mail);
+    var R = doc('rapres:' + mail, {}) || {}; if (r) R[id] = rapResume(r); else delete R[id];
+    put('rapres:' + mail, R, mail);
+  }
+  function rapLire(mail, id){ var r = D().get(rKey(mail, id)); need(r, 'Rapport introuvable.'); return r; }
+  function rapJoint(mail, id, j, n){ var s = ''; for (var k = 0; k < n; k++){ var v = D().get(rjKey(mail, id, j, k)); if (v == null) break; s += v.d; } return s; }
+  var RAPPORT = {
+    rapportGet: function(me, p){ var r = rapLire(me.mail, str(p.id, 30)); if (!r.pub) delete r.prof; return { ok: true, r: r }; },
+    rapportSave: function(me, p){
+      var id = str(p.id, 30); need(/^[A-Za-z0-9_-]{4,30}$/.test(id), 'Rapport invalide.');
+      var old = D().get(rKey(me.mail, id)); need(!old || !old.remis, 'Rapport remis : il n’est plus modifiable.');
+      var r = rapNettoye(p.r || {}); r.id = id; r.cree = old ? old.cree : deps.now(); r.maj = deps.now();
+      if (old && old.prof) r.prof = old.prof;                      // remarques d'un rapport rendu par le prof
+      if (p.remettre) { r.remis = deps.now(); r.pub = 0; }
+      need(JSON.stringify(r).length <= PLAT.MAX_DOC, 'Rapport trop long.');
+      rapMaj(me.mail, id, r); return { ok: true, remis: r.remis || 0, maj: r.maj };
+    },
+    rapportDel: function(me, p){
+      var id = str(p.id, 30), r = rapLire(me.mail, id); need(!r.remis, 'Rapport remis : demande à ton prof.');
+      (r.joints || []).forEach(function(j){ for (var k = 0; k < (j.n || 1); k++) D().del(rjKey(me.mail, id, j.id, k)); });
+      D().del(rKey(me.mail, id)); var R = doc('rapres:' + me.mail, {}) || {}; delete R[id]; put('rapres:' + me.mail, R, me.mail);
+      return { ok: true };
+    },
+    rapportJoindre: function(me, p){
+      var id = str(p.id, 30), r = rapLire(me.mail, id); need(!r.remis, 'Rapport remis : il n’est plus modifiable.');
+      var data = String(p.data || ''); need(/^(data:image\/(png|jpeg|webp);base64,|<svg)/.test(data), 'Annexe invalide.'); need(data.length <= 12 * RAP_CH, 'Image trop lourde.');
+      r.joints = r.joints || []; need(r.joints.length < 8, '8 annexes au plus.');
+      var j = { id: 'j' + deps.now().toString(36), t: str(p.t || 'Annexe', 80), src: str(p.src, 20), mime: data.charAt(0) === '<' ? 'image/svg+xml' : data.slice(5, data.indexOf(';')), n: Math.ceil(data.length / RAP_CH) };
+      for (var k = 0; k < j.n; k++) D().set(rjKey(me.mail, id, j.id, k), { d: data.slice(k * RAP_CH, (k + 1) * RAP_CH) }, me.mail);
+      r.joints.push(j); r.maj = deps.now(); rapMaj(me.mail, id, r);
+      return { ok: true, joint: j };
+    },
+    rapportJointDel: function(me, p){
+      var id = str(p.id, 30), r = rapLire(me.mail, id); need(!r.remis, 'Rapport remis : il n’est plus modifiable.');
+      var j = (r.joints || []).filter(function(x){ return x.id === p.j; })[0]; need(j, 'Annexe introuvable.');
+      for (var k = 0; k < (j.n || 1); k++) D().del(rjKey(me.mail, id, j.id, k));
+      r.joints = r.joints.filter(function(x){ return x !== j; }); r.maj = deps.now(); rapMaj(me.mail, id, r); return { ok: true };
+    },
+    rapportJoint: function(me, p){      // l'image d'une annexe : la sienne, ou celle d'un élève pour un prof
+      var mail = me.role === 'prof' && p.mail ? str(p.mail, 120).toLowerCase() : me.mail, id = str(p.id, 30), r = rapLire(mail, id);
+      var j = (r.joints || []).filter(function(x){ return x.id === p.j; })[0]; need(j, 'Annexe introuvable.');
+      return { ok: true, data: rapJoint(mail, id, j.id, j.n || 1) };
+    }
+  };
+
   var DESSIN = {
     dessinListe: function(me){
       var o = {}; D().list('dessin:' + me.mail + '|').forEach(function(r){ o[r.key.slice(('dessin:' + me.mail + '|').length)] = (r.value && r.value.maj) || 0; });
@@ -221,6 +286,7 @@ function makeApi(store, deps) {
       out.stage.lieux = out.stage.lieux.filter(function(l){ return Object.keys(out.stage.mine).some(function(k){ return out.stage.mine[k].lieu === l.id; }); });
       out.stage.tel = (doc('stage:tel', {}))[me.mail] || '';
       out.fcor = fcorList(me);
+      out.rapports = doc('rapres:' + me.mail, {}) || {};
       out.bilans = bilanMeta().map(function(b){ var R = doc(bilanRepKey(b.id, me.mail), null) || {};
         b.open = bilanOuvert(b.id, me); b.remis = R.remis || 0; b.pub = R.pub || 0; return b; });
       return out;
@@ -238,7 +304,7 @@ function makeApi(store, deps) {
     out.stage.journal = listDocs('journal:');
     out.fcor = fcorList(me);
     out.bilans = bilanMeta(); out.bilanouv = doc('bilanouv', {});
-    out.dessins = listDocs('dessinres:');
+    out.dessins = listDocs('dessinres:'); out.rapports = listDocs('rapres:');
     if (me.coord) out.invites = invites().map(function(x){ var y = {}; Object.keys(x).forEach(function(k){ if (k !== 'h') y[k] = x[k]; }); return y; });
     var mp = doc('profprog:' + me.mail, null);                 // la progression du prof dans les capsules, remise à zéro chaque année scolaire
     out.myProg = mp && mp.annee === anneeSco(deps.now()) ? mp.prog : null;
@@ -338,7 +404,18 @@ function makeApi(store, deps) {
   /* ---------- actions prof ---------- */
   var PROF = {
     /* le prof qui fait les capsules (aperçu élève) retrouve où il s'est arrêté ; rien ne va dans le suivi ni dans le carnet */
-    dessinRes: function(me){ return { ok: true, dessins: listDocs('dessinres:') }; },   // relu par le carnet de cotes (en direct)
+    rapportProf: function(me, p){ return { ok: true, r: rapLire(str(p.mail, 120).toLowerCase(), str(p.id, 30)) }; },
+    rapportNoter: function(me, p){
+      var mail = str(p.mail, 120).toLowerCase(), id = str(p.id, 30), r = rapLire(mail, id);
+      if (p.rendre) { r.remis = 0; r.pub = 0; rapMaj(mail, id, r); return { ok: true }; }      // rendu à l'élève pour qu'il le complète
+      var q = p.prof || {};
+      r.prof = { remarques: str(q.remarques, 3000), comp: {}, criteres: (Array.isArray(q.criteres) ? q.criteres : []).slice(0, 12).map(function(c){ return [str(c[0], 200), c[1] === '' || c[1] == null ? '' : +c[1], c[2] === '' || c[2] == null ? '' : +c[2]]; }),
+        total: q.total === '' || q.total == null ? '' : Math.max(0, Math.min(100, +q.total)), at: deps.now(), by: me.nom };
+      Object.keys(q.comp || {}).slice(0, 30).forEach(function(k){ if (['NA', 'EV', 'ATT', ''].indexOf(q.comp[k]) >= 0) r.prof.comp[str(k, 4)] = q.comp[k]; });
+      if ('pub' in p) r.pub = p.pub ? deps.now() : 0;
+      rapMaj(mail, id, r); return { ok: true };
+    },
+    dessinRes: function(me){ return { ok: true, dessins: listDocs('dessinres:'), rapports: listDocs('rapres:') }; },   // relu par le carnet de cotes (en direct)
     dessinVoir: function(me, p){
       var v = D().get(dKey(str(p.mail, 120).toLowerCase(), str(p.id, 40))); need(v, 'Planche introuvable.');
       return { ok: true, pl: v };
@@ -501,6 +578,7 @@ function makeApi(store, deps) {
       if (a === 'boot') return { ok: true, data: boot(me) };
       if (a === 'checkMail') { try { var who = identify(p.mail); return { ok: true, res: { ok: true, role: who.role, nom: who.nom } }; } catch (e) { return { ok: true, res: { ok: false, msg: e.message } }; } }
       if (DESSIN[a]) return DESSIN[a](me, p);
+      if (RAPPORT[a]) return RAPPORT[a](me, p);
       if (me.role === 'eleve') { need(ELEVE[a], 'Action non autorisée.'); return ELEVE[a](me, p); }
       if (PROF[a]) return PROF[a](me, p);
       if (COORD[a]) { need(me.coord, 'Réservé au coordinateur.'); return COORD[a](me, p); }

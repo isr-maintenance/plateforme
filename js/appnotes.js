@@ -41,15 +41,15 @@ async function appAppel(app, a){
 /* relit une app (ou l'atelier) ; à la fin, le carnet se redessine s'il est affiché et que rien n'est en cours de saisie */
 async function appCharger(app, force){
   if(AN.charge[app] || (!force && AN.t[app] && Date.now()-AN.t[app] < AN_FRAIS)) return;
-  AN.charge[app]=true; const avant=JSON.stringify(app==='dessin'?S.dessins:AN.data[app]||null);
+  AN.charge[app]=true; const etat=()=>JSON.stringify(app==='dessin'?S.dessins:app==='rapport'?S.rapports:AN.data[app]||null), avant=etat();
   try{
     if(app==='dossier') AN.data.dossier = { eleves: await appAppel('dossier', 'profEleves') };
     else if(app==='banc'){ const d = await appAppel('banc', 'profDonnees'); AN.data.banc = { res: d.resultats || [] }; }
-    else if(app==='dessin'){ const r = await API.call('dessinRes'); if(r.ok) S.dessins = r.dessins || {}; }
+    else if(app==='dessin' || app==='rapport'){ const r = await API.call('dessinRes'); if(r.ok){ S.dessins = r.dessins || {}; if(r.rapports) S.rapports = r.rapports; } }
     AN.err[app]=''; AN.t[app]=Date.now();
   }catch(e){ AN.err[app]=e.message||String(e); AN.t[app]=Date.now(); }
   AN.charge[app]=false;
-  const apres=JSON.stringify(app==='dessin'?S.dessins:AN.data[app]||null);
+  const apres=etat();
   if((avant!==apres || AN.err[app]) && S.tab==='carnet'){ const f=document.activeElement; if(!(f && /INPUT|SELECT|TEXTAREA/.test(f.tagName) && f.closest('#main'))){ const y=window.scrollY; render(); window.scrollTo(0,y); } }
 }
 /* la liste des TP de Dossier TP (titres), lue dans l'app publiée */
@@ -79,6 +79,7 @@ function appScore(e, stud, key){
     Object.values(el.ex||{}).forEach(st=>{ if(!st.remis || !(st.remisLe>=deb && st.remisLe<=fin)) return; const n=dossierPct(st); if(n){ tot+=n.tot; max+=n.max; } else attente=true; });
     return max ? Math.round(tot/max*1000)/10 : attente ? 'wait' : null;
   }
+  if(d.a==='rapport') return typeof rapportScore==='function' ? rapportScore(e, stud, key) : null;
   if(d.a==='banc'){
     const B=AN.data.banc; if(!B) return null;
     const R=B.res.filter(r=>String(r.adresse).toLowerCase()===stud);
@@ -93,15 +94,16 @@ function appScore(e, stud, key){
 }
 function appDesc(e){ const d=e.app||{};
   if(d.a==='dossier') return d.k==='tp' ? 'Dossier TP : correction publiée de ce TP (points / 215)' : 'Dossier TP : moyenne des TP remis pendant la période (points obtenus / total)';
+  if(d.a==='rapport') return `Rapports de TP${d.type?' ('+RAP_TYPES[d.type].nom.toLowerCase()+')':''} : moyenne des notes /100 des rapports remis pendant la période`;
   if(d.a==='banc') return d.k==='defi' ? 'Banc de câblage : défi réussi = 100 %, pas réussi = 0 (pannes : la note /20)' : `Banc de câblage : moyenne de ${(d.ids||[]).length} défis (pas fait = 0)`;
   return ''; }
 
 /* ---------- le carnet : quelles apps relire, et la petite ligne d'état au-dessus du tableau ---------- */
-function appsDuCarnet(key){ const s=new Set(); evalsOf(key).forEach(e=>{ if(e.app) s.add(e.app.a); if(e.dessin) s.add('dessin'); }); return [...s]; }
+function appsDuCarnet(key){ const s=new Set(); evalsOf(key).forEach(e=>{ if(e.app) s.add(e.app.a==='rapport'?'rapport':e.app.a); if(e.dessin) s.add('dessin'); }); return [...s]; }
 function appEtat(key){
   const L=appsDuCarnet(key); if(!L.length) return '';
   L.forEach(a=>appCharger(a));
-  const nom = a => a==='dessin' ? 'Atelier de dessin' : APP_NOTES[a].nom;
+  const nom = a => a==='dessin' ? 'Atelier de dessin' : a==='rapport' ? 'Rapports de TP' : APP_NOTES[a].nom;
   return `<div class="small muted row wrap" style="gap:12px;margin:0 0 8px">${L.map(a=>AN.err[a]?`<span style="color:var(--bad)">⚠ ${esc(nom(a))} : ${esc(AN.err[a])}</span>`:AN.t[a]?`<span>✓ ${esc(nom(a))} lu à ${new Date(AN.t[a]).toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'})}</span>`:`<span>⏳ lecture de ${esc(nom(a))}…</span>`).join('')}
     <button class="btn sm ghost" data-appmaj>↻ Relire maintenant</button><span class="tiny">relu tout seul chaque minute</span></div>`;
 }
@@ -118,11 +120,15 @@ async function ajouterColonneApp(ev, date, apres, co){
     <div class="grid g3" style="gap:8px">
       <button class="card pad" style="text-align:left;cursor:pointer" data-capp="dossier"><b>Dossier TP</b><div class="small muted">la correction d’un TP, ou la moyenne des TP de la période</div></button>
       <button class="card pad" style="text-align:left;cursor:pointer" data-capp="banc"><b>Banc de câblage</b><div class="small muted">un défi, ou plusieurs défis (réussi ou pas, note des pannes)</div></button>
+      ${typeof RAP_COURS==='function' && RAP_COURS().includes(co)?`<button class="card pad" style="text-align:left;cursor:pointer" data-capp="rapport"><b>Rapports de TP</b><div class="small muted">la moyenne des rapports notés de la période</div></button>`:''}
       <button class="card pad" style="text-align:left;cursor:pointer" data-capp="dessin"><b>Atelier de dessin</b><div class="small muted">un exercice, une série ou un examen${meca?'':' (cours de mécanique)'}</div></button>
     </div><div data-cappz style="margin-top:12px"></div>`, {wide:true});
   const z=md.querySelector('[data-cappz]');
   const ajouter=(lib, app)=>{ ev.push({ id:'Ap'+Date.now().toString(36).slice(-4), lib, app, src:'app', orig:100, total:20, seuil:10, poids:1, date }); closeModal(); apres(); toast('Colonne ajoutée : règle la date, les points et le poids'); };
   md.querySelector('[data-capp="dessin"]').onclick=()=>{ closeModal(); ajouterColonneDessin(ev, date, apres); };
+  const crp=md.querySelector('[data-capp="rapport"]'); if(crp) crp.onclick=()=>{ z.innerHTML=`<label class="small">Quels rapports ? <select data-rtype><option value="">tous</option>${Object.entries(RAP_TYPES).map(([k,t])=>`<option value="${k}">${esc(t.nom)}</option>`).join('')}</select></label>
+      <p class="tiny muted">La note de chaque rapport est le TOTAL /100 que tu donnes en le corrigeant ; la colonne fait la moyenne des rapports remis pendant la période de la colonne.</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-dok>Ajouter la colonne</button></div>`;
+    z.querySelector('[data-dok]').onclick=()=>{ const type=z.querySelector('[data-rtype]').value; ajouter('Rapports de TP'+(type?' : '+RAP_TYPES[type].court.toLowerCase():''), Object.assign({a:'rapport'}, type?{type}:{})); }; };
   md.querySelector('[data-capp="dossier"]').onclick=async()=>{ z.innerHTML='<p class="small muted">Lecture de la liste des TP…</p>';
     let L=[]; try{ L=(await dossierTPs()).slice(); }catch(e){}
     await appCharger('dossier', true);   // + les TP créés dans l'app (onglet Exercices), vus dans les dossiers des élèves

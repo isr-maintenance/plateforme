@@ -8,6 +8,7 @@
    retrouve sur un autre appareil, et le prof voit les scores dans son carnet
    de cotes. Sans connexion, tout reste dans le navigateur, comme avant.
      #/dessin/voir/<adresse>/<planche>  (prof) ouvre une copie de la planche d'un élève
+     #/dessin/rapport/<rapport>/<titre>  planche vierge (3 vues) liée à un rapport de TP : bouton « Joindre au rapport »
    ===================================================================== */
 import { stockage, surEcriture, toast, esc } from './utils.js';
 
@@ -102,6 +103,47 @@ async function ouvrirCopie(mail, id) {
   setTimeout(() => toast(`Planche de ${mail.split('@')[0].replace(/\.student$/, '').split('.').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} : copie de consultation (tes changements ne lui sont pas envoyés).`, 7000), 600);
 }
 
+/* ---------- rapport de TP : une planche vierge liée au rapport, puis « Joindre au rapport » ---------- */
+let rapportCourant = null;   // { rid, titre, planche }
+function ouvrirPourRapport(rid, titre) {
+  const lien = stockage.lire('rapport.' + rid, ''), t = stockage.lire(CLE, {}) || {};
+  let id = lien && t[lien] ? lien : '';
+  if (!id) {
+    id = `p${Date.now().toString(36)}r`;
+    t[id] = { v: 1, format: 'A4', orientation: 'paysage', echelle: '1:1', grille: true, entites: [], maj: Date.now(),
+      cartouche: { titre: String(titre || 'Rapport de TP').slice(0, 31), auteur: moi ? moi.nom : '', classe: moi && moi.classe ? moi.classe.toUpperCase() : '', numero: '' } };
+    stockage.ecrire(CLE, t); stockage.ecrire('rapport.' + rid, id);
+  }
+  stockage.ecrire(COURANTE, id); rapportCourant = { rid, titre, planche: id };
+  location.replace('#/dessin/libre');
+  boutonJoindre();
+}
+/** La planche ouverte, en SVG autonome (styles recopiés), à la taille de la feuille en mm. */
+function planchePourRapport() {
+  const svg = document.querySelector('.dao-svg'); if (!svg) return null;
+  const t = stockage.lire(CLE, {}) || {}, p = t[stockage.lire(COURANTE, '')] || {};
+  const F = { A4: [210, 297], A3: [297, 420] }[p.format] || [210, 297], [W, H] = p.orientation === 'portrait' ? F : [F[1], F[0]];
+  const copie = svg.cloneNode(true), a = [svg, ...svg.querySelectorAll('*')], b = [copie, ...copie.querySelectorAll('*')];
+  const PROPS = ['stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'stroke-linejoin', 'fill', 'fill-opacity', 'opacity', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor', 'dominant-baseline', 'visibility', 'display'];
+  a.forEach((e, i) => { const cs = getComputedStyle(e); b[i].setAttribute('style', PROPS.map((k) => `${k}:${cs.getPropertyValue(k)}`).join(';')); });
+  for (const n of ['grille', 'curseur', 'apercu', 'correction', 'ombre']) copie.querySelectorAll(`.dao-${n}`).forEach((x) => x.remove());
+  copie.setAttribute('viewBox', `0 0 ${W} ${H}`); copie.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  copie.removeAttribute('class'); copie.setAttribute('style', 'background:#fff'); copie.setAttribute('width', `${W}mm`); copie.setAttribute('height', `${H}mm`);
+  return new XMLSerializer().serializeToString(copie);
+}
+function boutonJoindre() {
+  const zone = document.querySelector('.top-actions'); if (!zone || !rapportCourant) return;
+  let b = document.getElementById('pf-joindre');
+  if (!b) { b = document.createElement('button'); b.id = 'pf-joindre'; b.type = 'button'; b.className = 'btn primary'; b.textContent = '📎 Joindre au rapport'; b.title = 'Ajoute ce dessin aux annexes de ton rapport de TP'; zone.prepend(b); }
+  b.onclick = () => {
+    if (stockage.lire(COURANTE, '') !== rapportCourant.planche) { toast('Ouvre la planche du rapport avant de la joindre.'); return; }
+    const data = planchePourRapport(); if (!data) { toast('Ouvre la planche avant de la joindre.'); return; }
+    if (data.length > 450000) { toast('Dessin trop lourd pour le rapport : simplifie-le (hachures, textes).', 6000); return; }
+    window.parent.postMessage({ src: 'atelier', type: 'joindre', rid: rapportCourant.rid, t: 'Dessin : ' + rapportCourant.titre, data }, location.origin);
+    toast('Dessin envoyé dans ton rapport de TP.');
+  };
+}
+
 export async function demarrerPlateforme() {
   const A = API_(); if (!A) return;
   A.readHash();                                   // retour de la connexion Google (#t=…)
@@ -118,6 +160,8 @@ export async function demarrerPlateforme() {
     if (file.size || suppr.size) planifier();
   });
   window.addEventListener('beforeunload', (e) => { if (minuterie) { e.preventDefault(); e.returnValue = ''; } });
+  const rp = /^#\/dessin\/rapport\/([^/]+)(?:\/(.*))?$/.exec(location.hash);
+  if (rp && window.parent !== window) ouvrirPourRapport(decodeURIComponent(rp[1]), decodeURIComponent(rp[2] || ''));
   const v = /^#\/dessin\/voir\/([^/]+)\/([^/]+)$/.exec(location.hash);
   if (v && moi.role === 'prof') await ouvrirCopie(decodeURIComponent(v[1]), decodeURIComponent(v[2]));
 }

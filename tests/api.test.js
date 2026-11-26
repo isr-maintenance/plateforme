@@ -323,3 +323,26 @@ console.log(`✓ ${n} vérifications réussies`);
   ok(H(co, 'dessinRes').dessins[e1].pexam.ex.note === 64 && H(e1, 'dessinRes').ok === false, 'le carnet relit les résumés (prof seulement)');
   ok(H(e1, 'dessinDel', { id: 'pabc1' }).ok && !d12.get('dessin:' + e1 + '|pabc1') && !s12.get('dessinres:' + e1).pabc1, 'planche supprimée partout');
   console.log(`✓ ${n} vérifications réussies (avec Atelier de dessin)`); }
+
+// Rapports de TP : l'élève remplit et remet, annexes découpées, le prof note et publie
+{ const s13 = memStore(), d13 = memStore(), a13 = ctx.makeApi(s13, Object.assign({}, deps, { dessins: () => d13 })); a13.install('olivier.lesenfants@elmarche.be','O. Lesenfants');
+  const H = (m, a, p) => a13.handle({ t: a13.makeToken(m), a, p }), co = 'olivier.lesenfants@elmarche.be', e1 = 'zoe.c.student@elmarche.be', e2 = 'max.d.student@elmarche.be';
+  H(e1, 'setClasse', { classe: '4eqem' }); H(e2, 'setClasse', { classe: '4eqem' });
+  ok(H(e1, 'rapportSave', { id: 'r1abc', r: { type: 'fabrication', course: '4eqem-tpem', description: 'Support de moteur', prof: { total: 100 } } }).ok, 'l’élève enregistre son rapport');
+  ok(!d13.get('rapport:' + e1 + '|r1abc').prof && s13.get('rapres:' + e1).r1abc.t === 'Support de moteur', 'pas de note venue de l’élève ; résumé dans les données');
+  const img = 'data:image/jpeg;base64,' + 'A'.repeat(90000);
+  let r = H(e1, 'rapportJoindre', { id: 'r1abc', data: img, t: 'Schéma du Banc', src: 'banc' }); ok(r.ok && r.joint.n === 3, 'annexe découpée en 3 morceaux');
+  ok(H(e1, 'rapportJoint', { id: 'r1abc', j: r.joint.id }).data === img, 'annexe relue entière');
+  ok(H(e1, 'rapportJoindre', { id: 'r1abc', data: 'javascript:alert(1)' }).ok === false, 'annexe qui n’est pas une image refusée');
+  ok(H(e2, 'rapportGet', { id: 'r1abc' }).ok === false && H(e2, 'rapportJoint', { mail: e1, id: 'r1abc', j: r.joint.id }).ok === false, 'un autre élève ne voit rien');
+  ok(H(e1, 'rapportNoter', { mail: e1, id: 'r1abc', prof: { total: 100 } }).ok === false, 'l’élève ne se note pas');
+  ok(H(e1, 'rapportSave', { id: 'r1abc', r: { type: 'fabrication', course: '4eqem-tpem', description: 'Support de moteur', joints: d13.get('rapport:' + e1 + '|r1abc').joints }, remettre: true }).remis > 0, 'rapport remis');
+  ok(H(e1, 'rapportSave', { id: 'r1abc', r: { description: 'x' } }).ok === false && H(e1, 'rapportDel', { id: 'r1abc' }).ok === false, 'remis : plus modifiable ni supprimable');
+  ok(H(co, 'boot').data.rapports[e1].r1abc.remis > 0, 'le prof voit le rapport remis');
+  ok(H(co, 'rapportJoint', { mail: e1, id: 'r1abc', j: r.joint.id }).data.length === img.length, 'le prof voit l’annexe');
+  ok(H(co, 'rapportNoter', { mail: e1, id: 'r1abc', prof: { remarques: 'Bon travail', criteres: [['Cotes respectées', 18, 20]], total: 84, comp: { 0: 'ATT' } } }).ok, 'le prof note');
+  ok(H(e1, 'rapportGet', { id: 'r1abc' }).r.prof === undefined && s13.get('rapres:' + e1).r1abc.note === 84, 'note pas publiée : l’élève ne la voit pas');
+  H(co, 'rapportNoter', { mail: e1, id: 'r1abc', prof: { remarques: 'Bon travail', total: 84 }, pub: true });
+  ok(H(e1, 'rapportGet', { id: 'r1abc' }).r.prof.total === 84, 'note publiée : l’élève la voit');
+  ok(H(co, 'rapportNoter', { mail: e1, id: 'r1abc', rendre: true }).ok && H(e1, 'rapportSave', { id: 'r1abc', r: { type: 'fabrication', description: 'Support corrigé' } }).ok, 'rapport rendu : l’élève peut le compléter');
+  console.log(`✓ ${n} vérifications réussies (avec rapports de TP)`); }
