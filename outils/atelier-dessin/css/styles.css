@@ -1221,3 +1221,8 @@ label.cgu-ok input{margin-top:3px}
 .pf-compte .pf-etat{color:var(--muted,#667);font-size:12px}
 .pf-compte .pf-etat.err{color:#c0392b}
 @media (max-width:600px){.pf-compte .pf-nom{display:none}}
+
+/* type de trait de la sélection (barre de sélection) */
+.dao-seltrait{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;padding-left:6px;border-left:1px solid var(--border)}
+.dao-seltrait[hidden]{display:none}
+.dao-seltrait-t{font-weight:600;font-size:13px}

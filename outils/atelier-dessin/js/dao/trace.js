@@ -27,6 +27,7 @@ import { ajuster, prolonger, chanfrein, conge } from './construction.js';
 import { regionAutour, svgHachure, svgTexte } from './hachures.js';
 import { tousLesPoints, accrocher, intersections, ortho, lireSaisie, angleDe, surCercle, arcNormal, dist, arrondi, mesure, EPS } from './geom.js';
 
+const TRAITS = new Set(['l', 'c', 'a']);   // entités qui ont un type de trait modifiable
 export const STYLES = {
   v: { nom: 'Fort', titre: 'Trait fort : arête vue (F)', touche: 'f' },
   n: { nom: 'Fin', titre: 'Trait fin : construction, cotes (N)', touche: 'n' },
@@ -703,6 +704,7 @@ export function creerTraceur(o) {
       annuler: st.hist.length > 0 || st.pts.length > 0, retablir: st.refaire.length > 0,
       sel: st.sel.size, op: st.op, coteK: st.coteK, param: st.param,
       dim: dimSelection(),
+      selStyles: [...new Set([...st.sel].map((i) => entites()[i]).filter((e) => e && TRAITS.has(e.t)).map((e) => e.s || 'v'))],   // types de trait de la sélection
       attente: attente(),
       enCours: st.pts.length > 0 || !!st.cible || !!st.op,
     });
@@ -871,7 +873,8 @@ export function creerTraceur(o) {
     o.surOutil?.(t); apercu();
   }
   function choisirStyle(s) {
-    if (st.outil === 'selection' && st.sel.size) { changer(entites().map((e, i) => (st.sel.has(i) ? { ...e, s } : e))); return; }
+    // sélection : seuls les traits (lignes, cercles, arcs) changent de type ; cotes, textes et hachures gardent le leur
+    if (st.outil === 'selection' && st.sel.size) { changer(entites().map((e, i) => (st.sel.has(i) && TRAITS.has(e.t) ? { ...e, s } : e))); return; }
     st.style = s; o.surStyle?.(s); apercu();
   }
 

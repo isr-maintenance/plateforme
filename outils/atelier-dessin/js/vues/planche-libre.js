@@ -508,8 +508,8 @@ function monterPage(el, remonter) {
           <button class="btn dao-b" type="button" data-op="copier" title="Copier la sélection (point de base, puis une ou plusieurs destinations)">Copier</button>
           <button class="btn dao-b" type="button" data-op="miroir" title="Symétrie de la sélection par rapport à un axe (2 points)">Miroir</button>
           <span class="dao-dim" hidden><label class="dao-choix"><span class="dao-dim-nom">Longueur</span><input class="field dao-dim-v" type="number" step="0.5" min="0.1" style="width:80px"></label><label class="dao-choix dao-dim-a"><span>Angle °</span><input class="field dao-dim-ang" type="number" step="1" style="width:70px"></label><button class="btn dao-b" type="button" data-dim="ok" title="Appliquer (Entrée) : le bout le plus proche de ton clic se déplace">OK</button></span>
+          <span class="dao-seltrait"><span class="dao-seltrait-t">Trait :</span>${Object.entries(STYLES).filter(([k]) => k !== 'b' || (p.exo?.mode === 'completer' && EXERCICES.find((x) => x.id === p.exo.cat)?.piece?.arete)).map(([k, o]) => `<button class="btn dao-b" type="button" data-selstyle="${k}" title="Passer la sélection en ${esc(o.titre.charAt(0).toLowerCase() + o.titre.slice(1))}"><svg viewBox="0 0 34 10" class="dao-ech"><line class="dao-ech-${k}" x1="2" y1="5" x2="32" y2="5"/></svg><span>${esc(o.nom)}</span></button>`).join('')}</span>
           <button class="btn dao-b bad" type="button" data-op="supprimer" title="Supprimer la sélection (Suppr)">${icone('croix')}<span>Supprimer</span></button>
-          <span class="muted">Un type de trait choisi ci-dessus s'applique à la sélection.</span>
         </div>
         <div class="panel dao-piece" hidden>
           <div class="dao-piece-t" title="Glisse ici pour déplacer la fenêtre"><b class="dao-piece-nom"></b>
@@ -641,6 +641,8 @@ function monterPage(el, remonter) {
         } }
       selbar.hidden = !i.sel; selN.textContent = `${i.sel} élément${i.sel > 1 ? 's' : ''} sélectionné${i.sel > 1 ? 's' : ''} :`;
       selbar.querySelectorAll('[data-op]').forEach((b) => b.classList.toggle('on', b.dataset.op === i.op));
+      { const st = i.selStyles || []; const z = selbar.querySelector('.dao-seltrait'); z.hidden = !st.length;   // type de trait de la sélection (en surbrillance)
+        z.querySelectorAll('[data-selstyle]').forEach((b) => b.classList.toggle('on', st.length === 1 && b.dataset.selstyle === st[0])); }
     },
   });
   { // longueur / Ø / R d'un trait sélectionné
@@ -666,6 +668,7 @@ function monterPage(el, remonter) {
     }
   });
   selbar.addEventListener('click', (ev) => {
+    const t = ev.target.closest('[data-selstyle]'); if (t) { traceur.choisirStyle(t.dataset.selstyle); return; }   // fort, fin, interrompu, mixte…
     const b = ev.target.closest('[data-op]'); if (!b) return;
     if (b.dataset.op === 'supprimer') traceur.supprimerSelection(); else traceur.lancerOp(b.dataset.op);
   });
