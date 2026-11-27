@@ -55,7 +55,7 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
 
 ## La calculatrice (bouton 🧮)
 
-- `js/calculette.js` : calculatrice scientifique flottante, disposition proche de la calculatrice de classe (SHIFT, DEG, ENG, x², √, xʸ, sin/cos/tan et inverses, log, ln, ×10ˣ, Ans, ▲ calculs précédents, ⤵ recopie dans la dernière case cliquée). Calcul sans `eval` (`calcEval`), degrés par défaut, virgule décimale.
+- `js/calculette.js` : calculatrice scientifique flottante, disposition proche de la calculatrice de classe (SHIFT, DEG, ENG, x², √, exposant x▫ affiché en hauteur, fraction ▫/▫ empilée (numérateur → dénominateur → sortie), sin/cos/tan et inverses, log, ln, ×10ˣ, Ans, ▲ calculs précédents, ⤵ recopie dans la dernière case cliquée). Calcul sans `eval` (`calcEval`), degrés par défaut, virgule décimale.
 - Bouton `calcBtn()` (attribut `data-calc`, ouvert par un écouteur global) : en-tête des capsules, tableaux en quatre colonnes, évaluations en ligne. Sur téléphone, elle s'ouvre en bas de l'écran.
 
 ## Refaire une capsule (bouton ↺)

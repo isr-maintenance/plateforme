@@ -3,10 +3,11 @@
    Bouton « 🧮 Calculatrice » dans les capsules, les tableaux d'exercices et les évaluations : openCalc().
    Calcul sans eval : analyse de l'expression (priorités, parenthèses, multiplication implicite « 2π », « 3(4+1) »).
    Degrés par défaut (DEG), comme la calculatrice de classe ; SHIFT donne les fonctions inverses.
+   Fraction (touche ▫/▫) : numérateur, dénominateur, sortie ; affichée empilée. Exposant x▫ : 2^4, 10^(−3), affiché en hauteur.
    « ENG » écrit le résultat en puissances de 10 multiples de 3 (milli, kilo…) ; « Insérer » le recopie
    dans la dernière case d'exercice où l'élève a cliqué, avec une virgule.
    ========================================================= */
-const CALC = { expr:'', res:null, ans:0, shift:false, eng:false, rad:false, hist:[], hi:-1, el:null, cible:null, err:'' };
+const CALC = { frac:0, expr:'', res:null, ans:0, shift:false, eng:false, rad:false, hist:[], hi:-1, el:null, cible:null, err:'' };
 document.addEventListener('focusin', e=>{ const t=e.target; if(t && t.matches && t.matches('#main input[type=text], #main input:not([type]), #main input[inputmode], #main textarea') ) CALC.cible=t; });
 
 /* ---------- le calcul ---------- */
@@ -74,9 +75,9 @@ const calcBrut = v => `${+v.toPrecision(10)}`.replace('.',',').replace(/e\+?/,'E
 /* ---------- la fenêtre ---------- */
 const CALC_TOUCHES = [
   [['SHIFT','shift','fn sh'],['DEG','mode','fn'],['ENG','eng','fn'],['▲','hist','fn'],['⤵','ins','fn ins']],
-  [['x²','²','fn','x³','³'],['√','sqrt(','fn','∛','cbrt('],['xʸ','^','fn','ⁿ√ (écris x^(1/n))','^(1/'],['x⁻¹','⁻¹','fn','x!','!'],['log','log(','fn','10ˣ','exp10(']],
+  [['x²','²','fn','x³','³'],['√','sqrt(','fn','∛','cbrt('],['x<i class="calc-cx"></i>','^','fn','ⁿ√ (écris x^(1/n))','^(1/'],['x⁻¹','⁻¹','fn','x!','!'],['log','log(','fn','10ˣ','exp10(']],
   [['sin','sin(','fn','sin⁻¹','asin('],['cos','cos(','fn','cos⁻¹','acos('],['tan','tan(','fn','tan⁻¹','atan('],['ln','ln(','fn','eˣ','exp('],['(−)','-','fn']],
-  [['(','(','fn'],[')',')','fn'],['π','π','fn'],['%','%','fn'],['e','ℯ','fn']],
+  [['<span class="calc-fr"><i>▫</i><i>▫</i></span>','frac','fn','%','%'],['(','(','fn'],[')',')','fn'],['π','π','fn'],['e','ℯ','fn']],
   [['7','7'],['8','8'],['9','9'],['DEL','del','del'],['AC','ac','ac']],
   [['4','4'],['5','5'],['6','6'],['×','×','op'],['÷','÷','op']],
   [['1','1'],['2','2'],['3','3'],['+','+','op'],['−','−','op']],
@@ -88,7 +89,7 @@ function openCalc(){
   w.innerHTML=`<div class="calc-h"><span class="calc-marque">CALCULATRICE</span><span class="calc-mod">scientifique</span><button class="calc-x" data-cx type="button" aria-label="Fermer">✕</button></div>
     <div class="calc-ecran"><div class="calc-ind"><span data-ci-s></span><span data-ci-m>D</span><span data-ci-e></span></div><div class="calc-expr" data-cexpr></div><div class="calc-res" data-cres></div></div>
     <p class="calc-aide">▲ calculs précédents · ⤵ recopie le résultat dans la case où tu étais</p>
-    <div class="calc-k">${CALC_TOUCHES.map(r=>r.map(([l,v,cl,sl,sv])=>`<button type="button" class="calc-b ${cl||'ch'}" data-ck="${esc(v)}" ${sv?`data-sk="${esc(sv)}"`:''}>${sl?`<small>${esc(sl.split(' ')[0])}</small>`:''}${esc(l)}</button>`).join('')).join('')}</div>`;
+    <div class="calc-k">${CALC_TOUCHES.map(r=>r.map(([l,v,cl,sl,sv])=>`<button type="button" class="calc-b ${cl||'ch'}" data-ck="${esc(v)}" ${sv?`data-sk="${esc(sv)}"`:''} ${v==='frac'?'title="Fraction : appuie pour le numérateur, encore pour le dénominateur, encore pour sortir"':v==='^'?'title="Exposant : x puis l’exposant (4, 5, −2…)"':''}>${sl?`<small>${esc(sl.split(' ')[0])}</small>`:''}${/<(i|span)[ >]/.test(l)?l:esc(l)}</button>`).join('')).join('')}</div>`;
   document.body.appendChild(w); CALC.el=w;
   /* position gardée d'une fois à l'autre */
   let pos=null; try{ pos=JSON.parse(localStorage.getItem('plateforme-calc')||'null'); }catch(e){}
@@ -112,12 +113,22 @@ function calcTouche(v, base){
   if(v==='shift'){ C.shift=!C.shift; return calcAff(); }
   if(v==='mode'){ C.rad=!C.rad; return calcAff(); }
   if(v==='eng'){ C.eng=!C.eng; return calcAff(); }
-  if(v==='ac'){ C.expr=''; C.res=null; C.err=''; return calcAff(); }
-  if(v==='del'){ if(C.res!=null && !C.err){ C.res=null; } else { const m=C.expr.match(/(asin\(|acos\(|atan\(|sqrt\(|cbrt\(|exp10\(|exp\(|sin\(|cos\(|tan\(|log\(|ln\(|Ans|⁻¹|.)$/); C.expr=m?C.expr.slice(0,-m[0].length):''; } C.err=''; return calcAff(); }
+  if(v==='ac'){ C.expr=''; C.res=null; C.err=''; C.frac=0; return calcAff(); }
+  if(v==='frac'){
+    if(C.res!=null && !C.err){ C.expr='Ans'; C.res=null; }
+    C.err='';
+    if(C.frac===1){ C.expr+=')÷('; C.frac=2; }                     // numérateur fini : au dénominateur
+    else if(C.frac===2){ C.expr+=')'; C.frac=0; }                  // on sort de la fraction
+    else { const m=C.expr.match(/(Ans|π|ℯ|[0-9,]+)$/);              // un nombre déjà tapé devient le numérateur
+      if(m){ C.expr=C.expr.slice(0,-m[0].length)+'('+m[0]+')÷('; C.frac=2; } else { C.expr+='('; C.frac=1; } }
+    return calcAff();
+  }
+  if(v==='del'){ if(C.expr.endsWith(')÷(')){ C.expr=C.expr.slice(0,-3); C.frac=1; C.err=''; return calcAff(); } if(C.expr.endsWith('(') && C.frac===1) C.frac=0; if(C.res!=null && !C.err){ C.res=null; } else { const m=C.expr.match(/(asin\(|acos\(|atan\(|sqrt\(|cbrt\(|exp10\(|exp\(|sin\(|cos\(|tan\(|log\(|ln\(|Ans|⁻¹|.)$/); C.expr=m?C.expr.slice(0,-m[0].length):''; } C.err=''; return calcAff(); }
   if(v==='hist') return calcHist();
   if(v==='ins') return calcInserer();
   if(v==='eq'){
     if(!C.expr.trim()) return;
+    C.frac=0;
     try{ C.res=calcEval(C.expr, C.ans, C.rad); C.err=''; C.ans=C.res; C.hist.unshift([C.expr, C.res]); C.hist=C.hist.slice(0,20); C.hi=-1; }
     catch(e){ C.err=e.message||'Erreur'; C.res=null; }
     return calcAff();
@@ -125,14 +136,32 @@ function calcTouche(v, base){
   if(C.res!=null && !C.err){ C.expr = /^[×÷+−^²³%!]|^⁻¹|^E/.test(v) ? 'Ans' : ''; C.res=null; }   // après « = » : une opération continue avec Ans, un nombre recommence
   C.err=''; C.expr+=v; calcAff();
 }
-const calcJoli = s => esc(s).replace(/asin\(/g,'sin⁻¹(').replace(/acos\(/g,'cos⁻¹(').replace(/atan\(/g,'tan⁻¹(').replace(/sqrt\(/g,'√(').replace(/cbrt\(/g,'∛(').replace(/exp10\(/g,'10^(').replace(/exp\(/g,'e^(').replace(/E/g,'×10^').replace(/\^/g,'<span class="calc-pow">^</span>');
+const calcJoliLin = s => esc(s).replace(/asin\(/g,'sin⁻¹(').replace(/acos\(/g,'cos⁻¹(').replace(/atan\(/g,'tan⁻¹(').replace(/sqrt\(/g,'√(').replace(/cbrt\(/g,'∛(').replace(/exp10\(/g,'10^(').replace(/exp\(/g,'e^(').replace(/E/g,'×10^').replace(/\^/g,'<span class="calc-pow">^</span>');
+/* l'écran : « (A)÷(B » s'affiche en fraction empilée, « x^4 », « x^(−2) », « 10^n » en exposant */
+function calcJoli(s){
+  const ferme = (t, i) => { let n=0; for(let k=i;k<t.length;k++){ if(t[k]==='(') n++; else if(t[k]===')'){ n--; if(!n) return k; } } return -1; };   // parenthèse qui ferme celle en i (-1 : pas encore fermée)
+  let out='', i=0;
+  while(i<s.length){
+    if(s[i]==='('){ const j=ferme(s,i);
+      if(j>=0 && s.slice(j+1,j+3)==='÷('){ const k=ferme(s,j+2), den=k>=0?s.slice(j+3,k):s.slice(j+3);
+        out+=`<span class="calc-f"><span>${calcJoli(s.slice(i+1,j))||'▫'}</span><span>${calcJoli(den)||'▫'}</span></span>`; i = k>=0 ? k+1 : s.length; continue; }
+      if(j<0 && i===s.length-1){ out+='('; i++; continue; } }
+    if(s[i]==='^' || s[i]==='E'){ if(s[i]==='E') out+='×10'; let j=i+1, exp='';
+      if(s[j]==='('){ const k=ferme(s,j); exp = k>=0 ? s.slice(j,k+1) : s.slice(j); j = k>=0 ? k+1 : s.length; }
+      else { const m=s.slice(j).match(/^[−-]?(?:[0-9,]+|π|ℯ|Ans)?/); exp=m[0]; j+=exp.length; }
+      out+=`<sup class="calc-e">${exp?calcJoli(exp):'▫'}</sup>`; i=j; continue; }
+    const m=s.slice(i).match(/^(asin\(|acos\(|atan\(|sqrt\(|cbrt\(|exp10\(|exp\(|Ans|E|.)/);
+    out+=calcJoliLin(m[0]); i+=m[0].length;
+  }
+  return out;
+}
 function calcAff(){
   const w=CALC.el; if(!w) return;
   w.querySelector('[data-cexpr]').innerHTML = calcJoli(CALC.expr) + '<span class="calc-cur">▏</span>';
   w.querySelector('[data-cres]').innerHTML = CALC.err ? `<span class="calc-err">${esc(CALC.err)}</span>` : CALC.res!=null ? calcFmt(CALC.res, CALC.eng) : '';
   w.querySelector('[data-ci-s]').textContent = CALC.shift ? 'S' : '';
   w.querySelector('[data-ci-m]').textContent = CALC.rad ? 'R' : 'D';
-  w.querySelector('[data-ci-e]').textContent = CALC.eng ? 'ENG' : '';
+  w.querySelector('[data-ci-e]').textContent = (CALC.eng ? 'ENG ' : '') + (CALC.frac===1 ? 'numérateur' : CALC.frac===2 ? 'dénominateur' : '');
   w.classList.toggle('sh', CALC.shift);
 }
 function calcInserer(){
