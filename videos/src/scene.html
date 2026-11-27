@@ -1,0 +1,181 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#0f131a}svg{display:block}text{font-family:'Inter','Roboto','DejaVu Sans',sans-serif}
+</style></head><body><svg id="s" xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720"></svg>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const C={bg:'#0f131a',panel:'#171c25',panel2:'#1c222d',line:'#2a3240',ink:'#e9edf3',muted:'#98a2b3',blue:'#5b9bf5',blueSoft:'#1b2a44',amber:'#f5b82e',amberSoft:'#3a2f12',green:'#45c47e',copper:'#d68a4c',red:'#ff6b5f'};
+const svg=document.getElementById('s');
+function el(tag,a,parent,txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.innerHTML=txt;(parent||svg).appendChild(e);return e;}
+const ease=x=>{x=Math.max(0,Math.min(1,x));return 1-Math.pow(1-x,3)};
+const sup=(t)=>`<tspan baseline-shift="super" font-size="70%">${t}</tspan>`;
+const sub=(t)=>`<tspan baseline-shift="sub" font-size="70%">${t}</tspan>`;
+function T(p,x,y,txt,size,fill,opt){opt=opt||{};return el('text',Object.assign({x,y,'font-size':size,fill:fill||C.ink,'font-weight':opt.w||600,'text-anchor':opt.a||'start'},opt.extra||{}),p,txt);}
+function box(p,x,y,w,h,fill,stroke,r){return el('rect',{x,y,width:w,height:h,rx:r==null?16:r,fill,stroke:stroke||'none','stroke-width':2},p);}
+/* alpha d'un élément apparu au segment k (retard at, en s) */
+window.maxAt=0;
+function mk(seg,t){window.maxAt=0;return (k,at)=>{at=at||0;if(k<seg)return 1;if(k>seg)return 0;window.maxAt=Math.max(window.maxAt,at);return ease((t-at)/0.55);};}
+function grp(a,dy){const g=el('g',{opacity:a,transform:`translate(0 ${(1-a)*(dy==null?14:dy)})`});return g;}
+/* particules en boucle : période 0,5 s */
+function flow(p,x0,x1,y,spacing,r,fill,ph,glyph,band){const L=x1-x0;const n=Math.ceil(L/spacing)+1;for(let i=0;i<n;i++){let x=x0+((i*spacing+ph*spacing)%(n*spacing));if(x>x1)x-=n*spacing;if(x<x0||x>x1)continue;
+  el('circle',{cx:x,cy:y,r,fill},p);if(glyph)T(p,x,y+5,'−',r*1.5,'#3a2f12',{a:'middle',w:800});}}
+function tube(p,x,y,w,h,fill,stroke){box(p,x,y,w,h,fill,stroke,h/2);}
+function arrow(p,x1,y1,x2,y2,col,w){el('line',{x1,y1,x2,y2,stroke:col,'stroke-width':w||5,'stroke-linecap':'round'},p);const a=Math.atan2(y2-y1,x2-x1),s=16;el('path',{d:`M${x2} ${y2} L${x2-s*Math.cos(a-0.45)} ${y2-s*Math.sin(a-0.45)} L${x2-s*Math.cos(a+0.45)} ${y2-s*Math.sin(a+0.45)} Z`,fill:col},p);}
+function chip(p,x,y,w,txt,fill,col,size){box(p,x,y,w,50,fill,'none',25);T(p,x+w/2,y+34,txt,size||26,col,{a:'middle',w:700});}
+
+/* ================= SCÈNES ================= */
+const SC={};
+SC.titre=(p,A,ph)=>{
+  let g=grp(A(0,0));p.appendChild(g);
+  T(g,640,250,'La quantité d’électricité',72,C.ink,{a:'middle',w:800});
+  T(g,640,310,'Ce que c’est · comment la calculer · ses unités',30,C.muted,{a:'middle',w:500});
+  g=grp(A(0,0.5));p.appendChild(g);
+  chip(g,330,400,170,'Q = I . t',C.blueSoft,C.blue,30);chip(g,530,400,150,'coulomb',C.amberSoft,C.amber,26);chip(g,710,400,230,'ampère-heure',C.amberSoft,C.amber,26);
+  // batterie
+  box(g,520,490,240,100,'none',C.ink,14);box(g,760,520,18,40,C.ink,'none',4);
+  for(let i=0;i<4;i++)box(g,534+i*56,504,46,72,i<3?C.green:C.line,'none',8);
+  T(g,640,640,'Chapitre 6 · Ampère & Fils',24,C.muted,{a:'middle',w:500});
+};
+function pipePanel(p,x,y,w,title,sub1){box(p,x,y,w,330,C.panel,C.line,22);T(p,x+w/2,y+52,title,32,C.ink,{a:'middle',w:700});}
+SC.analogie=(p,A,ph)=>{
+  let g=grp(A(1,0));p.appendChild(g);
+  pipePanel(g,70,130,520,'Courant d’eau');
+  tube(g,100,300,460,90,'#10233f',C.blue);flow(g,125,535,345,52,13,'#7cb4ff',ph);
+  arrow(g,150,430,500,430,C.blue,5);
+  T(g,330,495,'Débit : m'+sup('3')+' par seconde',30,C.blue,{a:'middle',w:600});
+  g=grp(A(2,0));p.appendChild(g);
+  pipePanel(g,690,130,520,'Courant électrique');
+  tube(g,720,300,460,90,'#4a2a12',C.copper);flow(g,745,1155,345,52,14,C.amber,ph,true);
+  arrow(g,770,430,1120,430,C.amber,5);
+  T(g,950,495,'Intensité I : ampères (A)',30,C.amber,{a:'middle',w:600});
+  g=grp(A(2,1.5));p.appendChild(g);
+  T(g,950,560,'= nombre d’électrons par seconde',26,C.muted,{a:'middle',w:500});
+};
+function wireTop(p,ph,A){
+  box(p,60,120,1160,190,C.panel,C.line,22);
+  tube(p,100,185,1080,76,'#4a2a12',C.copper);flow(p,125,1155,223,52,12,C.amber,ph,true);
+  el('line',{x1:640,y1:160,x2:640,y2:290,stroke:C.ink,'stroke-width':3,'stroke-dasharray':'8 7'},p);
+  T(p,655,152,'section du fil',22,C.muted,{w:500});
+  arrow(p,150,290,330,290,C.amber,4);T(p,345,299,'I',30,C.amber,{w:800});
+}
+SC.formule=(p,A,ph)=>{
+  wireTop(p,ph);
+  let g=grp(A(3,0));p.appendChild(g);
+  el('path',{d:'M130 330 v12 h840 v-12',fill:'none',stroke:C.blue,'stroke-width':4,'stroke-linejoin':'round'},g);
+  T(g,550,376,'pendant un temps t',30,C.blue,{a:'middle',w:700});
+  g=grp(A(3,1.8));p.appendChild(g);chip(g,1000,330,200,'Q = ?',C.amberSoft,C.amber,30);
+  g=grp(A(4,0));p.appendChild(g);
+  box(g,60,420,1160,90,C.panel2,C.line,18);
+  T(g,640,479,'Q = nombre d’électrons transportés par I pendant t',34,C.ink,{a:'middle',w:700});
+  g=grp(A(5,0));p.appendChild(g);
+  box(g,60,530,560,150,C.blueSoft,C.blue,22);
+  T(g,340,630,'Q = I . t',84,C.blue,{a:'middle',w:800});
+  if(A(6,0)>0){ g=grp(A(6,0));p.appendChild(g);
+    box(g,660,530,560,150,C.panel,C.line,22);
+    // triangle
+    el('path',{d:'M760 655 L840 545 L920 655 Z',fill:'none',stroke:C.ink,'stroke-width':3},g);
+    el('line',{x1:786,y1:620,x2:894,y2:620,stroke:C.ink,'stroke-width':3},g);
+    el('line',{x1:840,y1:620,x2:840,y2:655,stroke:C.ink,'stroke-width':3},g);
+    T(g,840,612,'Q',34,C.amber,{a:'middle',w:800});T(g,802,650,'I',30,C.ink,{a:'middle',w:800});T(g,878,650,'t',30,C.ink,{a:'middle',w:800});
+    T(g,950,590,'I = Q / t',30,C.ink,{w:700});T(g,950,640,'t = Q / I',30,C.blue,{w:800});
+  }
+};
+SC.coulomb=(p,A,ph)=>{
+  let g=grp(A(7,0));p.appendChild(g);
+  box(g,60,130,1160,150,C.panel,C.line,22);
+  T(g,110,215,'L’unité : le coulomb',50,C.ink,{w:800});
+  chip(g,1010,170,170,'Cb',C.amberSoft,C.amber,36);
+  T(g,110,260,'(un électron est bien trop petit)',24,C.muted,{w:500});
+  g=grp(A(8,0));p.appendChild(g);
+  box(g,60,300,1160,170,C.blueSoft,C.blue,22);
+  T(g,110,375,'1 Cb ≈ 6,25 · 10'+sup('18')+' électrons',54,C.ink,{w:800});
+  g=grp(A(8,2.0));p.appendChild(g);
+  T(g,110,440,'1 Cb = 1 A × 1 s',44,C.amber,{w:800});
+  g=grp(A(9,0));p.appendChild(g);
+  box(g,60,490,1160,130,C.panel,C.line,22);
+  T(g,110,575,'Charge d’un électron : 1,6 · 10'+sup('−19')+' Cb',44,C.ink,{w:700});
+};
+SC.ampereheure=(p,A,ph)=>{
+  let g=grp(A(10,0));p.appendChild(g);
+  box(g,60,130,1160,130,C.panel,C.line,22);
+  T(g,110,210,'L’unité industrielle : l’ampère-heure',44,C.ink,{w:800});
+  chip(g,1010,155,170,'Ah',C.amberSoft,C.amber,36);
+  g=grp(A(10,1.6));p.appendChild(g);
+  T(g,640,310,'1 Ah = 1 A pendant 1 h',44,C.amber,{a:'middle',w:800});
+  g=grp(A(11,0));p.appendChild(g);
+  box(g,60,350,700,200,C.panel,C.line,22);
+  box(g,110,400,250,100,'none',C.ink,14);box(g,360,430,14,40,C.ink,'none',4);
+  for(let i=0;i<5;i++)box(g,120+i*46,410,38,80,C.green,'none',6);
+  T(g,235,470,'5 Ah',44,C.ink,{a:'middle',w:800,extra:{'paint-order':'stroke',stroke:'#0f131a','stroke-width':6}});
+  T(g,430,445,'1 A × 5 h',38,C.blue,{w:800});T(g,430,505,'5 A × 1 h',38,C.blue,{w:800});
+  g=grp(A(12,0));p.appendChild(g);
+  box(g,790,350,430,200,C.amberSoft,C.amber,22);
+  T(g,1005,415,'1 h = 3 600 s',40,C.ink,{a:'middle',w:700});
+  T(g,1005,490,'1 Ah = 3 600 Cb',46,C.amber,{a:'middle',w:800});
+  g=grp(A(12,2.0));p.appendChild(g);
+  T(g,640,615,'ampères-heures  ×  3 600  =  coulombs',34,C.muted,{a:'middle',w:600});
+};
+SC.unite=(p,A,ph)=>{
+  T(p,640,170,'Quelle unité pour Q ?',50,C.ink,{a:'middle',w:800});
+  let g=grp(A(13,0.8));p.appendChild(g);
+  box(g,100,230,1080,130,C.panel,C.line,22);
+  T(g,150,310,'t en secondes (s)',42,C.ink,{w:700});arrow(g,620,295,760,295,C.blue,6);chip(g,790,267,330,'Q en coulombs (Cb)',C.blueSoft,C.blue,28);
+  g=grp(A(13,3.6));p.appendChild(g);
+  box(g,100,390,1080,130,C.panel,C.line,22);
+  T(g,150,470,'t en heures (h)',42,C.ink,{w:700});arrow(g,620,455,760,455,C.amber,6);chip(g,790,427,390,'Q en ampères-heures (Ah)',C.amberSoft,C.amber,28);
+  g=grp(A(13,6.0));p.appendChild(g);
+  T(g,640,600,'I toujours en ampères (A)',30,C.muted,{a:'middle',w:600});
+};
+SC.exemple=(p,A,ph)=>{
+  let g=grp(A(14,0));p.appendChild(g);
+  box(g,60,120,1160,110,C.panel,C.line,22);
+  T(g,100,170,'Un chargeur fournit 3,5 A pendant 2 h.',38,C.ink,{w:700});
+  T(g,100,212,'Quelle quantité d’électricité ?',30,C.muted,{w:500});
+  // tableau 4 colonnes
+  const cols=[['Données',60,330],['Inconnue',390,200],['Formule',590,290],['Solution',880,340]];
+  g=grp(A(15,0));p.appendChild(g);
+  cols.forEach(([n,x,w])=>{box(g,x,260,w,56,C.blueSoft,C.line,0);T(g,x+w/2,297,n,26,C.blue,{a:'middle',w:700});box(g,x,316,w,120,C.panel,C.line,0);box(g,x,436,w,120,C.panel,C.line,0);});
+  g=grp(A(15,0.2));p.appendChild(g);
+  T(g,80,360,'I = 3,5 A',34,C.ink,{w:700});T(g,80,410,'t = 2 h',34,C.ink,{w:700});
+  T(g,490,385,'Q (Ah)',34,C.amber,{a:'middle',w:700});
+  g=grp(A(16,0));p.appendChild(g);
+  T(g,735,385,'Q = I . t',36,C.ink,{a:'middle',w:700});
+  g=grp(A(16,1.2));p.appendChild(g);
+  T(g,1050,370,'Q = 3,5 × 2',34,C.ink,{a:'middle',w:700});T(g,1050,414,'Q = 7 Ah',40,C.green,{a:'middle',w:800});
+  g=grp(A(17,0));p.appendChild(g);
+  T(g,80,480,'Q = ?',34,C.ink,{w:700});T(g,80,530,'en coulombs',26,C.muted,{w:500});
+  T(g,490,505,'Q (Cb)',34,C.amber,{a:'middle',w:700});
+  T(g,735,505,'Q (Cb) = Q (Ah) × 3 600',25,C.ink,{a:'middle',w:700});
+  g=grp(A(17,1.4));p.appendChild(g);
+  T(g,1050,490,'Q = 7 × 3 600',34,C.ink,{a:'middle',w:700});T(g,1050,536,'Q = 25 200 Cb',40,C.green,{a:'middle',w:800});
+};
+SC.recap=(p,A,ph)=>{
+  let g=grp(A(18,0));p.appendChild(g);
+  T(g,640,170,'À retenir',50,C.ink,{a:'middle',w:800});
+  box(g,140,210,1000,110,C.blueSoft,C.blue,22);T(g,640,285,'Q = I . t',64,C.blue,{a:'middle',w:800});
+  g=grp(A(18,1.2));p.appendChild(g);
+  box(g,140,345,490,130,C.panel,C.line,22);T(g,385,400,'coulomb (Cb)',36,C.amber,{a:'middle',w:800});T(g,385,445,'unité normalisée',26,C.muted,{a:'middle',w:500});
+  box(g,650,345,490,130,C.panel,C.line,22);T(g,895,400,'ampère-heure (Ah)',36,C.amber,{a:'middle',w:800});T(g,895,445,'unité industrielle',26,C.muted,{a:'middle',w:500});
+  g=grp(A(18,2.4));p.appendChild(g);
+  T(g,640,540,'1 Ah = 3 600 Cb',44,C.ink,{a:'middle',w:800});
+  g=grp(A(19,0));p.appendChild(g);
+  box(g,290,580,700,70,C.green,'none',35);T(g,640,628,'À toi de jouer : conversions + 3 exercices',30,'#0b2415',{a:'middle',w:800});
+};
+
+function wrap(txt,max){const w=txt.split(' ');const L=[''];w.forEach(x=>{if((L[L.length-1]+' '+x).trim().length>max&&L[L.length-1])L.push(x);else L[L.length-1]=(L[L.length-1]+' '+x).trim();});return L;}
+window.draw=function(seg,t,data){
+  svg.innerHTML='';
+  el('rect',{x:0,y:0,width:1280,height:720,fill:C.bg});
+  T(svg,60,66,data.chapitre,20,C.muted,{w:600,extra:{'letter-spacing':'2'}});
+  T(svg,1220,66,'Ampère & Fils',20,C.muted,{a:'end',w:600});
+  const s=data.segments[seg];const A=mk(seg,t);const ph=(t/0.5)%1;
+  const FIT={titre:650,formule:685,coulomb:625,ampereheure:620,unite:610,recap:655,analogie:575,exemple:565};
+  const bottom=FIT[s.scene]||565,k=Math.min(1,(575-100)/(bottom-110));
+  const g=el('g',{transform:`translate(${640-640*k} ${100-110*k}) scale(${k})`});SC[s.scene](g,A,ph);
+  // sous-titre : zone fixe en bas
+  let size=28,lines=wrap(s.texte,76);if(lines.length>2){size=26;lines=wrap(s.texte,86);}
+  box(svg,70,596,1140,100,'rgba(10,13,19,0.92)','none',18);
+  const y0=646-(lines.length-1)*20+9;
+  lines.forEach((l,i)=>T(svg,640,y0+i*40,l,size,'#fff',{a:'middle',w:500}));
+  return window.maxAt;
+};
+</script></body></html>

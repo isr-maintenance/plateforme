@@ -1,0 +1,127 @@
+{
+ "id": "ch06-quantite",
+ "titre": "La quantité d’électricité",
+ "chapitre": "CHAPITRE 6 · QUANTITÉ D’ÉLECTRICITÉ",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "titre",
+   "texte": "Dans cette capsule, tu vas découvrir la quantité d’électricité : ce que c’est, comment la calculer, et dans quelles unités.",
+   "voix": "Dans cette capsule, tu vas découvrir la quantité d’électricité : ce que c’est, comment la calculer, et dans quelles unités."
+  },
+  {
+   "cle": "s02",
+   "scene": "analogie",
+   "texte": "Imagine une rivière. Son débit, c’est le volume d’eau qui passe chaque seconde.",
+   "voix": "Imagine une rivière. Son débit, c’est le volume d’eau qui passe chaque seconde."
+  },
+  {
+   "cle": "s03",
+   "scene": "analogie",
+   "texte": "Dans un fil, c’est pareil : l’intensité I, en ampères, c’est le nombre d’électrons qui passent chaque seconde.",
+   "voix": "Dans un fil, c’est pareil : l’intensité i, en ampères, c’est le nombre d’électrons qui passent chaque seconde."
+  },
+  {
+   "cle": "s04",
+   "scene": "formule",
+   "texte": "Si le courant circule pendant un temps t, il transporte une certaine quantité d’électricité, notée Q.",
+   "voix": "Si le courant circule pendant un temps té, il transporte une certaine quantité d’électricité, notée ku."
+  },
+  {
+   "cle": "s05",
+   "scene": "formule",
+   "texte": "La quantité d’électricité, c’est le nombre d’électrons transportés par un courant I pendant un temps t.",
+   "voix": "La quantité d’électricité, c’est le nombre d’électrons transportés par un courant i pendant un temps té."
+  },
+  {
+   "cle": "s06",
+   "scene": "formule",
+   "texte": "On la calcule avec la formule : Q égale I fois t.",
+   "voix": "On la calcule avec la formule : ku égale i fois té."
+  },
+  {
+   "cle": "s07",
+   "scene": "formule",
+   "texte": "Avec le triangle, tu caches la lettre cherchée : pour trouver t, tu divises Q par I.",
+   "voix": "Avec le triangle, tu caches la lettre cherchée : pour trouver té, tu divises ku par i."
+  },
+  {
+   "cle": "s08",
+   "scene": "coulomb",
+   "texte": "Un électron est bien trop petit pour servir d’unité. On utilise le coulomb, noté Cb.",
+   "voix": "Un électron est bien trop petit pour servir d’unité. On utilise le coulon, noté cé bé."
+  },
+  {
+   "cle": "s09",
+   "scene": "coulomb",
+   "texte": "Un coulomb, c’est environ 6,25 fois 10 puissance 18 électrons. C’est aussi la quantité transportée par 1 ampère pendant 1 seconde.",
+   "voix": "Un coulon, c’est environ six virgule vingt-cinq fois dix puissance dix-huit électrons. C’est aussi la quantité transportée par un ampère pendant une seconde."
+  },
+  {
+   "cle": "s10",
+   "scene": "coulomb",
+   "texte": "Un seul électron porte donc une charge minuscule : 1,6 fois 10 puissance moins 19 coulomb.",
+   "voix": "Un seul électron porte donc une charge minuscule : un virgule six fois dix puissance moins dix-neuf coulon."
+  },
+  {
+   "cle": "s11",
+   "scene": "ampereheure",
+   "texte": "Dans l’industrie, on utilise plutôt l’ampère-heure, noté Ah : c’est la quantité transportée par 1 ampère pendant 1 heure.",
+   "voix": "Dans l’industrie, on utilise plutôt l’ampère-heure, noté a ache : c’est la quantité transportée par un ampère pendant une heure."
+  },
+  {
+   "cle": "s12",
+   "scene": "ampereheure",
+   "texte": "Une batterie de 5 Ah peut fournir 1 ampère pendant 5 heures, ou 5 ampères pendant 1 heure.",
+   "voix": "Une batterie de cinq ampères-heures peut fournir un ampère pendant cinq heures, ou cinq ampères pendant une heure."
+  },
+  {
+   "cle": "s13",
+   "scene": "ampereheure",
+   "texte": "Une heure compte 3 600 secondes : 1 Ah vaut donc 3 600 coulombs.",
+   "voix": "Une heure compte trois mille six cents secondes : un ampère-heure vaut donc trois mille six cents coulons."
+  },
+  {
+   "cle": "s14",
+   "scene": "unite",
+   "texte": "Quelle unité utiliser ? Regarde le temps. En secondes, Q est en coulombs. En heures, Q est en ampères-heures.",
+   "voix": "Quelle unité utiliser ? Regarde le temps. Si té est en secondes, ku est en coulons. Si té est en heures, ku est en ampères-heures."
+  },
+  {
+   "cle": "s15",
+   "scene": "exemple",
+   "texte": "Un exemple : un chargeur fournit 3,5 ampères pendant 2 heures. Quelle quantité d’électricité ?",
+   "voix": "Un exemple : un chargeur fournit trois virgule cinq ampères pendant deux heures. Quelle quantité d’électricité ?"
+  },
+  {
+   "cle": "s16",
+   "scene": "exemple",
+   "texte": "On écrit les données : I égale 3,5 A, et t égale 2 h. L’inconnue, c’est Q.",
+   "voix": "On écrit les données : i égale trois virgule cinq ampères, et té égale deux heures. L’inconnue, c’est ku."
+  },
+  {
+   "cle": "s17",
+   "scene": "exemple",
+   "texte": "On applique la formule : Q égale 3,5 fois 2, soit 7 ampères-heures.",
+   "voix": "On applique la formule : ku égale trois virgule cinq fois deux, soit sept ampères-heures."
+  },
+  {
+   "cle": "s18",
+   "scene": "exemple",
+   "texte": "Pour les coulombs, on multiplie par 3 600 : 7 fois 3 600 font 25 200 coulombs.",
+   "voix": "Pour les coulons, on multiplie par trois mille six cents : sept fois trois mille six cents font vingt-cinq mille deux cents coulons."
+  },
+  {
+   "cle": "s19",
+   "scene": "recap",
+   "texte": "À retenir : Q égale I fois t. Le coulomb est l’unité normalisée, l’ampère-heure l’unité industrielle.",
+   "voix": "À retenir : ku égale i fois té. Le coulon est l’unité normalisée, l’ampère-heure l’unité industrielle."
+  },
+  {
+   "cle": "s20",
+   "scene": "recap",
+   "texte": "À toi de jouer : fais les conversions, puis les trois exercices de la capsule.",
+   "voix": "À toi de jouer : fais les conversions, puis les trois exercices de la capsule."
+  }
+ ]
+}
