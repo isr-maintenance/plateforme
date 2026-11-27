@@ -1,0 +1,104 @@
+{
+ "id": "ch09-mathiessen",
+ "titre": "La loi de Mathiessen",
+ "chapitre": "CHAPITRE 9 · LA LOI DE MATHIESSEN",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "m_intro",
+   "texte": "Dans cette capsule, tu vas voir comment la résistance d’un conducteur change avec sa température : c’est la loi de Mathiessen.",
+   "voix": "Dans cette capsule, tu vas voir comment la résistance d’un conducteur change avec sa température : c’est la loi de Matiessène."
+  },
+  {
+   "cle": "s02",
+   "scene": "m_agit",
+   "texte": "Quand la température monte, les molécules s’agitent davantage et freinent les électrons : la résistance augmente.",
+   "voix": "Quand la température monte, les molécules s’agitent davantage et freinent les électrons : la résistance augmente.",
+   "flux": true
+  },
+  {
+   "cle": "s03",
+   "scene": "m_exp",
+   "texte": "Une bobine de cuivre de 1 Ω sous 6 V. Au départ, elle laisse passer 6 A. Après quinze minutes, il ne reste que 5 A.",
+   "voix": "Une bobine de cuivre de un aum, sous six volts. Au départ, elle laisse passer six ampères. Après quinze minutes, il ne reste que cinq ampères."
+  },
+  {
+   "cle": "s04",
+   "scene": "m_exp",
+   "texte": "Avec R = U / I : au départ 6 / 6 = 1 Ω, après quinze minutes 6 / 5 = 1,2 Ω. La résistance du fil a augmenté.",
+   "voix": "Avec r égale u divisé par i : au départ, six divisé par six font un aum ; après quinze minutes, six divisé par cinq font un virgule deux aum. La résistance du fil a augmenté."
+  },
+  {
+   "cle": "s05",
+   "scene": "m_signe",
+   "texte": "Pour les métaux, la résistance augmente avec la température : leur coefficient de température est positif.",
+   "voix": "Pour les métaux, la résistance augmente avec la température : leur coefficient de température est positif."
+  },
+  {
+   "cle": "s06",
+   "scene": "m_signe",
+   "texte": "Pour le carbone, les électrolytes et les semi-conducteurs, c’est l’inverse : le coefficient est négatif.",
+   "voix": "Pour le carbone, les électrolytes et les semi-conducteurs, c’est l’inverse : le coefficient est négatif."
+  },
+  {
+   "cle": "s07",
+   "scene": "m_formule",
+   "texte": "Voici la loi de Mathiessen : Rt = R0 . (1 + α . t).",
+   "voix": "Voici la loi de Matiessène : r t égale r zéro, fois, parenthèse, un plus alpha fois t, fermez la parenthèse."
+  },
+  {
+   "cle": "s08",
+   "scene": "m_formule",
+   "texte": "Rt est la résistance à la température t, R0 la résistance à 0 °C, α le coefficient de température, et t la variation de température.",
+   "voix": "R t est la résistance à la température t ; r zéro, la résistance à zéro degré ; alpha, le coefficient de température ; et t, la variation de température en degrés."
+  },
+  {
+   "cle": "s09",
+   "scene": "m_alpha",
+   "texte": "Alpha, c’est la variation de résistance pour 1 °C de plus. Cuivre : 3,93 fois 10 puissance moins 3. Carbone : moins 0,4 fois 10 puissance moins 3.",
+   "voix": "Alpha, c’est la variation de résistance pour un degré de plus. Pour le cuivre : trois virgule nonante-trois fois dix puissance moins trois. Pour le carbone : moins zéro virgule quatre fois dix puissance moins trois."
+  },
+  {
+   "cle": "s10",
+   "scene": "m_alpha",
+   "texte": "La manganine a un alpha voisin de zéro : sa résistance reste stable. On l’utilise quand on veut une résistance qui ne bouge pas.",
+   "voix": "La manganine a un alpha voisin de zéro : sa résistance reste stable. On l’utilise quand on veut une résistance qui ne bouge pas."
+  },
+  {
+   "cle": "s11",
+   "scene": "m_ex",
+   "texte": "Un bobinage de cuivre fait 200 Ω à 0 °C. Quelle est sa résistance à 50 °C ?",
+   "voix": "Un bobinage de cuivre fait deux cents aums à zéro degré. Quelle est sa résistance à cinquante degrés ?"
+  },
+  {
+   "cle": "s12",
+   "scene": "m_ex",
+   "texte": "Données : R0 = 200 Ω, α = 3,93 . 10⁻³ et t = 50 °C. On cherche Rt, avec la loi de Mathiessen.",
+   "voix": "Données : r zéro égale deux cents aums, alpha égale trois virgule nonante-trois fois dix puissance moins trois, et t égale cinquante degrés. On cherche r t, avec la loi de Matiessène."
+  },
+  {
+   "cle": "s13",
+   "scene": "m_ex",
+   "texte": "α . t = 0,1965 ; Rt = 200 × 1,1965 = 239,3 Ω. Le bobinage a pris près de 40 Ω.",
+   "voix": "Alpha fois t égale zéro virgule dix-neuf cent soixante-cinq. R t égale deux cents fois un virgule dix-neuf cent soixante-cinq, soit deux cent trente-neuf virgule trois aums. Le bobinage a pris près de quarante aums."
+  },
+  {
+   "cle": "s14",
+   "scene": "m_piege",
+   "texte": "Attention : si la résistance est donnée à 20 °C et non à 0 °C, calcule d’abord R0 = R20 / (1 + α . 20).",
+   "voix": "Attention : si la résistance est donnée à vingt degrés et non à zéro degré, calcule d’abord r zéro, égale r vingt divisé par, un plus alpha fois vingt."
+  },
+  {
+   "cle": "s15",
+   "scene": "m_recap",
+   "texte": "À retenir : Rt = R0 . (1 + α . t). Un métal chauffe, sa résistance monte ; le carbone chauffe, sa résistance baisse.",
+   "voix": "À retenir : r t égale r zéro, fois, un plus alpha fois t. Un métal chauffe, sa résistance monte ; le carbone chauffe, sa résistance baisse."
+  },
+  {
+   "cle": "s16",
+   "scene": "m_recap",
+   "texte": "À toi de jouer : le tableau de l’expérience, le tri des matériaux et trois exercices.",
+   "voix": "À toi de jouer : le tableau de l’expérience, le tri des matériaux et trois exercices."
+  }
+ ]
+}

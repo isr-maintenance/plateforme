@@ -1,0 +1,104 @@
+{
+ "id": "ch11-joule",
+ "titre": "L’effet Joule",
+ "chapitre": "CHAPITRE 11 · L’EFFET JOULE",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "j_intro",
+   "texte": "Dans cette capsule, tu vas voir l’effet Joule : la chaleur que dégage un courant dans un conducteur.",
+   "voix": "Dans cette capsule, tu vas voir l’effet Joule : la chaleur que dégage un courant dans un conducteur."
+  },
+  {
+   "cle": "s02",
+   "scene": "j_chaleur",
+   "texte": "Un conducteur parcouru par un courant dégage de la chaleur : c’est l’effet Joule. Le radiateur, le grille-pain, la bouilloire, c’est lui.",
+   "voix": "Un conducteur parcouru par un courant dégage de la chaleur : c’est l’effet Joule. Le radiateur, le grille-pain, la bouilloire, c’est lui.",
+   "flux": true
+  },
+  {
+   "cle": "s03",
+   "scene": "j_w",
+   "texte": "L’énergie fournie à un récepteur vaut W = U . I . t, en joules, avec le temps t en secondes.",
+   "voix": "L’énergie fournie à un récepteur vaut double vé égale u fois i fois t, en joules, avec le temps t en secondes."
+  },
+  {
+   "cle": "s04",
+   "scene": "j_w",
+   "texte": "Pour une résistance, U = R . I. On remplace U : W = R . I . I . t, soit W = R . I² . t.",
+   "voix": "Pour une résistance, u égale r fois i. On remplace u : double vé égale r fois i fois i fois t, soit double vé égale r fois i au carré fois t."
+  },
+  {
+   "cle": "s05",
+   "scene": "j_p",
+   "texte": "Avec la puissance, c’est pareil : P = R . I². C’est la puissance Joule, une formule très importante.",
+   "voix": "Avec la puissance, c’est pareil : p égale r fois i au carré. C’est la puissance Joule, une formule très importante."
+  },
+  {
+   "cle": "s06",
+   "scene": "j_carre",
+   "texte": "Dans 10 Ω : sous 2 A, 40 W ; sous 4 A, 160 W. Le courant double, la chaleur est multipliée par quatre.",
+   "voix": "Dans une résistance de dix aums : sous deux ampères, quarante watts ; sous quatre ampères, cent soixante watts. Le courant double, la chaleur est multipliée par quatre."
+  },
+  {
+   "cle": "s07",
+   "scene": "j_inc",
+   "texte": "Les inconvénients : les bobinages qui chauffent, les mauvais contacts qui chauffent, et surtout le court-circuit.",
+   "voix": "Les inconvénients : les bobinages qui chauffent, les mauvais contacts qui chauffent, et surtout le court-circuit."
+  },
+  {
+   "cle": "s08",
+   "scene": "j_fus",
+   "texte": "Contre le court-circuit, on place un point faible dans le circuit : le fusible. Ne ponte jamais un fusible : c’est dangereux.",
+   "voix": "Contre le court-circuit, on place un point faible dans le circuit : le fusible. Ne ponte jamais un fusible : c’est dangereux."
+  },
+  {
+   "cle": "s09",
+   "scene": "j_cc",
+   "texte": "Une ampoule de 40 W sous 230 V absorbe 0,17 A. En court-circuit de 0,1 Ω : 2 300 A, plus de treize mille fois plus.",
+   "voix": "Une ampoule de quarante watts sous deux cent trente volts absorbe zéro virgule dix-sept ampère. En court-circuit de zéro virgule un aum : deux mille trois cents ampères, plus de treize mille fois plus."
+  },
+  {
+   "cle": "s10",
+   "scene": "j_app",
+   "texte": "Les applications utiles : le chauffage, l’éclairage par incandescence et le fusible, dont le fil fond au bon moment.",
+   "voix": "Les applications utiles : le chauffage, l’éclairage par incandescence et le fusible, dont le fil fond au bon moment."
+  },
+  {
+   "cle": "s11",
+   "scene": "j_ex",
+   "texte": "Un grille-pain de 1 500 W fonctionne 4 minutes. Quelle énergie Joule dégage-t-il ?",
+   "voix": "Un grille-pain de mille cinq cents watts fonctionne quatre minutes. Quelle énergie Joule dégage-t-il ?"
+  },
+  {
+   "cle": "s12",
+   "scene": "j_ex",
+   "texte": "Données : P = 1 500 W, t = 4 min = 240 s. Formule : W = P . t, avec le temps en secondes.",
+   "voix": "Données : p égale mille cinq cents watts, t égale quatre minutes, soit deux cent quarante secondes. Formule : double vé égale p fois t, avec le temps en secondes."
+  },
+  {
+   "cle": "s13",
+   "scene": "j_ex",
+   "texte": "W = 1 500 × 240 = 360 000 J, soit 360 kJ.",
+   "voix": "Double vé égale mille cinq cents fois deux cent quarante, soit trois cent soixante mille joules, ou trois cent soixante kilojoules."
+  },
+  {
+   "cle": "s14",
+   "scene": "j_ex2",
+   "texte": "Un élément de chauffe de 23 Ω parcouru par 10 A : P = R . I² = 23 × 100 = 2 300 W.",
+   "voix": "Un élément de chauffe de vingt-trois aums parcouru par dix ampères : p égale r fois i au carré, soit vingt-trois fois cent, égale deux mille trois cents watts."
+  },
+  {
+   "cle": "s15",
+   "scene": "j_recap",
+   "texte": "À retenir : W = U . I . t, W = R . I² . t et P = R . I². Le courant au carré : il pèse lourd !",
+   "voix": "À retenir : double vé égale u fois i fois t, double vé égale r fois i au carré fois t, et p égale r fois i au carré. Le courant est au carré : il pèse lourd !"
+  },
+  {
+   "cle": "s16",
+   "scene": "j_recap",
+   "texte": "À toi de jouer : le court-circuit, le tri utile ou nuisible, et trois exercices.",
+   "voix": "À toi de jouer : le court-circuit, le tri utile ou nuisible, et trois exercices."
+  }
+ ]
+}

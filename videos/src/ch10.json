@@ -1,0 +1,91 @@
+{
+ "id": "ch10-puissance",
+ "titre": "La puissance électrique",
+ "chapitre": "CHAPITRE 10 · LA PUISSANCE ÉLECTRIQUE",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "q_intro",
+   "texte": "Dans cette capsule, tu vas voir ce qu’est la puissance électrique, son unité, le watt, et comment la calculer.",
+   "voix": "Dans cette capsule, tu vas voir ce qu’est la puissance électrique, son unité, le watt, et comment la calculer."
+  },
+  {
+   "cle": "s02",
+   "scene": "q_mes",
+   "texte": "Pour mesurer la puissance d’un récepteur, on place un ampèremètre en série et un voltmètre en parallèle.",
+   "voix": "Pour mesurer la puissance d’un récepteur, on place un ampèremètre en série et un voltmètre en parallèle."
+  },
+  {
+   "cle": "s03",
+   "scene": "q_mes",
+   "texte": "On multiplie la tension lue au voltmètre par le courant lu à l’ampèremètre : 230 × 0,261 donne environ 60 W.",
+   "voix": "On multiplie la tension lue au voltmètre par le courant lu à l’ampèremètre : deux cent trente fois zéro virgule deux cent soixante et un donnent environ soixante watts."
+  },
+  {
+   "cle": "s04",
+   "scene": "q_lampes",
+   "texte": "Avec trois lampes sous 230 V : 0,109 A, 0,261 A et 0,435 A. On trouve 25 W, 60 W et 100 W : la puissance écrite sur les lampes.",
+   "voix": "Avec trois lampes sous deux cent trente volts : zéro virgule cent neuf ampère, zéro virgule deux cent soixante et un ampère et zéro virgule quatre cent trente-cinq ampère. On trouve vingt-cinq watts, soixante watts et cent watts : la puissance écrite sur les lampes."
+  },
+  {
+   "cle": "s05",
+   "scene": "q_formule",
+   "texte": "La puissance est le produit de la tension par le courant : P = U . I. Elle s’exprime en watts.",
+   "voix": "La puissance est le produit de la tension par le courant : p égale u fois i. Elle s’exprime en watts."
+  },
+  {
+   "cle": "s06",
+   "scene": "q_formule",
+   "texte": "Avec le triangle : U = P / I et I = P / U.",
+   "voix": "Avec le triangle : u égale p divisé par i, et i égale p divisé par u."
+  },
+  {
+   "cle": "s07",
+   "scene": "q_comp",
+   "texte": "Sous la même tension, une lampe de 100 W absorbe quatre fois plus de courant qu’une lampe de 25 W.",
+   "voix": "Sous la même tension, une lampe de cent watts absorbe quatre fois plus de courant qu’une lampe de vingt-cinq watts."
+  },
+  {
+   "cle": "s08",
+   "scene": "q_kw",
+   "texte": "Attention aux multiples : 1 kW = 1 000 W. Donc 7,36 kW = 7 360 W.",
+   "voix": "Attention aux multiples : un kilowatt, c’est mille watts. Donc sept virgule trente-six kilowatts font sept mille trois cent soixante watts."
+  },
+  {
+   "cle": "s09",
+   "scene": "q_ex",
+   "texte": "Un four électrique de 2,3 kW sous 230 V. Quel courant absorbe-t-il ?",
+   "voix": "Un four électrique de deux virgule trois kilowatts, sous deux cent trente volts. Quel courant absorbe-t-il ?"
+  },
+  {
+   "cle": "s10",
+   "scene": "q_ex",
+   "texte": "On convertit d’abord : 2,3 kW = 2 300 W. Puis on cherche I avec la formule I = P / U.",
+   "voix": "On convertit d’abord : deux virgule trois kilowatts font deux mille trois cents watts. Puis on cherche i, avec la formule i égale p divisé par u."
+  },
+  {
+   "cle": "s11",
+   "scene": "q_ex",
+   "texte": "I = 2 300 / 230 = 10 A. Le four absorbe 10 A.",
+   "voix": "I égale deux mille trois cents divisé par deux cent trente, soit dix ampères. Le four absorbe dix ampères."
+  },
+  {
+   "cle": "s12",
+   "scene": "q_ex2",
+   "texte": "Une bouilloire absorbe 9 A sous 230 V : P = U . I = 230 × 9 = 2 070 W.",
+   "voix": "Une bouilloire absorbe neuf ampères sous deux cent trente volts : p égale u fois i, soit deux cent trente fois neuf, égale deux mille septante watts."
+  },
+  {
+   "cle": "s13",
+   "scene": "q_recap",
+   "texte": "À retenir : P = U . I, U = P / I et I = P / U. Le watt est l’unité de puissance.",
+   "voix": "À retenir : p égale u fois i, u égale p divisé par i, et i égale p divisé par u. Le watt est l’unité de puissance."
+  },
+  {
+   "cle": "s14",
+   "scene": "q_recap",
+   "texte": "À toi de jouer : les mesures de trois récepteurs et trois exercices.",
+   "voix": "À toi de jouer : les mesures de trois récepteurs et trois exercices."
+  }
+ ]
+}
