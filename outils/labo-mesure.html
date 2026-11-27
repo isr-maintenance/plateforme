@@ -10,6 +10,7 @@
 <style>
 /* Palette acier et bleu de contrôle ; mise en page : outils en onglets, dessin au centre, lecture détaillée dessous */
 :root{
+  --meca:var(--accent); --surface:var(--panel);
   --bg:#e9eef2; --panel:#fbfcfd; --plate:#dde5eb; --ink:#14202b; --muted:#566673; --line:#9fb0bd;
   --accent:#1456d8; --accent-soft:#dbe6fb; --good:#17703f; --good-soft:#dcf0e4; --bad:#b3261e; --bad-soft:#f8dedc;
   --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -125,12 +126,13 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
     <div class="seg" id="cal-prec" role="group" aria-label="Pr&eacute;cision du vernier">
       <button data-v="0.1" aria-pressed="true">1/10 &middot; 0,1 mm</button>
       <button data-v="0.05" aria-pressed="false">1/20 &middot; 0,05 mm</button>
+      <button data-v="0.02" aria-pressed="false">1/50 &middot; 0,02 mm</button>
     </div>
     <div class="seg" id="cal-mode" role="group" aria-label="Mode">
       <button data-v="explore" aria-pressed="true">Explorer</button>
       <button data-v="exo" aria-pressed="false">Exercice</button>
     </div>
-    <label class="chk"><input type="checkbox" id="cal-mm"> Num&eacute;roter les mm</label>
+    <label class="chk"><input type="checkbox" id="cal-full"> Voir le pied &agrave; coulisse en entier</label>
   </div>
   <div class="card"><div class="fig" id="cal-fig"></div></div>
   <div id="cal-explore">
@@ -153,7 +155,16 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
       <button data-v="explore" aria-pressed="true">Explorer</button>
       <button data-v="exo" aria-pressed="false">Exercice</button>
     </div>
-    <label class="chk"><input type="checkbox" id="mic-mm"> Num&eacute;roter les mm</label>
+    <div class="seg" id="mic-kind" role="group" aria-label="Type de microm&egrave;tre">
+      <button data-v="ext" aria-pressed="true">Ext&eacute;rieur</button>
+      <button data-v="int" aria-pressed="false">Int&eacute;rieur</button>
+    </div>
+    <div class="seg" id="mic-rod" role="group" aria-label="Rallonge" hidden>
+      <button data-v="50" aria-pressed="true">Rallonge 50</button>
+      <button data-v="75" aria-pressed="false">75</button>
+      <button data-v="100" aria-pressed="false">100</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="mic-full"> Voir l&rsquo;instrument en entier</label>
   </div>
   <div class="card"><div class="fig mic" id="mic-fig"></div></div>
   <div id="mic-explore">
@@ -161,7 +172,7 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
     <ol class="steps" id="mic-steps"></ol>
   </div>
   <div id="mic-exo" class="q" hidden>
-    <div class="ask">Quelle est la lecture du microm&egrave;tre ?</div>
+    <div class="ask" id="mic-ask">Quelle est la lecture du microm&egrave;tre ?</div>
     <div class="in"><input type="text" id="mic-in" inputmode="decimal" autocomplete="off" aria-label="Lecture en mm" placeholder="0,00"><span>mm</span>
       <button class="btn" id="mic-ok">V&eacute;rifier</button><button class="btn alt" id="mic-sol">Solution</button><button class="btn alt" id="mic-new">Nouvelle mesure</button></div>
     <div class="fb" id="mic-fb" role="status"></div>
@@ -279,6 +290,119 @@ input[type=text]{font:600 18px var(--mono);width:9em;padding:8px 10px;border:1px
 
 </div>
 
+<script>
+/* Dessins du pied à coulisse (plans SolidWorks de M. Baudson) et du micromètre — même fichier que js/pied.js de la plateforme */
+/* =========================================================
+   PIED À COULISSE — dessin de la vue de face, d'après les plans de M. Baudson (Solidworks → DXF)
+   Les contours viennent des plans ; les graduations de la règle et le vernier sont calculés.
+   Unité : le millimètre réel. Origine : la face du bec fixe. Le bec mobile se place à « lecture » mm.
+   piedSVG(lecture, n, opt) : n = 10, 20 ou 50 (nombre de divisions du vernier).
+     opt.vue  : 'complet' (becs et vernier) · 'vernier' (zoom sur la lecture) · 'becs'
+     opt.rep  : repères (vrai) : numéroter les becs et les graduations
+   ========================================================= */
+const PIED_D = {"rule": "M-4 12.85L-5 11.85M0 19.85L-4 12.85M0 23.85L0 19.85M220 23.85L0 23.85M220 39.85L220 23.85M171.05 39.85L220 39.85M170.05 39.85L170.95 39.85M169.05 39.85L169.95 39.85M168.05 39.85L168.95 39.85M167.05 39.85L167.95 39.85M166.05 39.85L166.95 39.85M165.05 39.85L165.95 39.85M164.05 39.85L164.95 39.85M163.05 39.85L163.95 39.85M162.05 39.85L162.95 39.85M161.05 39.85L161.95 39.85M160.05 39.85L160.95 39.85M159.05 39.85L159.95 39.85M158.05 39.85L158.95 39.85M157.05 39.85L157.95 39.85M156.05 39.85L156.95 39.85M155.05 39.85L155.95 39.85M154.05 39.85L154.95 39.85M153.05 39.85L153.95 39.85M152.05 39.85L152.95 39.85M151.05 39.85L151.95 39.85M150.05 39.85L150.95 39.85M149.05 39.85L149.95 39.85M148.05 39.85L148.95 39.85M147.05 39.85L147.95 39.85M146.05 39.85L146.95 39.85M145.05 39.85L145.95 39.85M144.05 39.85L144.95 39.85M143.05 39.85L143.95 39.85M142.05 39.85L142.95 39.85M141.05 39.85L141.95 39.85M140.05 39.85L140.95 39.85M139.05 39.85L139.95 39.85M138.05 39.85L138.95 39.85M137.05 39.85L137.95 39.85M136.05 39.85L136.95 39.85M135.05 39.85L135.95 39.85M134.05 39.85L134.95 39.85M133.05 39.85L133.95 39.85M132.05 39.85L132.95 39.85M131.05 39.85L131.95 39.85M130.05 39.85L130.95 39.85M129.05 39.85L129.95 39.85M128.05 39.85L128.95 39.85M127.05 39.85L127.95 39.85M126.05 39.85L126.95 39.85M125.05 39.85L125.95 39.85M124.05 39.85L124.95 39.85M123.05 39.85L123.95 39.85M122.05 39.85L122.95 39.85M121.05 39.85L121.95 39.85M120.05 39.85L120.95 39.85M119.05 39.85L119.95 39.85M118.05 39.85L118.95 39.85M117.05 39.85L117.95 39.85M116.05 39.85L116.95 39.85M115.05 39.85L115.95 39.85M114.05 39.85L114.95 39.85M113.05 39.85L113.95 39.85M112.05 39.85L112.95 39.85M111.05 39.85L111.95 39.85M110.05 39.85L110.95 39.85M109.05 39.85L109.95 39.85M108.05 39.85L108.95 39.85M107.05 39.85L107.95 39.85M106.05 39.85L106.95 39.85M105.05 39.85L105.95 39.85M104.05 39.85L104.95 39.85M103.05 39.85L103.95 39.85M102.05 39.85L102.95 39.85M101.05 39.85L101.95 39.85M100.05 39.85L100.95 39.85M99.05 39.85L99.95 39.85M98.05 39.85L98.95 39.85M97.05 39.85L97.95 39.85M96.05 39.85L96.95 39.85M95.05 39.85L95.95 39.85M94.05 39.85L94.95 39.85M93.05 39.85L93.95 39.85M92.05 39.85L92.95 39.85M91.05 39.85L91.95 39.85M90.05 39.85L90.95 39.85M89.05 39.85L89.95 39.85M88.05 39.85L88.95 39.85M87.05 39.85L87.95 39.85M86.05 39.85L86.95 39.85M85.05 39.85L85.95 39.85M84.05 39.85L84.95 39.85M83.05 39.85L83.95 39.85M82.05 39.85L82.95 39.85M81.05 39.85L81.95 39.85M80.05 39.85L80.95 39.85M79.05 39.85L79.95 39.85M78.05 39.85L78.95 39.85M77.05 39.85L77.95 39.85M76.05 39.85L76.95 39.85M75.05 39.85L75.95 39.85M74.05 39.85L74.95 39.85M73.05 39.85L73.95 39.85M72.05 39.85L72.95 39.85M71.05 39.85L71.95 39.85M70.05 39.85L70.95 39.85M69.05 39.85L69.95 39.85M68.05 39.85L68.95 39.85M67.05 39.85L67.95 39.85M66.05 39.85L66.95 39.85M65.05 39.85L65.95 39.85M64.05 39.85L64.95 39.85M63.05 39.85L63.95 39.85M62.05 39.85L62.95 39.85M61.05 39.85L61.95 39.85M60.05 39.85L60.95 39.85M59.05 39.85L59.95 39.85M58.05 39.85L58.95 39.85M57.05 39.85L57.95 39.85M56.05 39.85L56.95 39.85M55.05 39.85L55.95 39.85M54.05 39.85L54.95 39.85M53.05 39.85L53.95 39.85M52.05 39.85L52.95 39.85M51.05 39.85L51.95 39.85M50.05 39.85L50.95 39.85M49.05 39.85L49.95 39.85M48.05 39.85L48.95 39.85M47.05 39.85L47.95 39.85M46.05 39.85L46.95 39.85M45.05 39.85L45.95 39.85M44.05 39.85L44.95 39.85M43.05 39.85L43.95 39.85M42.05 39.85L42.95 39.85M41.05 39.85L41.95 39.85M40.05 39.85L40.95 39.85M39.05 39.85L39.95 39.85M38.05 39.85L38.95 39.85M37.05 39.85L37.95 39.85M36.05 39.85L36.95 39.85M35.05 39.85L35.95 39.85M34.05 39.85L34.95 39.85M33.05 39.85L33.95 39.85M32.05 39.85L32.95 39.85M31.05 39.85L31.95 39.85M30.05 39.85L30.95 39.85M29.05 39.85L29.95 39.85M28.05 39.85L28.95 39.85M27.05 39.85L27.95 39.85M26.05 39.85L26.95 39.85M25.05 39.85L25.95 39.85M24.05 39.85L24.95 39.85M23.05 39.85L23.95 39.85M22.05 39.85L22.95 39.85M21.05 39.85L21.95 39.85M20.05 39.85L20.95 39.85M19.05 39.85L19.95 39.85M18.05 39.85L18.95 39.85M17.05 39.85L17.95 39.85M16.05 39.85L16.95 39.85M15.05 39.85L15.95 39.85M14.05 39.85L14.95 39.85M13.05 39.85L13.95 39.85M12.05 39.85L12.95 39.85M11.05 39.85L11.95 39.85M10.05 39.85L10.95 39.85M9.05 39.85L9.95 39.85M8.05 39.85L8.95 39.85M7.05 39.85L7.95 39.85M6.05 39.85L6.95 39.85M5.05 39.85L5.95 39.85M4.05 39.85L4.95 39.85M3.05 39.85L3.95 39.85M2.05 39.85L2.95 39.85M0 39.85L1.95 39.85M0 72.85L0 39.85M0 72.85L-3 72.85M-3 72.85L-3 81.85M-5 79.85L-3 81.85M-15 39.85L-5 79.85M-15 23.85L-15 39.85M-8 23.85L-15 23.85M-8 18.85L-8 23.85M-8 18.85L-5 18.85M-5 18.85L-5 11.85M-8 18.85L-8 8.85M-8 8.85L-5 11.85", "s10": "M30.51 16.35L30.51 13.85M24.51 13.85L24.51 16.35M28.76 19.35L28.76 16.35M26.26 16.35L26.26 19.35M0.01 20.35L55 20.35M55 20.35L55 25.35M0.01 25.35L55 25.35M0.01 25.35L0.01 20.35M11.56 38.35L13.36 38.35M13.36 38.35L13.36 41.22M13.46 41.22L13.46 38.35M13.46 38.35L15.26 38.35M15.26 38.35L15.26 41.22M15.36 41.22L15.36 38.35M15.36 38.35L17.16 38.35M17.16 38.35L17.16 41.22M17.26 41.22L17.26 38.35M17.26 38.35L19.06 38.35M19.06 38.35L19.06 41.22M19.16 41.22L19.16 38.35M19.16 38.35L20.96 38.35M20.96 38.35L20.96 43.14M21.06 43.14L21.06 38.35M21.06 38.35L55 38.35M55 38.35L55 43.35M0.01 43.35L55 43.35M0.01 43.35L0.01 38.35M0.01 38.35L1.96 38.35M1.96 38.35L1.96 43.14M2.06 43.14L2.06 38.35M2.06 38.35L3.86 38.35M3.86 38.35L3.86 41.22M3.96 41.22L3.96 38.35M3.96 38.35L5.76 38.35M5.76 38.35L5.76 41.22M5.86 41.22L5.86 38.35M5.86 38.35L7.66 38.35M7.66 38.35L7.66 41.22M7.76 41.22L7.76 38.35M7.76 38.35L9.56 38.35M9.56 38.35L9.56 41.22M9.66 41.22L9.66 38.35M9.66 38.35L11.46 38.35M11.46 38.35L11.46 42.18M11.56 42.18L11.56 38.35M0.01 44.35L55 44.35M0.01 20.35L0.01 19.35M55 19.35L55 20.35M0.01 19.35L55 19.35M3.01 72.85L3.01 81.85M0.01 72.85L0.01 84.85M5.01 79.85L13.88 44.35M0.01 44.35L0.01 72.85M27.51 13.85L30.51 13.85M24.51 13.85L27.51 13.85M27.51 16.35L30.51 16.35M24.51 16.35L27.51 16.35M43.07 44.35L43.1 44.94L43.22 45.53L43.41 46.1L43.68 46.64L44.01 47.14L44.41 47.59L44.86 47.98L45.36 48.31L45.89 48.58L46.46 48.77L47.05 48.89L47.65 48.93L48.24 48.89L48.83 48.77L49.4 48.58L49.94 48.31L50.44 47.98L50.89 47.59L51.28 47.14L51.61 46.64L51.88 46.1L52.07 45.53L52.19 44.94L52.23 44.35M55 23.85L55 23.85M0.01 23.85L-0.59 23.85M55 39.85L55 39.85M-0.59 39.85L0.01 39.85", "s20": "M30.5 16.35L30.5 13.85M24.5 13.85L24.5 16.35M28.75 19.35L28.75 16.35M26.25 16.35L26.25 19.35M0 43.35L0 38.35M0 38.35L1.95 38.35M1.95 38.35L1.95 42.18M2.05 42.18L2.05 38.35M2.05 38.35L3.9 38.35M3.9 38.35L3.9 41.23M4 41.23L4 38.35M4 38.35L5.85 38.35M5.85 38.35L5.85 42.18M5.95 42.18L5.95 38.35M5.95 38.35L7.8 38.35M7.8 38.35L7.8 41.23M7.9 41.23L7.9 38.35M7.9 38.35L9.75 38.35M9.75 38.35L9.75 42.18M9.85 42.18L9.85 38.35M9.85 38.35L11.7 38.35M11.7 38.35L11.7 41.23M11.8 41.23L11.8 38.35M11.8 38.35L13.65 38.35M13.65 38.35L13.65 42.18M13.75 42.18L13.75 38.35M13.75 38.35L15.6 38.35M15.6 38.35L15.6 41.23M15.7 41.23L15.7 38.35M15.7 38.35L17.55 38.35M17.55 38.35L17.55 42.18M17.65 42.18L17.65 38.35M17.65 38.35L19.5 38.35M19.5 38.35L19.5 41.23M19.6 41.23L19.6 38.35M19.6 38.35L21.45 38.35M21.45 38.35L21.45 42.18M21.55 42.18L21.55 38.35M21.55 38.35L23.4 38.35M23.4 38.35L23.4 41.23M23.5 41.23L23.5 38.35M23.5 38.35L25.35 38.35M25.35 38.35L25.35 42.18M25.45 42.18L25.45 38.35M25.45 38.35L27.3 38.35M27.3 38.35L27.3 41.23M27.4 41.23L27.4 38.35M27.4 38.35L29.25 38.35M29.25 38.35L29.25 42.18M29.35 42.18L29.35 38.35M29.35 38.35L31.2 38.35M31.2 38.35L31.2 41.23M31.3 41.23L31.3 38.35M31.3 38.35L33.15 38.35M33.15 38.35L33.15 42.18M33.25 42.18L33.25 38.35M33.25 38.35L35.1 38.35M35.1 38.35L35.1 41.23M35.2 41.23L35.2 38.35M35.2 38.35L37.05 38.35M37.05 38.35L37.05 42.18M37.15 42.18L37.15 38.35M37.15 38.35L39 38.35M39 38.35L39 41.23M39.1 41.23L39.1 38.35M39.1 38.35L40.95 38.35M40.95 38.35L40.95 42.18M41.05 42.18L41.05 38.35M41.05 38.35L55 38.35M55 38.35L55 43.35M41.52 43.35L55 43.35M0 20.35L55 20.35M0 20.35L0 19.35M0 19.35L55 19.35M55 19.35L55 20.35M41.17 44.35L55 44.35M0 25.35L55 25.35M0 25.35L0 20.35M55 20.35L55 25.35M3 72.85L3 81.85M5 79.85L13.87 44.35M0 44.35L0 72.85M0 72.85L0 84.85M27.5 13.85L30.5 13.85M24.5 13.85L27.5 13.85M27.5 16.35L30.5 16.35M24.5 16.35L27.5 16.35M43.05 44.35L43.09 44.95L43.21 45.54L43.4 46.1L43.67 46.64L44 47.14L44.4 47.59L44.85 47.99L45.34 48.32L45.88 48.58L46.45 48.78L47.04 48.89L47.63 48.93L48.23 48.89L48.82 48.78L49.39 48.58L49.92 48.32L50.42 47.99L50.87 47.59L51.27 47.14L51.6 46.64L51.87 46.1L52.06 45.54L52.18 44.95L52.22 44.35M55 23.85L55 23.85M55 39.85L55 39.85M27.35 34.85L27.35 39.4M23.45 39.4L23.45 36.85M-0.55 39.85L0 39.85", "s50": "M30.5 16.35L30.5 13.85M24.5 13.85L24.5 16.35M28.75 19.35L28.75 16.35M26.25 16.35L26.25 19.35M45.17 38.35L46.05 38.35M46.05 38.35L46.05 42.18M46.15 42.18L46.15 38.35M46.15 38.35L47.03 38.35M47.03 38.35L47.03 41.22M47.13 41.22L47.13 38.35M47.13 38.35L48.01 38.35M48.01 38.35L48.01 41.22M48.11 41.22L48.11 38.35M48.11 38.35L48.99 38.35M48.99 38.35L48.99 41.22M49.09 41.22L49.09 38.35M49.09 38.35L49.97 38.35M49.97 38.35L49.97 41.22M50.07 41.22L50.07 38.35M50.07 38.35L50.95 38.35M50.95 38.35L50.95 42.18M51.05 42.18L51.05 38.35M51.05 38.35L55 38.35M55 38.35L55 43.35M0 43.35L0 38.35M0 38.35L1.95 38.35M1.95 38.35L1.95 42.18M2.05 42.18L2.05 38.35M2.05 38.35L2.93 38.35M2.93 38.35L2.93 41.22M3.03 41.22L3.03 38.35M3.03 38.35L3.91 38.35M3.91 38.35L3.91 41.22M4.01 41.22L4.01 38.35M4.01 38.35L4.89 38.35M4.89 38.35L4.89 41.22M4.99 41.22L4.99 38.35M4.99 38.35L5.87 38.35M5.87 38.35L5.87 41.22M5.97 41.22L5.97 38.35M5.97 38.35L6.85 38.35M6.85 38.35L6.85 42.18M6.95 42.18L6.95 38.35M6.95 38.35L7.83 38.35M7.83 38.35L7.83 41.22M7.93 41.22L7.93 38.35M7.93 38.35L8.81 38.35M8.81 38.35L8.81 41.22M8.91 41.22L8.91 38.35M8.91 38.35L9.79 38.35M9.79 38.35L9.79 41.22M9.89 41.22L9.89 38.35M9.89 38.35L10.77 38.35M10.77 38.35L10.77 41.22M10.87 41.22L10.87 38.35M10.87 38.35L11.75 38.35M11.75 38.35L11.75 42.18M11.85 42.18L11.85 38.35M11.85 38.35L12.73 38.35M12.73 38.35L12.73 41.22M12.83 41.22L12.83 38.35M12.83 38.35L13.71 38.35M13.71 38.35L13.71 41.22M13.81 41.22L13.81 38.35M13.81 38.35L14.69 38.35M14.69 38.35L14.69 41.22M14.79 41.22L14.79 38.35M14.79 38.35L15.67 38.35M15.67 38.35L15.67 41.22M15.77 41.22L15.77 38.35M15.77 38.35L16.65 38.35M16.65 38.35L16.65 42.18M16.75 42.18L16.75 38.35M16.75 38.35L17.63 38.35M17.63 38.35L17.63 41.22M17.73 41.22L17.73 38.35M17.73 38.35L18.61 38.35M18.61 38.35L18.61 41.22M18.71 41.22L18.71 38.35M18.71 38.35L19.59 38.35M19.59 38.35L19.59 41.22M19.69 41.22L19.69 38.35M19.69 38.35L20.57 38.35M20.57 38.35L20.57 41.22M20.67 41.22L20.67 38.35M20.67 38.35L21.55 38.35M21.55 38.35L21.55 42.18M21.65 42.18L21.65 38.35M21.65 38.35L22.53 38.35M22.53 38.35L22.53 41.22M22.63 41.22L22.63 38.35M22.63 38.35L23.51 38.35M23.51 38.35L23.51 41.22M23.61 41.22L23.61 38.35M23.61 38.35L24.49 38.35M24.49 38.35L24.49 41.22M24.59 41.22L24.59 38.35M24.59 38.35L25.47 38.35M25.47 38.35L25.47 41.22M25.57 41.22L25.57 38.35M25.57 38.35L26.45 38.35M26.45 38.35L26.45 42.18M26.55 42.18L26.55 38.35M26.55 38.35L27.43 38.35M27.43 38.35L27.43 41.22M27.53 41.22L27.53 38.35M27.53 38.35L28.41 38.35M28.41 38.35L28.41 41.22M28.51 41.22L28.51 38.35M28.51 38.35L29.39 38.35M29.39 38.35L29.39 41.22M29.49 41.22L29.49 38.35M29.49 38.35L30.37 38.35M30.37 38.35L30.37 41.22M30.47 41.22L30.47 38.35M30.47 38.35L31.35 38.35M31.35 38.35L31.35 42.18M31.45 42.18L31.45 38.35M31.45 38.35L32.33 38.35M32.33 38.35L32.33 41.22M32.43 41.22L32.43 38.35M32.43 38.35L33.31 38.35M33.31 38.35L33.31 41.22M33.41 41.22L33.41 38.35M33.41 38.35L34.29 38.35M34.29 38.35L34.29 41.22M34.39 41.22L34.39 38.35M34.39 38.35L35.27 38.35M35.27 38.35L35.27 41.22M35.37 41.22L35.37 38.35M35.37 38.35L36.25 38.35M36.25 38.35L36.25 42.18M36.35 42.18L36.35 38.35M36.35 38.35L37.23 38.35M37.23 38.35L37.23 41.22M37.33 41.22L37.33 38.35M37.33 38.35L38.21 38.35M38.21 38.35L38.21 41.22M38.31 41.22L38.31 38.35M38.31 38.35L39.19 38.35M39.19 38.35L39.19 41.22M39.29 41.22L39.29 38.35M39.29 38.35L40.17 38.35M40.17 38.35L40.17 41.22M40.27 41.22L40.27 38.35M40.27 38.35L41.15 38.35M41.15 38.35L41.15 42.18M41.25 42.18L41.25 38.35M41.25 38.35L42.13 38.35M42.13 38.35L42.13 41.22M42.23 41.22L42.23 38.35M42.23 38.35L43.11 38.35M43.11 38.35L43.11 41.22M43.21 41.22L43.21 38.35M43.21 38.35L44.09 38.35M44.09 38.35L44.09 41.22M44.19 41.22L44.19 38.35M44.19 38.35L45.07 38.35M45.07 38.35L45.07 41.22M45.17 41.22L45.17 38.35M55 19.35L55 20.35M0 20.35L55 20.35M0 20.35L0 19.35M0 19.35L55 19.35M55 20.35L55 25.35M0 25.35L55 25.35M0 25.35L0 20.35M3 72.85L3 81.85M0 72.85L0 84.85M5 79.85L13.88 44.35M0 44.35L0 72.85M27.5 16.35L30.5 16.35M24.5 16.35L27.5 16.35M27.5 13.85L30.5 13.85M24.5 13.85L27.5 13.85M43.06 44.35L43.1 44.95L43.22 45.53L43.41 46.1L43.67 46.64L44.01 47.14L44.4 47.59L44.85 47.98L45.35 48.32L45.89 48.58L46.46 48.77L47.04 48.89L47.64 48.93L48.24 48.89L48.83 48.77L49.39 48.58L49.93 48.32L50.43 47.98L50.88 47.59L51.28 47.14L51.61 46.64L51.87 46.1L52.07 45.53L52.18 44.95L52.22 44.35M55 23.85L55 23.85M55 39.85L55 39.85M28.49 36.85L28.49 39.39M27.49 36.85L27.49 39.39M26.49 34.85L26.49 39.39M25.49 36.85L25.49 39.39M23.59 39.39L23.59 36.85M22.59 39.39L22.59 36.85M21.59 39.39L21.59 35.85M20.59 39.39L20.59 36.85M-0.41 39.85L0 39.85"};
+const PREC_N = {10:0.1, 20:0.05, 50:0.02};
+const PIED_VERN = {10:19, 20:39, 50:49};          // longueur du vernier en mm (n divisions)
+function piedSVG(lect, n, opt){
+  opt = opt||{}; n = n||10;
+  const span = PIED_VERN[n], bg = opt.bg||'var(--surface,#fff)', ink = opt.ink||'var(--ink,#14202b)', acc = opt.acc||'var(--meca,#1456d8)';
+  const rule = PIED_D.rule, sl = PIED_D['s'+n];
+  let t = '';
+  // graduations de la règle : traits de 1 mm, 5 mm et 10 mm, chiffres tous les cm
+  let g = '';
+  for(let k=0;k<=170;k++){ const x=2+k, L = k%10===0?5: k%5===0?4:3; g += 'M'+x+' 39.86V'+(39.86-L); }
+  let nums = '';
+  for(let c=0;c<=16;c++) nums += `<text x="${2+c*10}" y="33.9" text-anchor="middle" font-size="4.3" font-weight="500" font-family="var(--font,system-ui,sans-serif)" fill="${c%2?ink:acc}">${c}</text>`;
+  // vernier : labels
+  let vl = '';
+  const lab = n===50 ? [0,1,2,3,4,5,6,7,8,9,10].map(i=>[i*5*span/n,String(i)]) : [[0,'0'],[span,'10']];
+  lab.forEach(([dx,tx],i)=>{ vl += `<text x="${(2+dx).toFixed(2)}" y="47.6" text-anchor="middle" font-size="3.4" font-weight="500" font-family="var(--font,system-ui,sans-serif)" fill="${i%2||n!==50?acc:ink}">${tx}</text>`; });
+  const sx = lect;
+  const view = opt.vue||'complet';
+  let vb;
+  if(view==='vernier') vb=[Math.max(-3,lect-6), 26, span+14, 24];
+  else if(view==='becs') vb=[-26, 0, Math.max(60,lect+36), 92];
+  else vb=[-28, 0, Math.max(150,lect+span+30), 92];
+  t += `<svg viewBox="${vb.map(v=>+v.toFixed(2)).join(' ')}" role="img" aria-label="${opt.alt||'Pied à coulisse'}" style="width:100%;height:auto;display:block">`;
+  t += `<g fill="none" stroke="${ink}" stroke-width=".16" stroke-linejoin="round"><path d="${rule}"/><path d="${g}" stroke-width=".13"/></g>${nums}`;
+  // coulisseau : il masque la règle derrière lui
+  t += `<g transform="translate(${sx} 0)"><rect x="0" y="19.3" width="55" height="6.1" fill="${bg}"/><rect x="${2+span}" y="38.3" width="${55-2-span}" height="1.9" fill="${bg}"/>`;
+  t += `<g fill="none" stroke="${ink}" stroke-width=".16" stroke-linejoin="round"><path d="${sl.replace(/^/,'')}"/><path d="M0 44.34H55M0 43.34H55M${2+span} 38.34H55" stroke-width=".16"/></g>${vl}</g>`;
+  if(opt.answer){ const u=Math.round(lect/PREC_N[n]), k=u%n, w=Math.floor(u/n);
+    t = t.replace(/<\/svg>$/,'') + `<g stroke="${acc}" stroke-linecap="round" fill="none"><line x1="${2+w+k}" x2="${2+w+k}" y1="33" y2="45" stroke-width=".38"/><line x1="${2+lect}" x2="${2+lect}" y1="37" y2="48.6" stroke-width=".3" stroke-dasharray=".8 .6"/></g></svg>`; }
+  return t + '</svg>';
+}
+
+/* ---------- micromètre : même graphisme que le pied à coulisse ----------
+   micrometreSVG(valeur, {mode:'ext'|'int', vue:'lecture'|'complet', rod, answer, mm, alt})
+   ext : valeur = lecture de la douille + du tambour (mm).
+   int : micromètre d'intérieur à rallonges ; valeur = rallonge (opt.rod, mm) + lecture de la tête (0 à 25 mm). */
+function micPartsN(value){ const v=Math.round(value*100), d=v%50, b=v-d; return {v100:v, base:b/100, d, half:b%100===50}; }
+function micrometreSVG(value, opt){
+  opt = opt||{};
+  const mode=opt.mode||'ext', vue=opt.vue||'lecture', ans=!!opt.answer;
+  const ink=opt.ink||'var(--ink,#14202b)', acc=opt.acc||'var(--meca,#1456d8)', bg=opt.bg||'var(--surface,#fff)', mut='var(--muted,#566673)';
+  const ff='var(--font,system-ui,sans-serif)';
+  const T=(x,y,tx,fill,fs,an)=>`<text x="${x}" y="${y}" text-anchor="${an||'middle'}" font-size="${fs||4}" font-weight="500" font-family="${ff}" fill="${fill}">${tx}</text>`;
+  const ST=`fill="${bg}" stroke="${ink}" stroke-width=".26" stroke-linejoin="round"`;
+  const L=(x1,y1,x2,y2,c,w)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||ink}" stroke-width="${w||.2}"/>`;
+  const lab=(x,tx,y2,yt)=>T(x,yt||12,tx,mut,3.9)+L(x,(yt||12)+2,x,y2,mut,.14);
+  const svg=(vb,al,body)=>`<svg viewBox="${vb}" role="img" aria-label="${al}" style="width:100%;height:auto;display:block">${body}</svg>`;
+  if(vue==='complet' && mode==='ext'){
+    let b='';
+    b+=`<path d="M14 22 Q8 22 8 30 V58 Q8 84 40 84 H128 V42 H112 V66 H44 Q30 66 30 52 V46 H28 V22 Z" ${ST}/>`;
+    b+=`<rect x="28" y="30" width="16" height="8" ${ST}/><rect x="62" y="32" width="52" height="4" ${ST}/>`;
+    b+=`<rect x="118" y="18" width="8" height="8" rx="1.5" ${ST}/><rect x="112" y="26" width="44" height="16" ${ST}/>`;
+    b+=`<rect x="156" y="22" width="36" height="24" rx="2.5" ${ST}/><line x1="164" y1="22.6" x2="164" y2="45.4" stroke="${ink}" stroke-width=".14"/>`;
+    for(let i=0;i<13;i++){ const y=26+i*1.5; b+=L(156,y,161,y,ink,.12); }
+    b+=`<rect x="192" y="27" width="14" height="14" rx="2.5" ${ST}/>`+L(196,27.6,196,40.4,ink,.14)+L(200,27.6,200,40.4,ink,.14);
+    b+=L(112,34,156,34,ink,.22);
+    for(let x=116;x<=154;x+=2.5) b+=L(x,34,x,x%10===6?30.5:32,ink,.14);
+    b+=lab(30,'Enclume',29)+lab(72,'Broche',31)+lab(122,'Blocage',17)+lab(146,'Douille',25,6)+lab(176,'Tambour',21,6)+lab(200,'Cliquet',26,12);
+    b+=T(62,76,'Cadre',mut,3.9)+T(53,47,'mesure',acc,3.6)+`<path d="M44 40 H62" stroke="${acc}" stroke-width=".3" stroke-dasharray="1 .8"/>`;
+    return svg('0 0 214 90',opt.alt||'Micromètre d’extérieur : cadre, enclume, broche, douille, tambour, cliquet',b);
+  }
+  if(vue==='complet'){
+    let b='';
+    for(const x0 of [6,190]){ b+=`<rect x="${x0}" y="6" width="10" height="58" ${ST}/>`; for(let y=6;y<=58;y+=6) b+=L(x0,y+6,x0+10,y,ink,.12); }
+    b+=`<rect x="16" y="30" width="4" height="6" ${ST}/><rect x="20" y="29" width="60" height="8" ${ST}/>`;
+    b+=T(50,34.2,opt.rod!=null?String(opt.rod):'50',ink,4);
+    b+=`<rect x="80" y="25" width="30" height="16" ${ST}/><rect x="110" y="21" width="30" height="24" rx="2.5" ${ST}/><rect x="140" y="31.5" width="46" height="3" ${ST}/><rect x="186" y="30" width="4" height="6" ${ST}/>`;
+    for(let x=84;x<=108;x+=2.5) b+=L(x,33,x,x%10===4?29.5:31,ink,.14);
+    b+=L(80,33,110,33,ink,.2);
+    b+=lab(24,'Touche',29,10)+lab(50,'Rallonge',28,10)+lab(95,'Douille',24,10)+lab(125,'Tambour',20,10)+lab(176,'Touche',31,10);
+    b+=`<g stroke="${acc}" stroke-width=".3" fill="none"><line x1="16" x2="190" y1="56" y2="56"/><path d="M16 56 l3 -1.4 v2.8 z M190 56 l-3 -1.4 v2.8 z" fill="${acc}"/></g>`+T(103,53.6,'diamètre de l’alésage',acc,3.9);
+    return svg('0 0 206 68',opt.alt||'Micromètre d’intérieur à rallonges dans un alésage',b);
+  }
+  // vue « lecture » : douille + tambour agrandis
+  const rod = mode==='int' ? (opt.rod!=null?opt.rod:50) : 0;
+  const head = mode==='int' ? Math.round((value-rod)*100)/100 : value;
+  const P=micPartsN(head), val=P.v100/100, pxm=5.5, xe=50, cy=30;
+  let b='';
+  if(mode==='int'){
+    b+=`<rect x="-37" y="27" width="3" height="6" ${ST}/><rect x="-34" y="25.5" width="34" height="9" ${ST}/>`+T(-17,31.4,String(rod),ink,4.2);
+  }
+  b+=`<rect x="0" y="12" width="${xe}" height="31" ${ST}/>`;
+  const h0=Math.ceil(Math.max(0,val-9)*2-1e-9), h1=Math.floor(val*2+1e-9);
+  for(let h=h0;h<=h1;h++){ const sv=h/2, x=+(xe-(val-sv)*pxm).toFixed(2);
+    if(h%2===0){ const mm=h/2, len=mm%5===0?9:6; b+=L(x,cy,x,cy-len,ink,.22);
+      if(mm%5===0 && x<xe-4) b+=T(x,cy-12.4,mm,(mm/5)%2?ink:acc,4.2); else if(opt.mm && x<xe-3) b+=T(x,cy-8.4,mm,mut,3);
+    } else b+=L(x,cy,x,cy+4.6,ink,.2); }
+  b+=L(0,cy,xe,cy,ink,.36);
+  b+=`<rect x="${xe}" y="4" width="48" height="52" rx="2.5" ${ST}/><line x1="${xe+9}" y1="4.6" x2="${xe+9}" y2="55.4" stroke="${ink}" stroke-width=".14"/>`;
+  for(let m=-7;m<=7;m++){ const Lg=(((P.d+m)%50)+50)%50, y=+(cy+24*Math.sin(m*0.15)).toFixed(2), major=Lg%5===0;
+    b+=L(xe,y,xe+(major?7:4.4),y,ink,.2);
+    if(major) b+=T(xe+14,+(y+1.5).toFixed(2),Lg,(Lg/5)%2?ink:acc,4); }
+  if(ans){
+    b+=`<line x1="${xe-4}" x2="${xe+8.5}" y1="${cy}" y2="${cy}" stroke="${acc}" stroke-width=".75" stroke-linecap="round"/>`;
+    const xl=+(xe-(val-P.base)*pxm).toFixed(2); b+=`<line x1="${xl}" x2="${xl}" y1="${cy-11}" y2="${cy+8}" stroke="${acc}" stroke-width=".6" stroke-linecap="round"/>`;
+    b+=T(xe+34,cy+1.5,'◀ '+P.d,acc,4.4,'start');
+  }
+  const vb = mode==='int' ? '-42 0 148 60' : '-4 0 106 60';
+  return svg(vb,opt.alt||(mode==='int'?'Micromètre d’intérieur : rallonge et tête graduée':'Micromètre d’extérieur : douille et tambour'),b);
+}
+
+</script>
 <script>
 /* Labo de mesure — code partagé (page interactive + feuilles imprimables) */
 const FR = (x, d) => Number(x).toFixed(d).replace('.', ',');
@@ -682,14 +806,14 @@ function dialSVG(pos, max, unit, o) {
   });
 
   /* ---- Pied à coulisse ---- */
-  const C = { prec: 0.1, mode: 'explore', mm: false, val: 23.4, ex: null, score: { n: 0, ok: 0 }, shown: false };
+  const C = { prec: 0.1, mode: 'explore', full: false, val: 23.4, ex: null, score: { n: 0, ok: 0 }, shown: false };
   function calSliderSetup() {
     const n = Math.round(1 / C.prec), sl = $('#cal-sl');
     sl.min = 2 * n; sl.max = 90 * n; sl.value = Math.round(C.val / C.prec);
   }
   function calDraw() {
     const exo = C.mode === 'exo', v = exo ? C.ex : C.val;
-    $('#cal-fig').innerHTML = caliperSVG(v, C.prec, { mm: C.mm, answer: exo ? C.shown : true });
+    $('#cal-fig').innerHTML = piedSVG(Math.round(v * 100) / 100, Math.round(1 / C.prec), { vue: C.full ? 'complet' : 'vernier', answer: exo ? C.shown : true, alt: 'Pied à coulisse au 1/' + Math.round(1 / C.prec) });
     if (!exo) {
       const P = caliperParts(v, C.prec);
       $('#cal-steps').innerHTML =
@@ -711,7 +835,7 @@ function dialSVG(pos, max, unit, o) {
   }
   seg('#cal-prec', v => { C.prec = parseFloat(v); C.val = Math.round(C.val / C.prec) * C.prec; calSliderSetup(); if (C.mode === 'exo') calNew(); else calDraw(); });
   seg('#cal-mode', calMode);
-  $('#cal-mm').addEventListener('change', e => { C.mm = e.target.checked; calDraw(); });
+  $('#cal-full').addEventListener('change', e => { C.full = e.target.checked; calDraw(); });
   $('#cal-sl').addEventListener('input', e => { C.val = Math.round(+e.target.value * C.prec * 100) / 100; calDraw(); });
   function calCheck() {
     const a = parse($('#cal-in').value), fbEl = $('#cal-fb'), P = caliperParts(C.ex, C.prec);
@@ -730,22 +854,25 @@ function dialSVG(pos, max, unit, o) {
     fb($('#cal-fb'), 'info', 'Solution : ' + P.whole + ' mm + ' + P.k + ' &times; ' + FR(C.prec, C.prec < 0.1 ? 2 : 1) + ' = <b>' + FR(C.ex, C.prec < 0.1 ? 2 : 1) + ' mm</b>.'); $('#cal-score').textContent = scoreTxt(C.score); });
   $('#cal-new').addEventListener('click', calNew);
 
-  /* ---- Micromètre ---- */
-  const M = { mode: 'explore', mm: false, val: 1284, ex: null, score: { n: 0, ok: 0 }, shown: false };
+  /* ---- Micromètre (extérieur et intérieur) ---- */
+  const M = { mode: 'explore', kind: 'ext', rod: 50, full: false, val: 1284, ex: null, exRod: 50, score: { n: 0, ok: 0 }, shown: false };
+  const micTot = (head100, rod) => (M.kind === 'int' ? rod * 100 : 0) + head100;     // en centièmes de mm
   function micDraw() {
-    const exo = M.mode === 'exo', v = (exo ? M.ex : M.val) / 100;
-    $('#mic-fig').innerHTML = micSVG(v, { mm: M.mm, answer: exo ? M.shown : true });
+    const exo = M.mode === 'exo', head = exo ? M.ex : M.val, rod = exo ? M.exRod : M.rod, tot = micTot(head, rod) / 100;
+    $('#mic-fig').innerHTML = micrometreSVG(tot, { mode: M.kind, rod: rod, vue: (M.full && !exo) ? 'complet' : 'lecture', answer: exo ? M.shown : true });
     if (!exo) {
-      const P = micParts(v);
+      const P = micPartsN(head / 100);
       $('#mic-steps').innerHTML =
+        (M.kind === 'int' ? '<li><b>Rallonge</b> : le nombre grav&eacute; sur la rallonge donne la base, <span class="num">' + rod + ' mm</span></li>' : '') +
         '<li><b>Douille</b> : dernier trait visible &agrave; <span class="num">' + FR(P.base, 1) + ' mm</span> (' + (P.half ? 'mm entiers + demi-mm visible' : 'pas de demi-mm visible apr&egrave;s le dernier mm') + ')</li>' +
         '<li><b>Tambour</b> : le trait <span class="num">' + P.d + '</span> est en face de la ligne de r&eacute;f&eacute;rence, donc <span class="num">' + P.d + ' &times; 0,01 = ' + FR(P.d / 100, 2) + ' mm</span></li>' +
-        '<li class="res"><b>Lecture</b> : <span class="num">' + FR(P.base, 1) + ' + ' + FR(P.d / 100, 2) + ' = ' + FR(v, 2) + ' mm</span></li>';
+        '<li class="res"><b>Lecture</b> : <span class="num">' + (M.kind === 'int' ? rod + ' + ' : '') + FR(P.base, 1) + ' + ' + FR(P.d / 100, 2) + ' = ' + FR(tot, 2) + ' mm</span></li>';
     }
   }
   function micNew() {
-    let v; do { v = ri(Math.random, 300, 2450); } while (v % 50 === 0 || v === M.ex);
-    M.ex = v; M.shown = false; $('#mic-in').value = ''; $('#mic-fb').className = 'fb';
+    let v; do { v = ri(Math.random, 300, 2450); } while (v % 50 === 0 || (v === M.ex && M.kind === 'ext'));
+    M.ex = v; M.exRod = M.kind === 'int' ? pick(Math.random, [50, 75, 100]) : 0; M.shown = false; $('#mic-in').value = ''; $('#mic-fb').className = 'fb';
+    $('#mic-ask').textContent = M.kind === 'int' ? 'Quelle est la mesure de l’alésage ? (rallonge + tête)' : 'Quelle est la lecture du micromètre ?';
     micDraw(); $('#mic-in').focus({ preventScroll: true });
   }
   function micMode(m) {
@@ -753,22 +880,26 @@ function dialSVG(pos, max, unit, o) {
     if (m === 'exo') { micNew(); $('#mic-score').textContent = scoreTxt(M.score); } else micDraw();
   }
   seg('#mic-mode', micMode);
-  $('#mic-mm').addEventListener('change', e => { M.mm = e.target.checked; micDraw(); });
+  seg('#mic-kind', v => { M.kind = v; $('#mic-rod').hidden = v !== 'int'; M.score = { n: 0, ok: 0 }; if (M.mode === 'exo') { micNew(); $('#mic-score').textContent = scoreTxt(M.score); } else micDraw(); });
+  seg('#mic-rod', v => { M.rod = +v; micDraw(); });
+  $('#mic-full').addEventListener('change', e => { M.full = e.target.checked; micDraw(); });
   $('#mic-sl').addEventListener('input', e => { M.val = +e.target.value; micDraw(); });
+  const micSol = () => { const tot = micTot(M.ex, M.exRod) / 100, P = micPartsN(M.ex / 100);
+    return (M.kind === 'int' ? M.exRod + ' mm + ' : '') + FR(P.base, 1) + ' mm + ' + P.d + ' &times; 0,01 mm = <b>' + FR(tot, 2) + ' mm</b>'; };
   function micCheck() {
-    const a = parse($('#mic-in').value), f = $('#mic-fb'), v = M.ex / 100, P = micParts(v);
-    if (a === null) { fb(f, 'info', 'Tape ta lecture en mm, par exemple 12,84.'); return; }
-    const ok = Math.round(a * 100) === M.ex;
+    const a = parse($('#mic-in').value), f = $('#mic-fb'), tot = micTot(M.ex, M.exRod);
+    if (a === null) { fb(f, 'info', 'Tape ta lecture en mm, par exemple ' + (M.kind === 'int' ? '62,84.' : '12,84.')); return; }
+    const ok = Math.round(a * 100) === tot;
     if (!M.shown) bump(M.score, ok);
     M.shown = true; micDraw();
-    if (ok) fb(f, 'ok', 'Juste : <b>' + FR(v, 2) + ' mm</b>.');
-    else fb(f, 'ko', 'Pas tout &agrave; fait. La r&eacute;ponse est <b>' + FR(v, 2) + ' mm</b> : douille ' + FR(P.base, 1) + ' mm + tambour ' + P.d + ' &times; 0,01 mm.');
+    if (ok) fb(f, 'ok', 'Juste : <b>' + FR(tot / 100, 2) + ' mm</b>.');
+    else fb(f, 'ko', 'Pas tout &agrave; fait. La r&eacute;ponse est ' + micSol() + '.');
     $('#mic-score').textContent = scoreTxt(M.score);
   }
   $('#mic-ok').addEventListener('click', micCheck);
   $('#mic-in').addEventListener('keydown', e => { if (e.key === 'Enter') micCheck(); });
-  $('#mic-sol').addEventListener('click', () => { const v = M.ex / 100, P = micParts(v); if (!M.shown) bump(M.score, false); M.shown = true; micDraw();
-    fb($('#mic-fb'), 'info', 'Solution : ' + FR(P.base, 1) + ' mm + ' + P.d + ' &times; 0,01 mm = <b>' + FR(v, 2) + ' mm</b>.'); $('#mic-score').textContent = scoreTxt(M.score); });
+  $('#mic-sol').addEventListener('click', () => { if (!M.shown) bump(M.score, false); M.shown = true; micDraw();
+    fb($('#mic-fb'), 'info', 'Solution : ' + micSol() + '.'); $('#mic-score').textContent = scoreTxt(M.score); });
   $('#mic-new').addEventListener('click', micNew);
 
   /* ---- Tolérances ---- */

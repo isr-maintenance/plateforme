@@ -26,28 +26,9 @@ const figPied = (v,n,vue,alt) => `<div class="m20fig">${piedSVG(v,n,{vue,alt})}<
 /* lecture d'un vernier : mm entiers, trait qui coïncide, total */
 function lecture(v,n){ const p=PREC[n], u=Math.round(v/p), k=u%n, whole=Math.floor(u/n); return {whole,k,frac:k*p,p}; }
 
-/* ---------- micromètre (dessin repris du Labo de mesure) ---------- */
-function micParts(value){ const v100=Math.round(value*100), d=v100%50, b=v100-d; return {v100, base:b/100, d, half:b%100===50}; }
-function micSVG(value, ans){
-  const P=micParts(value), pxm=34, yr=100, xr=34+8.5*pxm, tw=175, val=P.v100/100;
-  let s='<svg viewBox="0 0 520 200" role="img" aria-label="Micromètre : douille graduée en mm et demi-mm, tambour gradué en centièmes" style="width:100%;height:auto;display:block">';
-  s+=`<rect x="10" y="${yr-34}" width="${(xr-10).toFixed(1)}" height="68" class="mc-bar"/>`;
-  for(let h=Math.ceil(Math.max(0,val-8.5)*2); h/2<=val+1e-9; h++){
-    const sv=h/2, x=(xr-(val-sv)*pxm).toFixed(1);
-    if(h%2===0){ const mm=h/2, len=mm%5===0?28:20;
-      s+=`<line x1="${x}" x2="${x}" y1="${yr}" y2="${yr-len}" class="mc-tk"/>`;
-      if(mm%5===0 && +x<xr-16) s+=`<text x="${x}" y="${yr-42}" text-anchor="middle" class="mc-lab">${mm}</text>`;
-    } else s+=`<line x1="${x}" x2="${x}" y1="${yr}" y2="${yr+16}" class="mc-tk"/>`;
-  }
-  s+=`<line x1="10" x2="${xr.toFixed(1)}" y1="${yr}" y2="${yr}" class="mc-refl"/><rect x="${xr.toFixed(1)}" y="${yr-78}" width="${tw}" height="156" class="mc-plate"/>`;
-  for(let m=-7;m<=7;m++){ const L=(((P.d+m)%50)+50)%50, y=yr+m*10, major=L%5===0;
-    s+=`<line x1="${xr.toFixed(1)}" x2="${(xr+(major?22:13)).toFixed(1)}" y1="${y}" y2="${y}" class="mc-tk"/>`;
-    if(major) s+=`<text x="${(xr+34).toFixed(1)}" y="${y+5}" class="mc-lab">${L}</text>`; }
-  if(ans){ s+=`<line x1="${(xr-6).toFixed(1)}" x2="${(xr+28).toFixed(1)}" y1="${yr}" y2="${yr}" stroke="var(--meca)" stroke-width="2.6"/>`;
-    s+=`<line x1="${(xr-(val-P.base)*pxm).toFixed(1)}" x2="${(xr-(val-P.base)*pxm).toFixed(1)}" y1="${yr-34}" y2="${yr+34}" stroke="var(--meca)" stroke-width="2.6"/>`; }
-  return s+'</svg>';
-}
-const figMic = (v,ans) => `<div class="m20fig mic">${micSVG(v,ans)}</div>`;
+/* ---------- micromètre : dessin de js/pied.js (même graphisme que le pied à coulisse) ---------- */
+const micParts = micPartsN;
+const figMic = (v, ans, o) => `<div class="m20fig mic">${micrometreSVG(v, Object.assign({answer:ans}, o||{}))}</div>`;
 
 /* ---------- laboratoire : lire un vernier en déplaçant le bec mobile ---------- */
 function mountVernierLab(root){
@@ -68,16 +49,20 @@ function mountVernierLab(root){
   draw();
 }
 
-/* ---------- laboratoire : micromètre ---------- */
-function mountMicLab(root){
-  const box=root.querySelector('#m20mic'); if(!box) return; let val=7.38;
-  box.innerHTML=`<div id="m20mf"></div><div class="m20lab"><label for="m20ms"><b>Ouverture</b></label><input type="range" id="m20ms" min="300" max="2450" step="1" value="738"><span class="num" id="m20mv"></span></div><ol class="m20steps" id="m20ms2"></ol>`;
-  const draw=()=>{ const P=micParts(val);
-    box.querySelector('#m20mf').innerHTML=figMic(val,true); box.querySelector('#m20mv').textContent=nf(val,2)+' mm';
-    box.querySelector('#m20ms2').innerHTML=`<li><b>La douille</b> : le dernier trait visible indique <b>${nf(P.base,2)} mm</b> (${P.half?'un trait de demi-millimètre est visible : on ajoute 0,5 mm':'pas de trait de demi-millimètre visible'}).</li>
+/* ---------- laboratoire : micromètre (extérieur ou intérieur) ---------- */
+function mountMicLab(root, sel, kind){
+  const box=root.querySelector(sel); if(!box) return; let val=7.38, rod=50;
+  box.innerHTML=`${kind==='int'?`<div class="m20lab"><div class="seg m20seg" role="group" aria-label="Rallonge">${[50,75,100].map(r=>`<button data-r="${r}" aria-pressed="${r===50}">Rallonge ${r}</button>`).join('')}</div></div>`:''}<div class="mfig"></div><div class="m20lab"><label><b>Ouverture</b> <input type="range" min="300" max="2450" step="1" value="738" style="min-width:160px"></label><span class="num mval"></span></div><ol class="m20steps"></ol>`;
+  const draw=()=>{ const P=micPartsN(val), tot=Math.round((val+(kind==='int'?rod:0))*100)/100;
+    box.querySelector('.mfig').innerHTML=figMic(tot,true,{mode:kind,rod});
+    box.querySelector('.mval').textContent=nf(tot,2)+' mm';
+    box.querySelector('.m20steps').innerHTML=(kind==='int'?`<li><b>La rallonge</b> : le nombre gravé donne la base, <b>${rod} mm</b>.</li>`:'')+
+      `<li><b>La douille</b> : le dernier trait visible indique <b>${nf(P.base,2)} mm</b> (${P.half?'un trait de demi-millimètre est visible : on ajoute 0,5 mm':'pas de trait de demi-millimètre visible'}).</li>
       <li><b>Le tambour</b> : le trait de la douille est en face de la graduation <b>${P.d}</b>, donc ${P.d} × 0,01 = <b>${nf(P.d/100,2)} mm</b>.</li>
-      <li class="res"><b>Lecture</b> : ${nf(P.base,2)} + ${nf(P.d/100,2)} = <b>${nf(val,2)} mm</b></li>`; };
-  box.querySelector('#m20ms').oninput=e=>{ val=+e.target.value/100; draw(); }; draw();
+      <li class="res"><b>Lecture</b> : ${kind==='int'?rod+' + ':''}${nf(P.base,2)} + ${nf(P.d/100,2)} = <b>${nf(tot,2)} mm</b></li>`; };
+  box.querySelector('input[type=range]').oninput=e=>{ val=+e.target.value/100; draw(); };
+  box.querySelectorAll('[data-r]').forEach(bt=>bt.onclick=()=>{ rod=+bt.dataset.r; box.querySelectorAll('[data-r]').forEach(x=>x.setAttribute('aria-pressed',x===bt)); draw(); });
+  draw();
 }
 
 /* ---------- séries de lectures : des valeurs propres à chaque élève ---------- */
@@ -95,6 +80,15 @@ function serieMic(box,key){
   mountDrillW(box,key,{ intro:'Lis chaque micromètre : douille (mm et demi-mm) + tambour (centièmes). Réponds en mm.', hint:'Douille : le dernier trait visible. Tambour : la graduation en face du trait horizontal × 0,01 mm.',
     rows:[0,1,2,3].map(i=>({ q:figMic(v['v'+i],false), unit:'mm', ans:v['v'+i], tol:0, abs:0.006, hint:`Douille : ${nf(micParts(v['v'+i]).base,2)} mm ; tambour : ${micParts(v['v'+i]).d} × 0,01 = ${nf(micParts(v['v'+i]).d/100,2)} mm.` })) });
 }
+
+function serieMicInt(box,key){
+  const choix={}; for(let i=0;i<4;i++){ const H=[]; for(let j=0;j<4;j++) H.push(Math.round((2+i*4.5+j*1.25+((i*11+j*19)%50)/100)*100)/100); choix['h'+i]=H; choix['r'+i]=[50,75,100,50].slice(j0(i)).concat([75,100,50]).slice(0,4); }
+  const v=vx(key,choix);
+  mountDrillW(box,key,{ intro:'Lis chaque micromètre d’intérieur : rallonge + douille + tambour. Réponds en mm : c’est la mesure de l’alésage.', hint:'Rallonge : le nombre gravé. Douille : le dernier trait visible. Tambour : la graduation en face du trait horizontal × 0,01 mm.',
+    rows:[0,1,2,3].map(i=>{ const tot=Math.round((v['r'+i]+v['h'+i])*100)/100, P=micPartsN(v['h'+i]); return { q:figMic(tot,false,{mode:'int',rod:v['r'+i]}), unit:'mm', ans:tot, tol:0, abs:0.006,
+      hint:`Rallonge ${v['r'+i]} mm ; douille ${nf(P.base,2)} mm ; tambour ${P.d} × 0,01 = ${nf(P.d/100,2)} mm.` }; }) });
+}
+const j0 = i => i%3;
 
 /* =================== CHAPITRE 20 — L'OUTILLAGE : LES OUTILS DE MESURE =================== */
 defMC(20, {
@@ -114,6 +108,9 @@ defMC(20, {
     M20fq1:{q:"Un micromètre se lit au…",o:["Dixième de mm","Centième de mm","Millimètre"],g:1,e:"Le tambour est gradué en 0,01 mm : un tour de tambour = 0,5 mm, 50 graduations.",r:'M20f'},
     M20fq2:{q:"Pourquoi utiliser le bouton à friction ?",o:["Pour mesurer plus vite","Pour exercer toujours la même pression et ne rien déformer","Pour lire le tambour"],g:1,e:"Le bouton à friction limite l’effort de serrage : pression constante, pas de déformation de la pièce ou des touches.",r:'M20f'},
     M20fq3:{q:"Quand faut-il vérifier l’étalonnage d’un micromètre ?",o:["Une fois par an","Avant chaque utilisation, avec une cale étalon","Jamais, c’est un instrument précis"],g:1,e:"On contrôle le zéro avec une cale étalon avant chaque utilisation.",r:'M20f'},
+    M20jq1:{q:"La rallonge porte le nombre 75 et la tête lit 12,36 mm. Quelle est la mesure de l’alésage ?",o:["12,36 mm","87,36 mm","75,36 mm"],g:1,e:"Mesure = rallonge + tête = 75 + 12,36 = 87,36 mm.",r:'M20j'},
+    M20jq2:{q:"Que mesure un micromètre d’intérieur ?",o:["Le diamètre d’un arbre","Le diamètre d’un alésage","La profondeur d’un trou"],g:1,e:"Ses touches s’appuient sur les parois opposées d’un alésage.",r:'M20j'},
+    M20jq3:{q:"Pourquoi visse-t-on une rallonge ?",o:["Pour mesurer de plus grands diamètres que les 25 mm de la tête","Pour lire plus finement","Pour serrer plus fort"],g:0,e:"La tête ne mesure que sur 25 mm : la rallonge allonge l’instrument, et sa longueur s’ajoute à la lecture.",r:'M20j'},
     M20gq1:{q:"Que mesure un comparateur ?",o:["Une cote absolue","Un écart par rapport à une valeur de référence (le point zéro)","Un angle"],g:1,e:"Le comparateur indique seulement l’écart par rapport à la valeur réglée au zéro, par exemple avec une cale étalon.",r:'M20g'},
     M20gq2:{q:"Pour mesurer une ovalisation, on…",o:["fait pivoter la pièce et on repère le maximum de l’aiguille","écarte les becs de la pièce","mesure deux fois au pied à coulisse"],g:0,e:"Le comparateur est fixe, réglé sur le plus petit rayon ; la pièce tourne et l’aiguille passe par un maximum.",r:'M20g'},
     M20hq1:{q:"Une bavure sur la pièce est une erreur due…",o:["à la pièce","à l’instrument","à l’opérateur"],g:0,e:"Bavures, chocs, copeaux, huile : ce sont des éléments parasites sur la pièce.",r:'M20h'},
@@ -164,14 +161,24 @@ defMC(20, {
      mount:root=>seriePied(root.querySelector('#m20x3'),'M20x3',50)},
     {id:'M20f', sec:'20.7', t:'Le micromètre', quiz:['M20fq1','M20fq2','M20fq3'], ex:{keys:['M20x4'], lbl:'Les quatre lectures'},
      body:()=>`<p class="lead">Le micromètre (ou palmer) mesure les dimensions linéaires extérieures ou intérieures, au centième de millimètre.</p>
+      ${figMic(0,false,{vue:'complet'})}
       <p>Il a un corps en U avec une <b>touche fixe</b> et une <b>touche mobile</b> actionnée par un tambour (système vis-écrou). Le <b>bouton à friction</b> assure une pression constante. Précision : 0,01 à 0,001 mm.</p>
       ${terrain('Vérifie l’étalonnage avec la cale étalon prévue, avant chaque utilisation.')}
       <h3>Méthode de mesure</h3>
       <ol><li>Place la pièce entre les touches, puis serre avec le <b>bouton à friction</b> (jamais avec le tambour).</li><li>Sur la <b>douille</b>, lis les mm entiers et les demi-mm découverts par le tambour.</li><li>Sur le <b>tambour</b>, lis les centièmes : la graduation en face du trait horizontal × 0,01 mm.</li><li>Additionne.</li></ol>
       <h3>Essaie</h3><div id="m20mic"></div>
       ${exbox('m20x4','Lis les quatre micromètres','Des valeurs différentes pour chaque élève.')}`,
-     mount:root=>{ mountMicLab(root); serieMic(root.querySelector('#m20x4'),'M20x4'); }},
-    {id:'M20g', sec:'20.8', t:'Le comparateur', quiz:['M20gq1','M20gq2'], ex:{keys:['M20x5'], lbl:'Ovalisation et faux-rond'},
+     mount:root=>{ mountMicLab(root,'#m20mic','ext'); serieMic(root.querySelector('#m20x4'),'M20x4'); }},
+    {id:'M20j', sec:'20.8', t:'Le micromètre d’intérieur', quiz:['M20jq1','M20jq2','M20jq3'], ex:{keys:['M20x6'], lbl:'Les quatre lectures'},
+     body:()=>`<p class="lead">Le micromètre d’intérieur mesure le <b>diamètre d’un alésage</b>. Sa tête se lit exactement comme un micromètre d’extérieur.</p>
+      ${figMic(0,false,{mode:'int',vue:'complet',rod:50})}
+      <p>On place l’instrument en travers de l’alésage : une <b>touche</b> de chaque côté. La tête (douille et tambour) mesure sur 25 mm ; pour couvrir de plus grands diamètres, on visse une <b>rallonge</b> dont la longueur est gravée dessus.</p>
+      ${mcDef('Lecture','<b>mesure = longueur de la rallonge + lecture de la tête</b> (douille + tambour). Exemple : rallonge 50, tête 12,34 → 50 + 12,34 = <b>62,34 mm</b>.')}
+      ${terrain('Balance doucement l’instrument dans l’alésage pour trouver la bonne position : on cherche la lecture la plus petite dans le sens de l’axe, la plus grande en le faisant pivoter dans la section. Fais valider ton geste à l’atelier par ton prof.')}
+      <h3>Essaie</h3><div id="m20mici"></div>
+      ${exbox('m20x6','Lis les quatre micromètres d’intérieur','Des valeurs différentes pour chaque élève.')}`,
+     mount:root=>{ mountMicLab(root,'#m20mici','int'); serieMicInt(root.querySelector('#m20x6'),'M20x6'); }},
+    {id:'M20g', sec:'20.9', t:'Le comparateur', quiz:['M20gq1','M20gq2'], ex:{keys:['M20x5'], lbl:'Ovalisation et faux-rond'},
      body:()=>`<p class="lead">Le comparateur ne donne pas une cote : il indique un <b>écart</b> par rapport à une valeur de référence.</p>
       <p>Il est formé d’un cadran gradué avec une aiguille, d’un palpeur (une tige et une touche) et d’une lunette avec un index pour matérialiser le zéro. Un totaliseur compte les tours de l’aiguille : pour une course de 10 mm, un tour = 1 mm.</p>
       ${mcDef('Principe','La tige se déplace en translation ; un mécanisme transforme ce déplacement en rotation de l’aiguille. L’angle est proportionnel au déplacement. On fait le zéro avec une cale étalon, puis on place la pièce : le comparateur indique la différence.')}
@@ -184,14 +191,14 @@ defMC(20, {
         {q:`Ovalisation : le zéro est réglé sur le plus petit rayon ; l’aiguille passe par un maximum de <b>+${nf(v.o)} mm</b>. Quelle est l’ovalisation ?`,unit:'mm',ans:v.o,tol:0,abs:0.004,hint:'L’ovalisation est la valeur maximale lue.'},
         {q:`Faux-rond : sur un tour complet, la plus grande lecture est <b>+${nf(v.a)} mm</b> et la plus petite <b>${nf(v.b)} mm</b>. Quel est le faux-rond ?`,unit:'mm',ans:(v.a-v.b)/2,tol:0,abs:0.004,hint:'(plus grande − plus petite) ÷ 2.'},
         {q:`Faux-rond : plus grande lecture <b>+${nf(v.c)} mm</b>, plus petite <b>${nf(v.d)} mm</b>. Quel est le faux-rond ?`,unit:'mm',ans:(v.c-v.d)/2,tol:0,abs:0.004,hint:'(plus grande − plus petite) ÷ 2.'}]}); }},
-    {id:'M20h', sec:'20.9', t:'Les erreurs de mesurage', quiz:['M20hq1','M20hq2','M20hq3'], ex:{keys:['M20err'], lbl:'D’où vient l’erreur ?'},
+    {id:'M20h', sec:'20.10', t:'Les erreurs de mesurage', quiz:['M20hq1','M20hq2','M20hq3'], ex:{keys:['M20err'], lbl:'D’où vient l’erreur ?'},
      body:()=>`<p class="lead">Il y a toujours une part d’erreur dans un mesurage : l’important est de la minimiser.</p>
       ${mcDef('Vocabulaire','<b>Dimension réelle</b> : la valeur exacte, une notion idéale qu’on ne peut jamais connaître exactement. <b>Erreur</b> : l’écart entre la dimension mesurée et la dimension réelle.')}
       ${tbl(['Origine','Exemples','Précaution'],[['A — La pièce','bavures, chocs, copeaux, huile de coupe','nettoyer les surfaces de contact'],['B — L’instrument','becs déformés ou usés, graduations illisibles, vis de réglage trop serrée, jeu du lardon','choisir un instrument adapté ; l’étalonner'],['C — L’opérateur','erreur de lecture (parallaxe, concordance) ; pièce mal alignée ; pression trop forte','aligner pièce et appareil ; pression constante et modérée'],['D — L’environnement','température : les instruments sont étalonnés à 20 °C, la dilatation fausse la mesure','température de la pièce et de l’appareil proche de 20 °C']])}
       ${exbox('m20err','Pièce, instrument, opérateur ou environnement ?','')}`,
      mount:root=>mountSortW(root.querySelector('#m20err'),'M20err',{cats:[['pi','Pièce'],['in','Instrument'],['op','Opérateur'],['en','Environnement']],items:[
        ['Une bavure sur l’arête mesurée','pi',''],['Des copeaux sur les faces de contact','pi',''],['Des becs déformés après une chute','in',''],['Des graduations usées, illisibles','in',''],['Une vis de serrage trop serrée qui frotte','in',''],['Une erreur de parallaxe à la lecture','op','Regarde l’échelle de face.'],['Une pression de contact trop forte','op',''],['La pièce mal alignée entre les becs','op',''],['Une pièce encore chaude sortie de machine','en','Elle est dilatée : on mesure trop grand.'],['Un atelier à 35 °C','en','']]})},
-    {id:'M20i', sec:'20.10', t:'Choisir le bon instrument', quiz:['M20iq1'], ex:{keys:['M20choix'], lbl:'Le bon instrument'},
+    {id:'M20i', sec:'20.11', t:'Choisir le bon instrument', quiz:['M20iq1'], ex:{keys:['M20choix'], lbl:'Le bon instrument'},
      body:()=>`<p class="lead">Le bon instrument, c’est celui dont la précision est adaptée à la tolérance de la cote.</p>
       ${tbl(['Instrument','Précision','Pour mesurer…'],[['Pied à coulisse','0,1 – 0,05 – 0,02 mm','longueurs, diamètres, profondeurs (cotes courantes)'],['Jauge de profondeur','0,02 mm','profondeurs, gorges'],['Micromètre','0,01 mm','dimensions précises (arbres, épaisseurs)'],['Comparateur','écart seulement','ovalisation, faux-rond, parallélisme']])}
       ${terrain('Règle simple : l’instrument doit lire au moins dix fois plus fin que la tolérance. Pour ± 0,01 mm, on prend un micromètre ; pour ± 0,5 mm, un pied à coulisse suffit.')}
@@ -199,7 +206,7 @@ defMC(20, {
      mount:root=>mountSortW(root.querySelector('#m20choix'),'M20choix',{cats:[['pc','Pied à coulisse'],['mi','Micromètre'],['co','Comparateur']],items:[
        ['Une longueur de 120 mm à ± 0,2 mm','pc',''],['Le diamètre extérieur d’un arbre à ± 0,01 mm','mi','Il faut lire le centième.'],['L’épaisseur d’une cale ou d’une tôle fine, au centième','mi',''],['Le faux-rond d’un arbre monté sur le tour','co',''],['L’écart de parallélisme d’une face sur le marbre','co',''],['La profondeur d’un trou borgne à ± 0,1 mm','pc',''],['Le diamètre intérieur d’un alésage ébauché','pc',''],['L’ovalisation d’une portée','co','']]})},
   ],
-  prereq:[{t:'Nommer les parties du pied à coulisse et choisir le type de mesure',cap:'M20a'},{t:'Expliquer le principe de lecture d’un vernier',cap:'M20b'},{t:'Lire un pied à coulisse au 1/10',cap:'M20c'},{t:'Lire un pied à coulisse au 1/20',cap:'M20d'},{t:'Lire un pied à coulisse au 1/50',cap:'M20e'},{t:'Lire un micromètre',cap:'M20f'},{t:'Utiliser un comparateur (ovalisation, faux-rond)',cap:'M20g'},{t:'Identifier les origines des erreurs de mesurage',cap:'M20h'},{t:'Choisir l’instrument adapté à la tolérance',cap:'M20i'}],
+  prereq:[{t:'Nommer les parties du pied à coulisse et choisir le type de mesure',cap:'M20a'},{t:'Expliquer le principe de lecture d’un vernier',cap:'M20b'},{t:'Lire un pied à coulisse au 1/10',cap:'M20c'},{t:'Lire un pied à coulisse au 1/20',cap:'M20d'},{t:'Lire un pied à coulisse au 1/50',cap:'M20e'},{t:'Lire un micromètre',cap:'M20f'},{t:'Lire un micromètre d’intérieur (rallonge + tête)',cap:'M20j'},{t:'Utiliser un comparateur (ovalisation, faux-rond)',cap:'M20g'},{t:'Identifier les origines des erreurs de mesurage',cap:'M20h'},{t:'Choisir l’instrument adapté à la tolérance',cap:'M20i'}],
 });
 
 })();
