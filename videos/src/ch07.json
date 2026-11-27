@@ -1,0 +1,109 @@
+{
+ "id": "ch07-pouillet",
+ "titre": "La loi de Pouillet",
+ "chapitre": "CHAPITRE 7 · LA LOI DE POUILLET",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "p_intro",
+   "texte": "Dans cette capsule, tu vas voir de quoi dépend la résistance d’un fil : sa longueur, sa section et sa matière. C’est la loi de Pouillet.",
+   "voix": "Dans cette capsule, tu vas voir de quoi dépend la résistance d’un fil : sa longueur, sa section et sa matière. C’est la loi de Pouillet."
+  },
+  {
+   "cle": "s02",
+   "scene": "p_exp",
+   "texte": "Sur un panneau, on relie un conducteur entre deux points A et B, et on mesure sa résistance à l’ohmmètre. On ne change qu’un seul critère à la fois.",
+   "voix": "Sur un panneau, on relie un conducteur entre deux points A et B, et on mesure sa résistance à l’aummètre. On ne change qu’un seul critère à la fois."
+  },
+  {
+   "cle": "s03",
+   "scene": "p_long",
+   "texte": "Premier essai : la longueur. Un mètre de chrome-nickel mesure 1 ohm, deux mètres mesurent 2 ohms. Quand la longueur double, la résistance double.",
+   "voix": "Premier essai : la longueur. Un mètre de chrome-nickel mesure un aum, deux mètres mesurent deux aums. Quand la longueur double, la résistance double."
+  },
+  {
+   "cle": "s04",
+   "scene": "p_sec",
+   "texte": "Deuxième essai : la section. 1 mm² donne 1 ohm, 2 mm² donnent 0,5 ohm. Quand la section double, la résistance est divisée par deux.",
+   "voix": "Deuxième essai : la section. Un millimètre carré donne un aum, deux millimètres carrés donnent zéro virgule cinq aum. Quand la section double, la résistance est divisée par deux."
+  },
+  {
+   "cle": "s05",
+   "scene": "p_mat",
+   "texte": "Troisième essai : la matière. Pour 1 m et 1 mm² : chrome-nickel 1 ohm, ferro-nickel 0,8 ohm, cuivre à peine 0,017 ohm.",
+   "voix": "Troisième essai : la matière. Pour un mètre et un millimètre carré : chrome-nickel, un aum ; ferro-nickel, zéro virgule huit aum ; cuivre, à peine zéro virgule zéro dix-sept aum."
+  },
+  {
+   "cle": "s06",
+   "scene": "p_conc",
+   "texte": "Conclusion : la résistance est proportionnelle à la longueur, inversement proportionnelle à la section, et elle dépend de la matière.",
+   "voix": "Conclusion : la résistance est proportionnelle à la longueur, inversement proportionnelle à la section, et elle dépend de la matière."
+  },
+  {
+   "cle": "s07",
+   "scene": "p_formule",
+   "texte": "Cela donne la loi de Pouillet : R égale rô fois L, divisé par S.",
+   "voix": "Cela donne la loi de Pouillet : r égale rô fois elle, divisé par esse."
+  },
+  {
+   "cle": "s08",
+   "scene": "p_formule",
+   "texte": "Avec le triangle, tu trouves aussi la longueur, L égale R fois S sur rô, et la section, S égale rô fois L sur R.",
+   "voix": "Avec le triangle, tu trouves aussi la longueur, elle égale r fois esse sur rô, et la section, esse égale rô fois elle sur r."
+  },
+  {
+   "cle": "s09",
+   "scene": "p_rho",
+   "texte": "Le rô, c’est la résistivité : plus elle est petite, mieux le métal conduit. L’argent est le meilleur, puis le cuivre, puis l’aluminium.",
+   "voix": "Le rô, c’est la résistivité : plus elle est petite, mieux le métal conduit. L’argent est le meilleur, puis le cuivre, puis l’aluminium."
+  },
+  {
+   "cle": "s10",
+   "scene": "p_rho",
+   "texte": "Pour un fil rond, la section vaut pi fois le diamètre au carré, divisé par quatre.",
+   "voix": "Pour un fil rond, la section vaut pi fois le diamètre au carré, divisé par quatre."
+  },
+  {
+   "cle": "s11",
+   "scene": "p_rho",
+   "texte": "Attention aux unités : la longueur en mètres, la section en millimètres carrés, et la résistivité en ohms millimètre carré par mètre.",
+   "voix": "Attention aux unités : la longueur en mètres, la section en millimètres carrés, et la résistivité en aums millimètre carré par mètre."
+  },
+  {
+   "cle": "s12",
+   "scene": "p_ex",
+   "texte": "Un exemple : un câble de cuivre de 30 mètres et de 1,5 mm² de section. Quelle est sa résistance ?",
+   "voix": "Un exemple : un câble de cuivre de trente mètres et de un virgule cinq millimètre carré de section. Quelle est sa résistance ?"
+  },
+  {
+   "cle": "s13",
+   "scene": "p_ex",
+   "texte": "Les données : rô vaut 0,0175, L vaut 30 m et S vaut 1,5 mm². L’inconnue, c’est R.",
+   "voix": "Les données : rô vaut zéro virgule zéro cent septante-cinq, elle vaut trente mètres et esse vaut un virgule cinq millimètre carré. L’inconnue, c’est r."
+  },
+  {
+   "cle": "s14",
+   "scene": "p_ex",
+   "texte": "On applique la formule : R égale 0,0175 fois 30, divisé par 1,5, soit 0,35 ohm.",
+   "voix": "On applique la formule : r égale zéro virgule zéro cent septante-cinq fois trente, divisé par un virgule cinq, soit zéro virgule trente-cinq aum."
+  },
+  {
+   "cle": "s15",
+   "scene": "p_terrain",
+   "texte": "Sur le terrain, un câble trop long ou trop fin est une résistance de trop : il chauffe, et la tension n’arrive pas entière au récepteur.",
+   "voix": "Sur le terrain, un câble trop long ou trop fin est une résistance de trop : il chauffe, et la tension n’arrive pas entière au récepteur."
+  },
+  {
+   "cle": "s16",
+   "scene": "p_recap",
+   "texte": "À retenir : R égale rô L sur S. Plus le fil est long, plus R monte. Plus il est gros, plus R baisse.",
+   "voix": "À retenir : r égale rô elle sur esse. Plus le fil est long, plus r monte. Plus il est gros, plus r baisse."
+  },
+  {
+   "cle": "s17",
+   "scene": "p_recap",
+   "texte": "À toi de jouer : complète le tableau des résultats, puis fais les trois exercices.",
+   "voix": "À toi de jouer : complète le tableau des résultats, puis fais les trois exercices."
+  }
+ ]
+}

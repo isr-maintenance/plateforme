@@ -77,6 +77,7 @@ defAF(7, {
   caps:[
     {id:'A7a', sec:'7.1 — 7.4', t:'Les expériences de Pouillet', quiz:['A7aq1','A7aq2'], ex:{keys:['A7tab'], lbl:'Le tableau des résultats'},
      body:()=>`${progRef(['Citer la loi de Pouillet et les unités correspondantes (CM2D)','Résoudre des problèmes relatifs à cette loi (CM2D)','Citer les conducteurs et isolants usuels (CM2D)'],'p. 26')}
+      ${capVideo('videos/ch07-pouillet/capsule.mp4','La loi de Pouillet (2 min 28)',2)}
       <p class="lead">Sur un panneau, des conducteurs sont raccordés entre deux points A et B. À l’ohmmètre, on mesure leur résistance en changeant un seul critère à la fois : la longueur, la section, puis la matière.</p>
       <div class="figure" id="a7lab"></div>
       ${exbox('a7tab','Complète le tableau des résultats','Règle le panneau ci-dessus et relève la mesure de l’ohmmètre.')}
@@ -118,6 +119,7 @@ defAF(8, {
   caps:[
     {id:'A8a', sec:'8.1 — 8.6', t:'L’expérience', quiz:['A8aq1'], ex:{keys:['A8tab'], lbl:'Le tableau des mesures'},
      body:()=>`${progRef(['Citer la loi d’Ohm et les unités correspondantes (CM2D)','Expliquer cette loi sous la forme I = U / R (CM2D)','Résoudre des problèmes relatifs à la loi d’Ohm (CM2D)'],'p. 26')}
+      ${capVideo('videos/ch08-ohm/capsule.mp4','La loi d’Ohm (2 min 03)',2)}
       <p class="lead">Tension, courant, résistance : comme Georg Simon Ohm (1789-1854), cherchons la relation entre ces trois grandeurs.</p>
       <p>Matériel : un générateur continu de 4,5 V et 9 V, un ampèremètre, un voltmètre, des résistances de 20 Ω, 50 Ω et 100 Ω. On place successivement chaque résistance entre A et B et on note I, avec chacun des deux générateurs.</p>
       <div class="figure" id="a8lab"></div>

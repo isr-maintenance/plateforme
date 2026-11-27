@@ -1,0 +1,103 @@
+{
+ "id": "ch08-ohm",
+ "titre": "La loi d’Ohm",
+ "chapitre": "CHAPITRE 8 · LA LOI D’OHM",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "o_intro",
+   "texte": "Dans cette capsule, tu vas découvrir la loi d’Ohm : le lien entre la tension, le courant et la résistance.",
+   "voix": "Dans cette capsule, tu vas découvrir la loi d’Aum : le lien entre la tension, le courant et la résistance."
+  },
+  {
+   "cle": "s02",
+   "scene": "o_circuit",
+   "texte": "Comme Georg Simon Ohm, on branche un générateur, une résistance et un ampèremètre, et on note le courant.",
+   "voix": "Comme Georg Simon Aum, on branche un générateur, une résistance et un ampèremètre, et on note le courant."
+  },
+  {
+   "cle": "s03",
+   "scene": "o_tab",
+   "texte": "Avec un générateur de 4,5 volts : 20 ohms donnent 0,225 ampère, 50 ohms donnent 0,09 ampère, 100 ohms donnent 0,045 ampère.",
+   "voix": "Avec un générateur de quatre virgule cinq volts : vingt aums donnent zéro virgule deux cent vingt-cinq ampère, cinquante aums donnent zéro virgule zéro nonante ampère, cent aums donnent zéro virgule zéro quarante-cinq ampère."
+  },
+  {
+   "cle": "s04",
+   "scene": "o_tab",
+   "texte": "Multiplions : 20 fois 0,225 font 4,5. Et 50 fois 0,09 font aussi 4,5.",
+   "voix": "Multiplions : vingt fois zéro virgule deux cent vingt-cinq font quatre virgule cinq. Et cinquante fois zéro virgule zéro nonante font aussi quatre virgule cinq."
+  },
+  {
+   "cle": "s05",
+   "scene": "o_tab",
+   "texte": "Pour un même générateur, le produit R fois I reste constant : c’est la tension U du générateur.",
+   "voix": "Pour un même générateur, le produit r fois i reste constant : c’est la tension u du générateur."
+  },
+  {
+   "cle": "s06",
+   "scene": "o_9v",
+   "texte": "Avec un générateur de 9 volts, tous les courants doublent, et R fois I redonne 9 volts.",
+   "voix": "Avec un générateur de neuf volts, tous les courants doublent, et r fois i redonne neuf volts."
+  },
+  {
+   "cle": "s07",
+   "scene": "o_loi",
+   "texte": "Voici la loi d’Ohm : U égale R fois I. Des volts, des ohms et des ampères.",
+   "voix": "Voici la loi d’Aum : u égale r fois i. Des volts, des aums et des ampères."
+  },
+  {
+   "cle": "s08",
+   "scene": "o_loi",
+   "texte": "Avec le triangle : R égale U divisé par I, et I égale U divisé par R.",
+   "voix": "Avec le triangle : r égale u divisé par i, et i égale u divisé par r."
+  },
+  {
+   "cle": "s09",
+   "scene": "o_def",
+   "texte": "Le volt, c’est la tension qui fait circuler 1 ampère dans une résistance de 1 ohm.",
+   "voix": "Le volt, c’est la tension qui fait circuler un ampère dans une résistance de un aum."
+  },
+  {
+   "cle": "s10",
+   "scene": "o_inv",
+   "texte": "Si on garde la même tension et qu’on double la résistance, le courant est divisé par deux.",
+   "voix": "Si on garde la même tension et qu’on double la résistance, le courant est divisé par deux."
+  },
+  {
+   "cle": "s11",
+   "scene": "o_ex",
+   "texte": "Un exemple : le chauffe-eau. Sa résistance vaut 50 ohms et le courant est de 4,6 ampères. Quelle tension à ses bornes ?",
+   "voix": "Un exemple : le chauffe-eau. Sa résistance vaut cinquante aums et le courant est de quatre virgule six ampères. Quelle tension à ses bornes ?"
+  },
+  {
+   "cle": "s12",
+   "scene": "o_ex",
+   "texte": "Les données : R égale 50 ohms, I égale 4,6 ampères. L’inconnue, c’est U.",
+   "voix": "Les données : r égale cinquante aums, i égale quatre virgule six ampères. L’inconnue, c’est u."
+  },
+  {
+   "cle": "s13",
+   "scene": "o_ex",
+   "texte": "On applique U égale R fois I : 50 fois 4,6, soit 230 volts.",
+   "voix": "On applique u égale r fois i : cinquante fois quatre virgule six, soit deux cent trente volts."
+  },
+  {
+   "cle": "s14",
+   "scene": "o_ex2",
+   "texte": "Autre cas : un radiateur de 115 ohms sous 230 volts. On cherche I, avec I égale U divisé par R : 230 divisé par 115, soit 2 ampères.",
+   "voix": "Autre cas : un radiateur de cent quinze aums sous deux cent trente volts. On cherche i, avec i égale u divisé par r : deux cent trente divisé par cent quinze, soit deux ampères."
+  },
+  {
+   "cle": "s15",
+   "scene": "o_recap",
+   "texte": "À retenir : U égale R fois I. Choisis la forme selon la grandeur cherchée : U, R ou I.",
+   "voix": "À retenir : u égale r fois i. Choisis la forme selon la grandeur cherchée : u, r ou i."
+  },
+  {
+   "cle": "s16",
+   "scene": "o_recap",
+   "texte": "À toi de jouer : complète le tableau des mesures, puis fais les trois exercices.",
+   "voix": "À toi de jouer : complète le tableau des mesures, puis fais les trois exercices."
+  }
+ ]
+}

@@ -22,7 +22,7 @@ async def frames(data,out):
         for i,s in enumerate(data['segments']):
             mx=await pg.evaluate('([i,d])=>window.draw(i,0,d)',[i,data])
             # on balaie jusqu'à la fin des apparitions, puis un cycle de boucle si la scène a un flux
-            n=math.ceil((mx+0.6)*FPS); loop=LOOP if s['scene'] in FLOW else 0
+            n=math.ceil((mx+0.6)*FPS); loop=LOOP if (s.get('flux') or s['scene'] in FLOW) else 0
             for f in range(n+loop):
                 fn=f'{fr}/{s["cle"]}_{f:04d}.jpg'
                 if not os.path.exists(fn):

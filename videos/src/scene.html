@@ -23,7 +23,8 @@ function arrow(p,x1,y1,x2,y2,col,w){el('line',{x1,y1,x2,y2,stroke:col,'stroke-wi
 function chip(p,x,y,w,txt,fill,col,size){box(p,x,y,w,50,fill,'none',25);T(p,x+w/2,y+34,txt,size||26,col,{a:'middle',w:700});}
 
 /* ================= SCÈNES ================= */
-const SC={};
+const SC={}, SCL={};
+window.FIT={titre:650,formule:685,coulomb:625,ampereheure:620,unite:610,recap:655,analogie:575,exemple:565};
 SC.titre=(p,A,ph)=>{
   let g=grp(A(0,0));p.appendChild(g);
   T(g,640,250,'La quantité d’électricité',72,C.ink,{a:'middle',w:800});
@@ -168,9 +169,10 @@ window.draw=function(seg,t,data){
   T(svg,60,66,data.chapitre,20,C.muted,{w:600,extra:{'letter-spacing':'2'}});
   T(svg,1220,66,'Ampère & Fils',20,C.muted,{a:'end',w:600});
   const s=data.segments[seg];const A=mk(seg,t);const ph=(t/0.5)%1;
-  const FIT={titre:650,formule:685,coulomb:625,ampereheure:620,unite:610,recap:655,analogie:575,exemple:565};
+  const FIT=window.FIT;
   const bottom=FIT[s.scene]||565,k=Math.min(1,(575-100)/(bottom-110));
-  const g=el('g',{transform:`translate(${640-640*k} ${100-110*k}) scale(${k})`});SC[s.scene](g,A,ph);
+  const g=el('g',{transform:`translate(${640-640*k} ${100-110*k}) scale(${k})`});
+  if(SCL[s.scene]){ const first=data.segments.findIndex(x=>x.scene===s.scene); SCL[s.scene](g,(j,at)=>A(j+first,at),ph); } else SC[s.scene](g,A,ph);
   // sous-titre : zone fixe en bas
   let size=28,lines=wrap(s.texte,76);if(lines.length>2){size=26;lines=wrap(s.texte,86);}
   box(svg,70,596,1140,100,'rgba(10,13,19,0.92)','none',18);
@@ -178,4 +180,6 @@ window.draw=function(seg,t,data){
   lines.forEach((l,i)=>T(svg,640,y0+i*40,l,size,'#fff',{a:'middle',w:500}));
   return window.maxAt;
 };
-</script></body></html>
+</script>
+<script src="scenes-common.js"></script><script src="scenes-ch07.js"></script><script src="scenes-ch08.js"></script>
+</body></html>
