@@ -228,7 +228,7 @@ function mountDIFS(box, key){
         <span class="din"><input type="text" inputmode="decimal" data-rv="${i}" value="${esc(ok&&!okVal(r,v)?frN(r.ans):v)}" ${ok?'disabled':''} aria-label="${esc(r.lbl||'Résultat '+(i+1))}"><span class="u">${r.unit||''}</span></span>
         ${show&&!good&&r.hint?`<span class="dh">${r.hint}</span>`:''}</div>`; }).join('');
     box.innerHTML=`<div class="row between wrap" style="gap:8px"><div class="row" style="gap:8px"><span class="exn">${cfg.n}</span><b>${cfg.nom||'Exercice'} ${cfg.n}</b></div>
-        <div class="row" style="gap:6px">${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip amber">exercice</span>'}<button class="btn sm" data-formulaire="${cfg.course}" type="button">📐 Formulaire</button></div></div>
+        <div class="row" style="gap:6px">${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip amber">exercice</span>'}<button class="btn sm" data-formulaire="${cfg.course}" type="button">📐 Formulaire</button>${typeof calcBtn==='function'?calcBtn():''}</div></div>
       <div class="difs-en">${cfg.enonce}</div>
       ${ok||cfg.texte?'':fmToolbar()}
       <div class="difs ${cfg.texte?'one':''} ${ok?'done':''}">${cells}</div>

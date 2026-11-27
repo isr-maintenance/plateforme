@@ -213,7 +213,7 @@ function capHTML(id){
   const pdfPg = ch.legacy ? ch.pdf[i] : cap.pdf;
   return `<div class="cap-body">
     <div class="row between wrap"><div class="kicker">${cap.sec} · capsule ${i+1}/${L.length}</div>
-      <div class="row">${S.role==='prof'?`<button class="btn sm" data-signal="${cap.id}">⚑ Signaler une erreur</button>`:''}${ch.course!=='4-elec'&&typeof FORMULAIRES!=='undefined'&&FORMULAIRES[ch.course]?`<button class="btn sm" data-formulaire="${ch.course}">📐 Formulaire</button>`:''}${pdfPg?`<button class="btn sm ghost" data-pdf="${pdfPg}">Voir dans le PDF</button>`:''}</div></div>
+      <div class="row">${S.role==='prof'?`<button class="btn sm" data-signal="${cap.id}">⚑ Signaler une erreur</button>`:''}${typeof calcBtn==='function'?calcBtn():''}${ch.course!=='4-elec'&&typeof FORMULAIRES!=='undefined'&&FORMULAIRES[ch.course]?`<button class="btn sm" data-formulaire="${ch.course}">📐 Formulaire</button>`:''}${pdfPg?`<button class="btn sm ghost" data-pdf="${pdfPg}">Voir dans le PDF</button>`:''}</div></div>
     <h2>${cap.t}</h2>
     <div id="capbody">${capBody(id)}</div>
     <div class="hr"></div>

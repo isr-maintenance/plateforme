@@ -53,6 +53,11 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
    - ajouter le fichier à la liste `FILES` de `sw.js` et incrémenter `CACHE` (`plateforme-vN` → `plateforme-vN+1`).
 7. **Ouverture** : un chapitre est fermé aux élèves tant que leur prof ne l'ouvre pas (Suivi › « Chapitres ouverts »). Rien à faire dans le code.
 
+## La calculatrice (bouton 🧮)
+
+- `js/calculette.js` : calculatrice scientifique flottante, disposition proche de la calculatrice de classe (SHIFT, DEG, ENG, x², √, xʸ, sin/cos/tan et inverses, log, ln, ×10ˣ, Ans, ▲ calculs précédents, ⤵ recopie dans la dernière case cliquée). Calcul sans `eval` (`calcEval`), degrés par défaut, virgule décimale.
+- Bouton `calcBtn()` (attribut `data-calc`, ouvert par un écouteur global) : en-tête des capsules, tableaux en quatre colonnes, évaluations en ligne. Sur téléphone, elle s'ouvre en bas de l'écran.
+
 ## Refaire une capsule (bouton ↺)
 
 - Chaque capsule a un bouton « Refaire cette capsule » (pied de capsule, `data-refaire`, `js/pages.js`). `capReset(cap)` (`js/chapitres.js`) efface les réponses et la validation (`quiz`, `ex`, `dr` des clés de `cap.ex.keys`) ; rien à ajouter dans un nouveau chapitre.
