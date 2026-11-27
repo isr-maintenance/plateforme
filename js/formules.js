@@ -297,18 +297,20 @@ function mountTriangles(root){
 
 /* ---------- 7. Vue prof : les tableaux d'un élève ---------- */
 function exDoneOf(mail, course){ fillDIFS(course); const p=progOf(mail); return Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course && p.ex[k]).length; }
-function voirExercices(mail, course){
+function voirExercices(mail, course, focus){
   fillDIFS(course, mail);   // les valeurs de CET élève (données variables)
   const p=progOf(mail), dr=(p.dr&&typeof p.dr==='object')?p.dr:{};
   const keys=Object.keys(DIFS_REG).filter(k=>DIFS_REG[k].course===course);
   const byCh={}; keys.forEach(k=>{ const c=DIFS_REG[k].chap; (byCh[c]=byCh[c]||[]).push(k); });
   const body=Object.keys(byCh).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true})).map(ch=>{
     const rows=byCh[ch].map(k=>{ const cfg=DIFS_REG[k], d=dr[k]||{}, ok=!!p.ex[k], any=difsCols(cfg).some(([c])=>String(d[c]||'').trim());
-      if(!any && !ok) return `<div class="small muted" style="padding:4px 0">${cfg.nom||'Exercice'} ${cfg.n} — pas commencé</div>`;
-      return `<details class="vx" ${ok?'':'open'}><summary><b>${cfg.nom||'Exercice'} ${cfg.n}</b> ${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip warn">en cours</span>'}</summary>
+      if(!any && !ok) return `<div class="small muted" style="padding:4px 0" data-vk="${k}">${cfg.nom||'Exercice'} ${cfg.n} — pas commencé</div>`;
+      return `<details class="vx" data-vk="${k}" ${!ok||k===focus?'open':''}><summary><b>${cfg.nom||'Exercice'} ${cfg.n}</b> ${ok?'<span class="chip ok">✓ réussi</span>':'<span class="chip warn">en cours</span>'}</summary>
         <div class="small muted" style="margin:6px 0">${cfg.enonce}</div>
         <div class="difs done ${cfg.texte?'one':''}">${difsCols(cfg).map(([c,l])=>`<div class="difs-col"><div class="difs-h">${l}</div><div class="mcell ro"><div class="mview">${String(d[c]||'').trim()?fmath(d[c]):'<span class="muted tiny">vide</span>'}</div></div></div>`).join('')}</div>
         ${(cfg.res||[]).length?`<div class="small" style="margin-top:6px">${cfg.res.map((r,i)=>{ const v=(d.r||[])[i]||''; return `${r.lbl||'Résultat'} : <b style="color:${v===''?'var(--muted)':okVal(r,v)?'var(--ok)':'var(--bad)'}">${v===''?'—':esc(v)} ${r.unit||''}</b> <span class="tiny muted">(attendu ${frN(r.ans)} ${r.unit||''})</span>`; }).join(' · ')}</div>`:''}</details>`; }).join('');
     return `<h3 style="margin:14px 0 4px">Chapitre ${chapLbl(ch)} — ${esc(CHAPTERS[ch]?CHAPTERS[ch].titre:'')}</h3>${rows}`; }).join('');
-  modal(`Exercices — ${esc(nomEl(mail))}`, `<div class="vx-sheet">${body||'<p class="muted">Aucun exercice dans ce cours.</p>'}</div>`, {wide:true});
+  const md=modal(`Exercices — ${esc(nomEl(mail))}`, `<div class="vx-sheet">${body||'<p class="muted">Aucun exercice dans ce cours.</p>'}</div>`, {wide:true});
+  const f=focus&&md&&[...md.querySelectorAll('[data-vk]')].find(x=>x.dataset.vk===focus);   // ouvert depuis le parcours : directement sur cet exercice
+  if(f){ f.style.outline='2px solid var(--accent, #2563eb)'; f.style.borderRadius='8px'; setTimeout(()=>f.scrollIntoView({block:'center'}),50); }
 }

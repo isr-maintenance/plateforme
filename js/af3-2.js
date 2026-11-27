@@ -100,7 +100,14 @@ defAF(7, {
       <div class="grid g2" style="gap:12px">${tbl(['Métal','ρ (Ω·mm²/m)'],[['Argent','0,016'],['Cuivre','0,01725'],['Aluminium','0,028'],['Tungstène','0,056'],['Fer','0,1'],['Mercure','0,958']])}
       ${tbl(['Alliage','ρ (Ω·mm²/m)','Composition'],[['Bronze','0,067','Cu + Sn'],['Laiton','0,07','Cu + Zn'],['Maillechort','0,25','Cu + Zn + Ni'],['Manganine','0,42','Cu + Mn + Ni'],['Ferro-nickel','0,8','Fe + Ni'],['Nickel-chrome','1','Ni + Cr + Fe']])}</div>
       <p class="small muted">Ces tableaux sont aussi dans le 📐 Formulaire. Dans les exercices, on prend souvent ρ = 0,0175 pour le cuivre : utilise toujours la valeur donnée dans l’énoncé.</p>
-      ${terrain('Un câble trop long ou trop fin, c’est une résistance de trop : il chauffe et la tension n’arrive pas entière au récepteur. C’est Pouillet qui te dit quelle section choisir.')}`},
+      ${terrain('Un câble trop long ou trop fin, c’est une résistance de trop : il chauffe et la tension n’arrive pas entière au récepteur. C’est Pouillet qui te dit quelle section choisir.')}
+      <h3>La chute de tension dans un câble</h3>
+      <p>Un câble a une résistance R. Quand un courant I le traverse, une partie de la tension se perd dans le câble : c’est la <b>chute de tension</b>. Elle se calcule en deux temps.</p>
+      <ol><li>La résistance du câble, avec Pouillet et <b>la longueur aller-retour</b> (les deux fils) : ${fm('R = ρ . L / S')}</li>
+      <li>La chute de tension, avec le courant qui traverse le câble : ${fm('U = R . I')} (U en V, R en Ω, I en A).</li></ol>
+      <div class="note"><b>Exemple guidé</b>Un câble de cuivre (ρ = 0,0175 Ω·mm²/m) de 2,5 mm² mesure 40 m aller-retour. Il est parcouru par 16 A.<br>
+      R = 0,0175 . 40 / 2,5 = <b>0,28 Ω</b><br>U = 0,28 . 16 = <b>4,48 V</b> perdus dans le câble.</div>
+      <p class="small muted">U = R . I, c’est la loi d’Ohm : tu la verras en détail au chapitre 8. La chute de tension en ligne revient au chapitre 13.</p>`},
     {id:'A7c', sec:'7.7', t:'Exercices', quiz:[], ex:{keys:['A7x1','A7x2','A7x3'], lbl:'Les trois exercices'},
      body:()=>`<p class="lead">Données, inconnue, formule, solution. Attention aux unités : L en mètres, S en mm².</p>
       ${(v=>AX(7,'A7x1',1,`Calculer la résistance d’un câble de cuivre utilisé pour raccorder un panneau solaire, de section ${fr(v.S)} mm² et de longueur ${v.L} m. (ρ cuivre = 0,0175 Ω·mm²/m)`,[{lbl:'R',unit:'Ω',ans:0.0175*v.L/v.S}]))(vx('A7x1',{S:[2.5,4,6],L:[8,12,15,20]}))}

@@ -158,13 +158,14 @@ function dashChap(cl, studs, co='4-elec'){
 function voirParcours(mail, co){
   const pr=progOf(mail), el=S.eleves[mail]||{}, ON=chapsOuverts(el.ct||el.classe, co), NUMS=chapNums(co);
   const ess = n => n==null?'—':n===0?'du 1<sup>er</sup> coup':`${n+1} essais`;
+  fillDIFS(co, mail);   // avant le rendu : les lignes « exercice N » deviennent des liens vers le tableau
   const body=withProg(pr, ()=>{
     let nCaps=0, nDone=0; const notes=[];
     const chs=NUMS.filter(k=>ON.includes(k) || CHAPTERS[k].caps.some(c=>capDone(c)||capPart(c))).map(k=>{ const CH=CHAPTERS[k];
       const lignes=CH.caps.map(c=>{ nCaps++; const done=capDone(c), part=capPart(c), nt=capNote(c), d=capDetail(c); if(done) nDone++; if(nt!=null) notes.push(nt);
         const qOk=d.q.filter(x=>x.essais===0).length, eOk=d.ex.filter(x=>x.ok&&x.essais===0).length;
         const dets=[d.q.length?`questions : ${qOk}/${d.q.length} du 1<sup>er</sup> coup`:'', d.ex.length?`exercices : ${d.ex.filter(x=>x.ok).length}/${d.ex.length} réussis${d.ex.some(x=>x.ok)?`, ${eOk} du 1<sup>er</sup> coup`:''}`:''].filter(Boolean).join(' · ');
-        const detEx=d.ex.map((x,i)=>({x,i})).filter(({x})=>x.ok||x.essais).map(({x,i})=>`exercice ${i+1} : ${x.ok?ess(x.essais):`pas encore (${x.essais} essai${x.essais>1?'s':''})`}`).join(' · ');
+        const detEx=d.ex.map((x,i)=>({x,i})).filter(({x})=>x.ok||x.essais).map(({x,i})=>`${DIFS_REG[x.k]?`<a href="#" data-vxk="${esc(x.k)}" title="Voir son tableau">exercice ${i+1}</a>`:`exercice ${i+1}`} : ${x.ok?ess(x.essais):`pas encore (${x.essais} essai${x.essais>1?'s':''})`}`).join(' · ');
         return `<tr><td><span class="tiny muted">${esc(c.sec||'')}</span> ${esc(c.t)}${detEx?`<div class="tiny muted">${detEx}</div>`:''}${(P().rs||{})[c.id]?`<div class="tiny"><span class="chip warn">↺ refaite ×${P().rs[c.id].n}</span></div>`:''}</td>
           <td>${done?'<span class="cell ok" style="min-width:0">✓ validée</span>':part?'<span class="cell run" style="min-width:0">en cours</span>':'<span class="cell none" style="min-width:0">·</span>'}</td>
           <td class="small">${(done||part)&&dets||'—'}</td><td>${nt!=null?`<b style="color:${nt>=8?'var(--ok)':nt>=5?'var(--amber, #b7791f)':'var(--bad)'}">${fr(nt,1)}</b><span class="tiny muted"> / 10</span>`:'—'}</td></tr>`; }).join('');
@@ -181,10 +182,10 @@ function voirParcours(mail, co){
       ${t!=null?`<p class="small">Évaluation formative 2.3 en ligne : <b>${t==='wait'?'à corriger':t+' / '+TOTAL}</b></p>`:''}
       <p class="tiny muted" style="margin:0 0 6px">Note formative d’une capsule validée : chaque question et chaque exercice réussi du premier coup vaut 1, au 2<sup>e</sup> ou 3<sup>e</sup> essai ½, plus tard ¼ ; ramené sur 10. Les essais sont comptés depuis le 26 novembre 2026 : avant, un exercice réussi compte comme réussi du premier coup.</p>
       ${chs||'<p class="muted">Aucun chapitre commencé.</p>'}${typeof dessinsBlock==='function'?dessinsBlock(mail):''}`; });
-  fillDIFS(co, mail);
   const aTableaux=Object.keys(DIFS_REG).some(k=>DIFS_REG[k].course===co);
   const md=modal(`Parcours — ${esc(nomEl(mail))}`, `<div class="vx-sheet">${aTableaux?`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn sm" data-vxt>Voir ses tableaux d’exercices</button></div>`:''}${body}</div>`, {wide:true});
   const b=md.querySelector('[data-vxt]'); if(b) b.onclick=()=>voirExercices(mail, co);
+  md.querySelectorAll('[data-vxk]').forEach(a=>a.onclick=e=>{ e.preventDefault(); voirExercices(mail, co, a.dataset.vxk); });
   if(typeof bindDessins==='function') bindDessins(md);
 }
 /* points « à l'atelier » des chapitres ouverts : le prof coche quand il a vu l'élève faire */
