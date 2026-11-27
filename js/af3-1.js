@@ -110,6 +110,7 @@ defAF(1, {
   caps:[
     {id:'A1a', sec:'1.1 — 1.2', t:'Le problème : éclairer la chaufferie', quiz:['A1aq1'], ex:{keys:['A1el'], lbl:'Le rôle de chaque élément'},
      body:()=>`${progRef(['Distinguer circuit ouvert et circuit fermé (CM2D)','Distinguer les composants d’un circuit électrique (CM2D)','Schématiser un circuit électrique (CM2D)'],'p. 25')}
+      ${window.capVideo('videos/ch01-eclairage/capsule.mp4','Éclairer un local (1 min 25)',1)}
       <p class="lead">On désire réaliser l’éclairage d’une chaufferie de l’atelier d’électricité : un petit local, avec une seule porte d’accès.</p>
       <p>Le but du montage est donc d’<b>allumer une lampe d’un seul endroit</b>. Quels éléments faut-il pour réaliser ce circuit ?</p>
       ${tbl(['Il faut…','C’est…'],[['Une source de courant (230 V)','l’alimentation'],['Du fil','le conducteur'],['Une lampe','le récepteur'],['Un interrupteur simple','l’organe de commande']])}
@@ -146,6 +147,7 @@ defAF(2, {
   caps:[
     {id:'A2a', sec:'2.1 — 2.2', t:'Les éléments du circuit électrique', quiz:['A2aq1','A2aq2'], ex:{keys:['A2el','A2en'], lbl:'Les deux classements'},
      body:()=>`${progRef(['Distinguer un circuit ouvert d’un circuit fermé (CM2D)','Distinguer les différents composants d’un circuit électrique (CM2D)','Schématiser un circuit électrique à l’aide de symboles normalisés (CM2D)'],'p. 25')}
+      ${window.capVideo('videos/ch02-circuit/capsule.mp4','Le circuit électrique (1 min 38)',1)}
       ${defBox('Définition','Le circuit électrique est constitué par des <b>conducteurs</b> reliant les bornes du <b>générateur</b> à celles du <b>récepteur</b>. Le circuit peut être ouvert ou fermé à l’aide d’un <b>interrupteur</b>.')}
       ${tbl(['Élément','Sa fonction'],[['La source (générateur)','Produire l’électricité'],['Les conducteurs','Amener le courant électrique aux récepteurs'],['Les isolants','Ne laisser passer que très difficilement le courant électrique'],['Les récepteurs','Transformer l’énergie électrique en énergie lumineuse, thermique, mécanique, chimique…'],['Les appareils de commande','Ouvrir ou fermer un circuit électrique'],['Les appareils de sécurité','Protéger le circuit en cas de fonctionnement anormal (fusibles)'],['Les appareils de mesure','Renseigner sur le fonctionnement de l’installation']])}
       ${exbox('a2el','Range chaque appareil','Le cours te demande des exemples pour chaque élément : en voici, à classer.')}
@@ -186,6 +188,7 @@ defAF(3, {
   caps:[
     {id:'A3a', sec:'3.1 — 3.3', t:'Molécules, atomes et états de la matière', quiz:['A3aq1','A3aq2'], ex:{keys:['A3zoom','A3et'], lbl:'Le zoom et les trois états'},
      body:()=>`${progRef(['Expliquer physiquement la notion de courant électrique (CM2D)'],'p. 25')}
+      ${window.capVideo('videos/ch03-matiere/capsule.mp4','La matière (2 min 04)',1)}
       <p class="lead">Pour comprendre ce qu’est le courant électrique, il faut connaître la constitution de la matière.</p>
       <p>Prends une goutte d’eau (H₂O) et partage-la en deux, puis recommence des milliers de fois : tu obtiens une goutte si petite qu’il faudrait le meilleur microscope pour l’apercevoir. Elle a pourtant toutes les propriétés chimiques de l’eau : on est arrivé à la <b>molécule</b>.</p>
       ${defBox('Définition','La molécule est la plus petite partie d’un corps qui garde encore toutes les propriétés chimiques de ce corps.')}
@@ -235,6 +238,7 @@ defAF(4, {
   caps:[
     {id:'A4a', sec:'4.1 — 4.3', t:'Le générateur et la différence de potentiel', quiz:['A4aq1','A4aq2'], ex:{keys:['A4ten'], lbl:'Les tensions courantes'},
      body:()=>`${progRef(['Expliquer physiquement la notion de courant électrique ; citer l’unité d’intensité, les effets et le sens conventionnel du courant (CM2D)','Différencier pratiquement la notion de différence de potentiel et de tension ; citer l’unité de d.d.p. (CM2D)','Définir la notion de résistance électrique (CM2D)'],'pp. 25-26')}
+      ${window.capVideo('videos/ch04-notions/capsule.mp4','Les notions générales (2 min 02)',1)}
       <p class="lead">Le courant électrique est un déplacement d’électrons libres dans des conducteurs.</p>
       ${defBox('Le générateur','Un générateur d’électricité est un appareil qui produit en permanence un <b>excès</b> d’électrons libres à une des bornes (borne –) et un <b>manque</b> d’électrons libres à l’autre borne (borne +). Exemples : piles, accumulateurs, dynamo, alternateur.')}
       ${defBox('La différence de potentiel','La d.d.p., ou tension électrique, est la différence des charges + et – entre les deux bornes d’un générateur. Son unité est le <b>volt (V)</b>. On la mesure avec un <b>voltmètre</b>, raccordé directement aux bornes du générateur ou entre les bornes où l’on veut mesurer la tension.')}
@@ -272,6 +276,7 @@ defAF(5, {
   caps:[
     {id:'A5a', sec:'5.1', t:'Le voltmètre', quiz:['A5aq1','A5aq2'], ex:{keys:['A5cl','A5vo'], lbl:'Classe et raccordement'},
      body:()=>`${progRef(['Placer un ampèremètre en série dans un circuit, en toute sécurité (CM2D)','Placer un voltmètre en parallèle aux bornes à mesurer, en toute sécurité (CM2D)','Lire et interpréter correctement la mesure obtenue (CM2D)'],'pp. 25-26')}
+      ${window.capVideo('videos/ch05-mesures/capsule.mp4','Les appareils de mesures (1 min 40)',1)}
       <p>Le voltmètre mesure une d.d.p. : celle du réseau, la f.é.m. d’une pile… Un appareil qui fonctionne mal peut avoir une tension trop faible ou trop élevée ; une tension trop élevée l’use prématurément. Le voltmètre sert aussi à déterminer les chutes de tension et à rechercher les défauts.</p>
       <h3>Avant de mesurer</h3>
       <ul><li><b>Le genre de tension</b> : alternative (AC) ou continue (DC).</li><li><b>La classe de l’appareil</b> : 0,1 – 0,2 – 0,5 pour les mesures précises (laboratoire) ; 1 – 1,5 pour les mesures courantes dans les installations.</li><li><b>Le calibre</b> : toujours supérieur à la tension à mesurer. Si elle est inconnue, on choisit le calibre le plus élevé.</li></ul>
