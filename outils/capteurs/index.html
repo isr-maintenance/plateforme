@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif capteurs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning: a lycée MEI course, clear and hands-on
+   IDEA a didactic training bench: petrol-green panel, orange sensor LEDs, live test rigs per chapter
+   PICTURE a conveyor passing four parts under three sensors whose LEDs light by material
+   COLOUR petrol panel ground, white page, signal orange for "detected", cyan for fields and waves
+   TYPE Barlow Condensed (industrial labelling) + Barlow
+   LAYOUT hero band with title + conveyor full width; sticky chapter rail; each chapter = text beside its test rig, quiz under */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#1b0e10);--ink:light-dark(#2a1416,#f2e8e8);--mut:light-dark(#6b4a4d,#c9a9ab);--panel:light-dark(#6e1423,#4a0d18);--pink:#fbeaea;--acc:#ff6a13;--cy:light-dark(#c2185b,#f06292);--soft:light-dark(#fbf0f0,#2a1619);--line:light-dark(#e8d0d2,#4d2a2f);--metal:light-dark(#a9a2a2,#857b7c);--ok:light-dark(#1d7a46,#4cc483);--bad:light-dark(#c0392b,#ff7a6b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;line-height:1.05;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(40px,6vw,64px)}
+h2{font-size:clamp(32px,4vw,44px);margin-bottom:6px}
+h3{font-size:22px;margin:22px 0 6px}
+p{margin:0 0 12px;max-width:68ch}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:4px}
+.band{padding-block:clamp(28px,4vw,56px);padding-inline:max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.hero{background:var(--panel);color:var(--pink);padding-bottom:18px}
+.hero p{color:#f3d9da;font-size:18px}
+.hero .top{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:end;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.chip{display:flex;align-items:center;gap:8px;background:#ffffff14;border:1px solid #ffffff2a;border-radius:999px;padding:6px 14px;font-weight:600}
+.led{width:12px;height:12px;border-radius:50%;background:#6e4a4e;box-shadow:inset 0 0 0 2px #00000030;flex:none}
+.led.on{background:var(--acc);box-shadow:0 0 10px var(--acc)}
+#conv{width:100%;height:auto;display:block}
+.note{font-size:14px;color:var(--mut)}
+.hero .note{color:#e3b5b8}
+nav{position:sticky;top:0;z-index:5;background:var(--panel);border-top:1px solid #ffffff1f}
+nav .in{display:flex;gap:4px;overflow-x:auto;padding:8px max(5vw,16px);scrollbar-width:thin;align-items:center}
+nav a{flex:none;color:#f6e3e4;text-decoration:none;padding:9px 12px;border-radius:8px;font:600 15px Barlow,sans-serif;white-space:nowrap}
+nav a:hover,nav a:focus-visible{background:#ffffff1c;outline:none}
+nav .score{flex:none;margin-left:auto;color:var(--acc);font:700 16px "Barlow Condensed",sans-serif;padding:0 8px;white-space:nowrap}
+section.mod{border-bottom:1px solid var(--line)}
+section.mod:nth-of-type(even){background:var(--soft)}
+.num{font:700 18px "Barlow Condensed",sans-serif;color:var(--acc)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(20px,3vw,44px);align-items:start;margin-top:14px}
+.rig{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px;position:sticky;top:76px}
+section.mod:nth-of-type(odd) .rig{background:var(--soft)}
+.rig h3{margin:0 0 4px;font-size:20px}
+.rig svg{width:100%;height:auto;display:block}
+.rig svg text{font:600 14px Barlow,sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+section.mod:nth-of-type(odd) .rig svg text{stroke:var(--soft)}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:10px}
+.ctl label{display:flex;align-items:center;gap:8px;font-weight:600;flex-wrap:wrap}
+input[type=range]{accent-color:var(--acc);width:min(220px,100%);height:32px}
+select,button{font:600 16px Barlow,sans-serif;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:9px;padding:9px 14px;min-height:44px;cursor:pointer}
+button:hover{border-color:var(--cy)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--cy);outline-offset:2px}
+button.sel{background:var(--panel);color:#fff;border-color:var(--panel)}
+.read{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-weight:600}
+.read b{font:700 20px "Barlow Condensed",sans-serif;white-space:nowrap}
+.out{display:inline-flex;align-items:center;gap:8px}
+.k{fill:var(--ink)}.kp{fill:var(--panel)}.ka{fill:var(--acc)}.ks{fill:var(--soft)}.kl{fill:var(--line)}.kc{fill:var(--cy)}.kb{fill:var(--bg)}.km{fill:var(--metal)}.n{fill:none}
+.sk{stroke:var(--ink)}.sa{stroke:var(--acc)}.sl{stroke:var(--line)}.sc{stroke:var(--cy)}.sm{stroke:var(--mut)}
+table{border-collapse:collapse;width:100%;font-size:15.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mut)}
+.scroll{overflow-x:auto}
+.quiz{margin-top:26px;border-top:2px solid var(--ink);padding-top:12px}
+.quiz h3{margin-top:0}
+.q{margin:14px 0 18px}
+.q p{font-weight:600;margin-bottom:8px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{text-align:left;font-weight:500}
+.opts button.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--bg))}
+.opts button.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--bg))}
+.fb{font-size:15px;margin-top:6px;color:var(--mut)}
+.fb strong{color:var(--ink)}
+.wiz{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;margin-top:14px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:22px}
+.ask{font:700 clamp(26px,3vw,34px)/1.1 "Barlow Condensed",sans-serif;margin:6px 0 18px}
+.yn{display:flex;gap:12px}
+.yn button{min-width:120px;font-size:18px}
+.path{list-style:none;padding:0;margin:0}
+.path li{padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.path li span{color:var(--acc);font-weight:700;margin-left:6px}
+.res{border-left:6px solid var(--acc);padding-left:14px}
+.fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));gap:0 28px}
+.def{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:10px 0}
+.def div{border-top:3px solid var(--cy);padding-top:8px}
+.def strong{display:block;font:700 20px "Barlow Condensed",sans-serif}
+footer{background:var(--panel);color:#f3d9da;font-size:14px}
+.ph-t{margin-top:30px}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:10px}
+figure{margin:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+figure img{display:block;width:100%;height:170px;object-fit:contain;padding:10px;background:#fff}
+figure.wide2{grid-column:span 2}
+figure.wide2 img{object-fit:contain}
+@media(max-width:520px){figure.wide2{grid-column:auto}}
+figcaption{flex:1;padding:8px 12px;font-size:14px;line-height:1.35;color:var(--mut);background:var(--bg);border-top:1px solid var(--line)}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid #8888;margin-right:8px;vertical-align:-2px}
+#rcTab td,#rcTab th{font-size:15px}
+.autob{min-height:36px;padding:5px 12px;font-size:14px;margin:2px 0 8px}
+.rcgo{min-height:40px;padding:6px 14px}
+#raccordement td:first-child{white-space:nowrap}
+#rcTab td:last-child,#rcTab th:last-child{text-align:right;white-space:nowrap;font-weight:600}
+.exrow{display:grid;grid-template-columns:minmax(0,10em) minmax(0,16em) minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.exrow .ok{color:var(--ok);font-weight:600}.exrow .ko{color:var(--bad);font-weight:600}
+@media(max-width:600px){.exrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.exrow span:last-child{grid-column:1/-1}}
+footer a{color:#fff}
+@media(max-width:860px){.grid,.wiz,.hero .top{grid-template-columns:minmax(0,1fr)}.rig{position:static}.chips{justify-content:flex-start}}
+@media(max-width:600px){table{font-size:13.5px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:3px 0;text-align:right}.stack td::before{content:attr(data-l);color:var(--mut);text-align:left}.def{grid-template-columns:minmax(0,1fr)}.yn button{min-width:0;flex:1}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="hero band">
+ <div class="wrap">
+  <div class="top">
+   <div>
+    <h1>Les capteurs</h1>
+    <p>Cours interactif de la section maintenance industrielle : comprendre, tester et choisir les capteurs d'un système automatisé. Chaque chapitre a son banc d'essai et son quiz.</p>
+   </div>
+   <div class="chips" id="heroChips"></div>
+  </div>
+  <svg id="conv" viewBox="0 0 1000 300" role="img" aria-label="Convoyeur : quatre objets passent sous un détecteur inductif, un détecteur photoélectrique reflex et un détecteur à ultrasons"></svg>
+  <button id="heroB" class="autob" style="background:#ffffff14;color:#fff;border-color:#ffffff40"></button>
+  <p class="note" id="heroRead">Le convoyeur tourne : observe quel détecteur réagit à quel objet.</p>
+ </div>
+</header>
+
+<nav aria-label="Chapitres"><div class="in">
+ <a href="#generalites">Généralités</a><a href="#contact">Contact</a><a href="#sans-contact">Sans contact</a><a href="#inductif">Inductif</a><a href="#capacitif">Capacitif</a><a href="#magnetique">Magnétique</a><a href="#photo">Photoélectrique</a><a href="#hall">Effet Hall</a><a href="#ultrasons">Ultrasons</a><a href="#codeurs">Codeurs</a><a href="#pression">Pressostat</a><a href="#pnp-npn">PNP / NPN</a><a href="#temperature">Température</a><a href="#analogique">4–20 mA</a><a href="#force">Force</a><a href="#niveau">Niveau</a><a href="#debit">Débit</a><a href="#position">Position</a><a href="#securite">Sécurité</a><a href="#raccordement">Raccordement</a><a href="#guide">Guide de choix</a>
+ <span class="score" id="score">Score 0/0</span>
+</div></nav>
+
+<main>
+<section class="mod band" id="generalites"><div class="wrap">
+ <div class="num">Chapitre 0</div><h2>Généralités</h2>
+ <div class="grid">
+  <div>
+   <p>Un <strong>capteur</strong> est un dispositif qui, soumis à l'action d'une grandeur physique, fournit un signal pour la partie commande. Ce signal est parfois pneumatique, mais dans la grande majorité des cas il est électrique.</p>
+   <h3>Structure fonctionnelle</h3>
+   <p>Le terme capteur englobe deux éléments :</p>
+   <ul>
+    <li>le <strong>corps d'épreuve</strong>, qui capte une grandeur physique à mesurer (vitesse, température, débit, pression…) ou détecte un état (présence, niveau haut, niveau bas) ;</li>
+    <li>le <strong>transducteur-adaptateur</strong>, qui transforme cette grandeur en signal de sortie transmis à la partie commande par une liaison physique (câble, fibre optique) ou immatérielle (ondes radio).</li>
+   </ul>
+   <h3>Le nom dépend du signal de sortie</h3>
+   <div class="def">
+    <div><strong>Détecteur</strong>Signal logique TOR (tout ou rien, 0 ou 1).</div>
+    <div><strong>Codeur</strong>Signal numérique : plusieurs bits en parallèle ou un train d'impulsions en série.</div>
+    <div><strong>Capteur</strong>Signal analogique, variation continue.</div>
+   </div>
+   <h3>Les familles</h3>
+   <p>La famille la plus fournie est celle des <strong>détecteurs de présence</strong> : par contact ou de proximité. Pour la position ou le déplacement d'un mobile, on utilise surtout des <strong>codeurs optiques</strong>. On trouve aussi des capteurs de vitesse, température, pression, débit, force / couple, vibration / acoustique…</p>
+  </div>
+  <div class="rig">
+   <h3>Chaîne d'acquisition</h3>
+   <svg id="chain" viewBox="0 0 600 330"></svg>
+   <div class="ctl" id="sigBtns"><button data-s="tor" class="sel">Détecteur (TOR)</button><button data-s="num">Codeur (NUM)</button><button data-s="ana">Capteur (ANA)</button></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/gen0.jpg" alt="Interrupteur de position (contact)" loading="lazy"><figcaption>Interrupteur de position (contact)</figcaption></figure><figure><img src="img/gen1.jpg" alt="Détecteur photoélectrique cylindrique" loading="lazy"><figcaption>Détecteur photoélectrique cylindrique</figcaption></figure><figure><img src="img/gen2.jpg" alt="Codeur rotatif" loading="lazy"><figcaption>Codeur rotatif</figcaption></figure><figure><img src="img/gen3.jpg" alt="Détecteur à fourche" loading="lazy"><figcaption>Détecteur à fourche</figcaption></figure></div>
+ <div class="quiz" data-m="gen"></div>
+</div></section>
+
+<section class="mod band" id="contact"><div class="wrap">
+ <div class="num">Chapitre 1</div><h2>Détecteurs de présence par contact</h2>
+ <div class="grid">
+  <div>
+   <p>Aussi appelés <strong>interrupteurs de position</strong>, ce sont des commutateurs actionnés par le déplacement d'un organe de commande (galet, levier, poussoir, tige).</p>
+   <p>Lorsqu'ils sont actionnés, ils ouvrent ou ferment un ou plusieurs circuits électriques ou pneumatiques. De nombreuses versions existent selon l'encombrement et la nature du mouvement à prendre en compte.</p>
+   <p>Le signal de sortie est <strong>tout ou rien</strong>.</p>
+   <p class="note">Le guide de choix les retient pour un objet solide, de masse supérieure à 500 g, avec une durée de passage supérieure à 1,5 ms et une fréquence de passage inférieure à 1 Hz, quand le contact physique est possible.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : interrupteur à galet</h3>
+   <svg id="lev" viewBox="0 0 600 260"></svg>
+   <div class="ctl"><label>Position de la came <input type="range" id="levR" min="0" max="100" value="62"></label></div>
+   <div class="read"><span class="out"><span class="led" id="levLed"></span>Contact NO : <b id="levV">0</b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/contact0.jpg" alt="Interrupteur de position à levier et galet" loading="lazy"><figcaption>Interrupteur de position à levier et galet</figcaption></figure><figure><img src="img/contact1.jpg" alt="Interrupteur de position à poussoir" loading="lazy"><figcaption>Interrupteur de position à poussoir</figcaption></figure></div>
+ <div class="quiz" data-m="contact"></div>
+</div></section>
+
+<section class="mod band" id="sans-contact"><div class="wrap">
+ <div class="num">Chapitre 2</div><h2>La détection sans contact</h2>
+ <p>On l'utilise chaque fois qu'il faut détecter la présence d'un élément sans le toucher. Avantages : pas de contact physique, pas d'usure, possibilité de détecter des objets fragiles ou fraîchement peints.</p>
+ <p>On distingue <strong>6 familles</strong> de détecteurs de proximité électriques. Pour des usages particuliers, il existe aussi des détecteurs de proximité pneumatiques (capteurs à fuite).</p>
+ <div class="scroll"><table class="stack">
+  <thead><tr><th>Famille</th><th>Détecte</th><th>Portée</th><th>À retenir</th></tr></thead>
+  <tbody id="famT"></tbody>
+ </table></div>
+ <div class="quiz" data-m="sc"></div>
+</div></section>
+
+<section class="mod band" id="inductif"><div class="wrap">
+ <div class="num">Chapitre 3</div><h2>Détecteurs inductifs</h2>
+ <div class="grid">
+  <div>
+   <p>Ils fonctionnent grâce à la variation d'un champ électromagnétique perturbé par la proximité d'un <strong>objet métallique</strong>.</p>
+   <p>La distance de détection varie de <strong>1 à 60 mm</strong> selon le type de capteur, les conditions d'utilisation et la nature du métal (acier, aluminium, cuivre…). Ils supportent bien les ambiances humides ou poussiéreuses.</p>
+   <h3>Principe</h3>
+   <p>Le détecteur contient un <strong>oscillateur</strong> dont les bobinages forment la face sensible : un champ magnétique alternatif est créé à l'avant, comme un aimant dont la polarité changerait en permanence.</p>
+   <p>Un objet métallique placé dans ce champ développe à sa surface des <strong>courants induits</strong> qui contrarient le champ initial et provoquent l'arrêt des oscillations. Un circuit électronique détecte cette modification et délivre le signal de sortie.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : portée selon le métal</h3>
+   <svg id="ind" viewBox="0 0 600 270"></svg>
+   <div class="ctl"><label>Cible <select id="indM"></select></label><label>Distance <input type="range" id="indD" min="0" max="20" step="0.5" value="12"></label></div>
+   <div class="read"><span>Distance <b id="indDv"></b></span><span>Portée réelle <b id="indSr"></b></span><span class="out"><span class="led" id="indLed"></span>Sortie <b id="indO"></b></span></div>
+   <p class="note">Détecteur à portée nominale Sn = 10 mm sur acier. Coefficients de réduction typiques des catalogues, à titre indicatif.</p>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/ind0.jpg" alt="Détecteurs inductifs cylindriques filetés" loading="lazy"><figcaption>Détecteurs inductifs cylindriques filetés</figcaption></figure><figure><img src="img/ind1.jpg" alt="Détecteurs inductifs parallélépipédiques" loading="lazy"><figcaption>Détecteurs inductifs parallélépipédiques</figcaption></figure></div>
+ <div class="quiz" data-m="ind"></div>
+</div></section>
+
+<section class="mod band" id="capacitif"><div class="wrap">
+ <div class="num">Chapitre 4</div><h2>Détecteurs capacitifs</h2>
+ <div class="grid">
+  <div>
+   <p>Ils détectent des matériaux de toute nature : verre, plastique, métaux, liquides, poudres… On les emploie surtout pour les éléments <strong>non conducteurs</strong>, que les inductifs ne voient pas.</p>
+   <p>Ils sont très sensibles aux modifications de l'environnement (saletés, poussières) et leur distance de détection est faible, quelques millimètres. La plupart ont un potentiomètre de réglage de la sensibilité, à l'arrière du boîtier. Délicats à mettre en œuvre, ils ne sont employés que lorsqu'aucune autre technologie ne convient.</p>
+   <h3>Ordres de grandeur des distances</h3>
+   <div class="scroll"><table><thead><tr><th>Matériau</th><th style="text-align:right">Distance</th><th>Matériau</th><th style="text-align:right">Distance</th></tr></thead>
+   <tbody><tr><td>Carton</td><td style="text-align:right">4 mm</td><td>Acier</td><td style="text-align:right">10 mm</td></tr><tr><td>Bois</td><td style="text-align:right">4 mm</td><td>Verre</td><td style="text-align:right">7 mm</td></tr><tr><td>Eau</td><td style="text-align:right">10 mm</td><td>PVC</td><td style="text-align:right">6 mm</td></tr></tbody></table></div>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : tous matériaux</h3>
+   <svg id="cap" viewBox="0 0 600 270"></svg>
+   <div class="ctl"><label>Cible <select id="capM"></select></label><label>Distance <input type="range" id="capD" min="0" max="15" step="0.5" value="5"></label></div>
+   <div class="read"><span>Distance <b id="capDv"></b></span><span>Portée <b id="capSr"></b></span><span class="out"><span class="led" id="capLed"></span>Sortie <b id="capO"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/cap0.jpg" alt="Détecteurs capacitifs cylindriques (face sensible bleue)" loading="lazy"><figcaption>Détecteurs capacitifs cylindriques (face sensible bleue)</figcaption></figure><figure><img src="img/cap1.jpg" alt="Détecteur capacitif M30 à corps plastique" loading="lazy"><figcaption>Détecteur capacitif M30 à corps plastique</figcaption></figure><figure><img src="img/cap2.jpg" alt="Réglage de la sensibilité au tournevis" loading="lazy"><figcaption>Réglage de la sensibilité au tournevis</figcaption></figure></div>
+ <div class="quiz" data-m="cap"></div>
+</div></section>
+
+<section class="mod band" id="magnetique"><div class="wrap">
+ <div class="num">Chapitre 5</div><h2>Détecteurs magnétiques (ILS)</h2>
+ <div class="grid">
+  <div>
+   <p>Les détecteurs magnétiques, ou <strong>interrupteurs à lame souple (ILS)</strong>, sont fixés directement sur le corps du vérin dont le piston comporte un <strong>aimant</strong> : gain de place et simplicité.</p>
+   <p>Quand l'aimant passe à proximité, le contact se ferme et l'information est donnée à la partie commande. Quand il s'éloigne, le contact s'ouvre et l'information disparaît.</p>
+   <h3>Attention</h3>
+   <p>L'information est acquise au niveau de l'<strong>actionneur</strong> (positions extrêmes), pas de l'effecteur ni de la matière d'œuvre. Si l'outil est brisé, le travail n'est pas réalisé, mais la tige du vérin est quand même sortie : la partie commande l'ignore.</p>
+   <p>On les retrouve aussi dans les alarmes d'ouverture de porte.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : vérin avec deux ILS</h3>
+   <svg id="ils" viewBox="0 0 600 230"></svg>
+   <div class="ctl"><label>Tige <input type="range" id="ilsR" min="0" max="100" value="100"></label><button id="ilsC">Cycle aller-retour</button><button id="ilsB">Casser l'outil</button></div>
+   <div class="read"><span class="out"><span class="led" id="ilsL0"></span>a0 tige rentrée <b id="ilsV0"></b></span><span class="out"><span class="led" id="ilsL1"></span>a1 tige sortie <b id="ilsV1"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/mag0.jpg" alt="Vérin équipé d'un détecteur ILS (entouré)" loading="lazy"><figcaption>Vérin équipé d'un détecteur ILS (entouré)</figcaption></figure><figure><img src="img/mag1.jpg" alt="ILS fixé sur le corps d'un vérin" loading="lazy"><figcaption>ILS fixé sur le corps d'un vérin</figcaption></figure><figure><img src="img/mag2.jpg" alt="Différents modèles de détecteurs magnétiques" loading="lazy"><figcaption>Différents modèles de détecteurs magnétiques</figcaption></figure></div>
+ <div class="quiz" data-m="mag"></div>
+</div></section>
+
+<section class="mod band" id="photo"><div class="wrap">
+ <div class="num">Chapitre 6</div><h2>Détecteurs photoélectriques</h2>
+ <div class="grid">
+  <div>
+   <p>Un émetteur (en général une LED) et un récepteur de lumière (en général un phototransistor). Le détecteur délivre une information chaque fois que le faisceau est interrompu par un objet opaque. Pour être insensible à la lumière ambiante, la lumière est émise à <strong>fréquence fixe</strong> (infrarouge par exemple).</p>
+   <h3>Trois procédés</h3>
+   <ul>
+    <li><strong>Reflex</strong> : émetteur et récepteur dans le même boîtier, faisceau renvoyé par un réflecteur. Portée jusqu'à <strong>10 m</strong>.</li>
+    <li><strong>Barrage</strong> : émetteur et récepteur de part et d'autre de l'objet. Portée jusqu'à <strong>30 m</strong>, adapté aux environnements difficiles.</li>
+    <li><strong>Proximité</strong> : même boîtier, c'est l'objet qui réfléchit le faisceau. Cible réfléchissante, portée de l'ordre de <strong>1,5 m</strong> selon la couleur et le pouvoir réfléchissant.</li>
+   </ul>
+   <h3>Fibre optique</h3>
+   <p>Émetteur et récepteur déportés : la lumière circule dans des fibres (cœur plastique ou verre, diamètre de l'ordre de 2 mm). Idéal pour de très petites pièces ou une zone peu accessible. Portée réduite : <strong>20 mm</strong> en proximité, <strong>300 mm</strong> en barrage.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : choisir le procédé</h3>
+   <div class="ctl" id="phM"><button data-m="reflex" class="sel">Reflex</button><button data-m="barrage">Barrage</button><button data-m="prox">Proximité</button></div>
+   <svg id="ph" viewBox="0 0 600 250"></svg>
+   <div class="ctl"><label>Objet <input type="range" id="phR" min="0" max="100" value="50"></label><label>Surface <select id="phS"><option value="m">Mate, sombre</option><option value="r">Réfléchissante</option></select></label></div>
+   <div class="read"><span>Portée max <b id="phP"></b></span><span class="out"><span class="led" id="phLed"></span>Objet détecté <b id="phO"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/ph0.jpg" alt="Détecteurs photoélectriques de différents formats" loading="lazy"><figcaption>Détecteurs photoélectriques de différents formats</figcaption></figure><figure><img src="img/ph1.jpg" alt="Détecteur photoélectrique" loading="lazy"><figcaption>Détecteur photoélectrique</figcaption></figure><figure><img src="img/ph2.jpg" alt="Amplificateur pour fibre optique" loading="lazy"><figcaption>Amplificateur pour fibre optique</figcaption></figure><figure><img src="img/ph3.jpg" alt="Détection de mousses en système barrage" loading="lazy"><figcaption>Détection de mousses en système barrage</figcaption></figure><figure><img src="img/ph4.jpg" alt="Détecteurs montés sur une installation" loading="lazy"><figcaption>Détecteurs montés sur une installation</figcaption></figure></div>
+ <div class="quiz" data-m="ph"></div>
+</div></section>
+
+<section class="mod band" id="hall"><div class="wrap">
+ <div class="num">Chapitre 7</div><h2>Capteurs à effet Hall</h2>
+ <div class="grid">
+  <div>
+   <p>Un capteur à effet Hall détecte la présence d'un <strong>champ magnétique</strong> ou sa variation : présence d'un aimant, ou, équipé d'un aimant permanent, modification du flux lors du déplacement d'un objet métallique. Il est très employé pour la <strong>mesure de vitesse</strong> avec une roue dentée.</p>
+   <h3>L'effet Hall</h3>
+   <p>Découvert en <strong>1879 par Edwin Hall</strong> : une différence de potentiel apparaît sur les bords latéraux d'un conducteur parcouru par un courant et soumis à un champ magnétique.</p>
+   <h3>Capteur à fourche, roue dentée</h3>
+   <p>Le passage d'une dent métallique modifie le champ de l'aimant, donc la tension de Hall. Le capteur met le signal en forme : un <strong>train d'impulsions</strong> dont la fréquence donne la vitesse de rotation.</p>
+   <p>Pour une roue de <em>z</em> dents tournant à <em>N</em> tr/min : <strong>f = z × N / 60</strong> (en Hz).</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : roue de 12 dents</h3>
+   <svg id="hal" viewBox="0 0 600 260"></svg>
+   <div class="ctl"><label>Vitesse <input type="range" id="halR" min="0" max="120" step="5" value="30"></label></div>
+   <div class="read"><span>N <b id="halN"></b></span><span>f = 12 × N / 60 <b id="halF"></b></span><span class="out"><span class="led" id="halLed"></span>Sortie</span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/hall0.jpg" alt="Capteurs de vitesse à effet Hall" loading="lazy"><figcaption>Capteurs de vitesse à effet Hall</figcaption></figure><figure><img src="img/hall1.jpg" alt="Capteur face à une roue dentée" loading="lazy"><figcaption>Capteur face à une roue dentée</figcaption></figure><figure><img src="img/hall2.jpg" alt="Capteur et aimant face à une roue dentée" loading="lazy"><figcaption>Capteur et aimant face à une roue dentée</figcaption></figure></div>
+ <div class="quiz" data-m="hall"></div>
+</div></section>
+
+<section class="mod band" id="ultrasons"><div class="wrap">
+ <div class="num">Chapitre 8</div><h2>Détecteurs à ultrasons</h2>
+ <div class="grid">
+  <div>
+   <p>Ils détectent sans contact tout objet, quel que soit le <strong>matériau</strong> (métal, plastique, bois, carton), la <strong>nature</strong> (solide, liquide, poudre), la <strong>couleur</strong> ou la <strong>transparence</strong>.</p>
+   <p>Applications : présence de pièces, passage de bouteilles en verre ou d'emballages sur convoyeur, niveau de peinture dans des pots ou de granulés dans une trémie.</p>
+   <h3>Principe</h3>
+   <p>Le transducteur, excité par un générateur haute tension, émet une onde ultrasonore de <strong>200 à 500 kHz</strong> qui se propage dans l'air à la vitesse du son. L'onde réfléchie par l'objet (l'écho) revient au transducteur. Un microcontrôleur mesure le temps écoulé et le compare aux temps prédéfinis pour commander une sortie NO ou NC.</p>
+   <p>Distance : <strong>d = v × t / 2</strong>, avec v ≈ 340 m/s dans l'air.</p>
+   <h3>Avantages</h3>
+   <ul><li>Pas de contact ni d'usure : objets fragiles, peints, chauds.</li><li>Tout matériau et toute couleur à la même portée, sans facteur de correction.</li><li>Pas de pièce mobile : durée de vie indépendante du nombre de cycles.</li><li>Mesure de l'éloignement, de 1 ou 2 cm à plus de 10 m.</li><li>Apprentissage par bouton des portées minimale et maximale.</li></ul>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : écho et fenêtre</h3>
+   <svg id="us" viewBox="0 0 600 220"></svg>
+   <div class="ctl"><label>Objet à <input type="range" id="usD" min="0.05" max="6" step="0.05" value="2.4"></label></div>
+   <div class="ctl"><label>Fenêtre min <input type="range" id="usA" min="0" max="6" step="0.1" value="1"></label><label>max <input type="range" id="usB" min="0" max="6" step="0.1" value="3.5"></label></div>
+   <div class="read"><span>Distance <b id="usDv"></b></span><span>Temps aller-retour <b id="usT"></b></span><span class="out"><span class="led" id="usLed"></span>Sortie <b id="usO"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/us0.jpg" alt="Détecteurs à ultrasons" loading="lazy"><figcaption>Détecteurs à ultrasons</figcaption></figure><figure><img src="img/us1.jpg" alt="Détecteur à ultrasons à boîtier rectangulaire" loading="lazy"><figcaption>Détecteur à ultrasons à boîtier rectangulaire</figcaption></figure><figure><img src="img/us2.jpg" alt="Détecteur à ultrasons à grande face" loading="lazy"><figcaption>Détecteur à ultrasons à grande face</figcaption></figure><figure><img src="img/us3.jpg" alt="Gamme de détecteurs à ultrasons" loading="lazy"><figcaption>Gamme de détecteurs à ultrasons</figcaption></figure></div>
+ <div class="quiz" data-m="us"></div>
+</div></section>
+
+<section class="mod band" id="codeurs"><div class="wrap">
+ <div class="num">Chapitre 9</div><h2>Codeurs optiques</h2>
+ <p>Les détecteurs de fin de course ne donnent qu'une information binaire. Pour connaître à tout instant la position, la vitesse ou le déplacement d'une partie mobile, on utilise des <strong>codeurs</strong>, liés mécaniquement à l'arbre dont on veut suivre la rotation.</p>
+ <p>Principe commun : un disque à zones opaques et translucides, des LED d'un côté, des phototransistors de l'autre. Chaque phototransistor délivre un signal quand une ouverture passe devant lui.</p>
+ <div class="grid">
+  <div>
+   <h3>Codeur incrémental</h3>
+   <p>Il délivre un <strong>train d'impulsions</strong> : leur nombre donne le déplacement, leur fréquence la vitesse. Pour un tour, la partie commande reçoit autant d'impulsions qu'il y a de fenêtres.</p>
+   <ul>
+    <li><strong>Piste intérieure Z</strong> : une impulsion par tour, pour compter les tours.</li>
+    <li><strong>Deux têtes A et B</strong> sur la piste extérieure, décalées l'une de l'autre. Chacune permet de compter l'angle ; la voie qui change d'état en premier donne le <strong>sens de rotation</strong>.</li>
+   </ul>
+   <p>L'information est relative : il faut d'abord définir une origine.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : 12 fenêtres, voies A, B, Z</h3>
+   <svg id="inc" viewBox="0 0 600 280"></svg>
+   <div class="ctl" id="incB"><button data-d="-1">Sens anti-horaire</button><button data-d="0">Arrêt</button><button data-d="1" class="sel">Sens horaire</button><button data-d="r">Remise à zéro</button></div>
+   <div class="read"><span>Impulsions <b id="incC"></b></span><span>Angle <b id="incA"></b></span><span>Sens détecté <b id="incS"></b></span></div>
+  </div>
+ </div>
+ <div class="grid">
+  <div>
+   <h3>Codeur absolu (numérique de position)</h3>
+   <p>Plusieurs pistes concentriques, une tête de lecture par piste : la partie commande reçoit directement un <strong>code sur n bits</strong> (n = nombre de pistes), sans traitement. Jusqu'à 24 pistes en industrie. Avec 5 pistes : 2⁵ = <strong>32 positions</strong> par tour. L'information est absolue dans un tour.</p>
+   <p>Les pistes suivent le <strong>code Gray</strong> (binaire réfléchi) : d'une position à la suivante, un seul bit change. Un léger défaut d'alignement des têtes ne produit donc jamais de position aberrante, ce qui arriverait en binaire pur. En contrepartie, la partie commande doit convertir le code si elle doit calculer.</p>
+   <p>Les pistes les plus fines sont à l'extérieur, les grandes zones translucides à l'intérieur.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : disque Gray 5 pistes</h3>
+   <svg id="gray" viewBox="0 0 600 300"></svg>
+   <div class="ctl"><button id="grM">Position −1</button><label>Position <input type="range" id="grR" min="0" max="31" value="15"></label><button id="grP">Position +1</button></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/cod0.jpg" alt="Codeur incrémental" loading="lazy"><figcaption>Codeur incrémental</figcaption></figure><figure><img src="img/cod1.jpg" alt="Vue intérieure d'un codeur" loading="lazy"><figcaption>Vue intérieure d'un codeur</figcaption></figure><figure><img src="img/cod2.jpg" alt="Disque d'un codeur absolu" loading="lazy"><figcaption>Disque d'un codeur absolu</figcaption></figure><figure><img src="img/cod3.jpg" alt="Gamme de codeurs" loading="lazy"><figcaption>Gamme de codeurs</figcaption></figure></div>
+ <div class="quiz" data-m="cod"></div>
+</div></section>
+
+<section class="mod band" id="pression"><div class="wrap">
+ <div class="num">Chapitre 10</div><h2>Pressostats et vacuostats</h2>
+ <div class="grid">
+  <div>
+   <p>Le <strong>pressostat</strong> (manocontact) délivre une information lorsque la pression appliquée dépasse un <strong>seuil</strong>, souvent réglable.</p>
+   <p>La pression agit sur une membrane ou un piston qui ferme le contact électrique ; quand elle disparaît, un ressort ramène le contact au repos. La pression minimale d'action dépend de l'<strong>effort du ressort</strong>, parfois réglable.</p>
+   <p>Il en existe pour de nombreux usages : présence d'une pression, seuil atteint, pression entre deux seuils, comparaison avec une référence ou avec la pression atmosphérique. Chaque modèle a sa plage (0–2 bar, 0–10 bar…). Les versions électroniques ont une fonction d'apprentissage qui mémorise la pression de seuil.</p>
+   <h3>Vacuostat</h3>
+   <p>Il détecte une <strong>dépression</strong>, de manière différentielle : il réagit quand l'écart entre la pression appliquée et une référence (souvent la pression atmosphérique) dépasse le seuil réglé. Plage courante : <strong>−0,2 à −1 bar</strong>.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai</h3>
+   <div class="ctl" id="prM"><button data-m="p" class="sel">Pressostat</button><button data-m="v">Vacuostat</button></div>
+   <svg id="pr" viewBox="0 0 600 240"></svg>
+   <div class="ctl"><label>Pression <input type="range" id="prP" min="0" max="100" value="55"></label><label>Seuil (ressort) <input type="range" id="prS" min="10" max="90" value="40"></label></div>
+   <div class="read"><span>Pression <b id="prPv"></b></span><span>Seuil <b id="prSv"></b></span><span class="out"><span class="led" id="prLed"></span>Contact <b id="prO"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/pr0.jpg" alt="Pressostat électronique" loading="lazy"><figcaption>Pressostat électronique</figcaption></figure><figure><img src="img/pr1.jpg" alt="Pressostats électromécaniques" loading="lazy"><figcaption>Pressostats électromécaniques</figcaption></figure><figure><img src="img/pr2.jpg" alt="Pressostat miniature" loading="lazy"><figcaption>Pressostat miniature</figcaption></figure><figure><img src="img/pr3.jpg" alt="Pressostat avec connecteur" loading="lazy"><figcaption>Pressostat avec connecteur</figcaption></figure></div>
+ <div class="quiz" data-m="pr"></div>
+</div></section>
+
+<section class="mod band" id="pnp-npn"><div class="wrap">
+ <div class="num">Chapitre 11</div><h2>Câblage PNP ou NPN</h2>
+ <div class="grid">
+  <div>
+   <p>Les détecteurs de proximité électroniques ont une sortie à <strong>transistor</strong> qui agit comme un contact. Ils ont en principe 3 fils :</p>
+   <ul><li><strong>Brun</strong> (ou rouge) : alimentation + 24 V CC</li><li><strong>Bleu</strong> : 0 V</li><li><strong>Noir</strong> : sortie, reliée à l'entrée de l'automate</li></ul>
+   <h3>PNP</h3>
+   <p>Le transistor de sortie fonctionne en <strong>commutation</strong> : <strong>bloqué</strong>, il se comporte comme un contact ouvert ; <strong>passant</strong> (saturé), comme un contact fermé. C'est le courant de base, envoyé par l'électronique de détection, qui le rend passant.</p>
+   <p>PNP : en détection, le transistor devient passant et la sortie passe à <strong>+24 V</strong>. L'entrée de l'automate passe à 1 sur un potentiel positif : pour les automates en <strong>logique positive</strong>.</p>
+   <h3>NPN</h3>
+   <p>En détection, le transistor devient passant et la sortie passe à <strong>0 V</strong>. L'entrée passe à 1 sur un potentiel nul : pour les automates en <strong>logique négative</strong>.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : câblage vers l'automate</h3>
+   <div class="ctl" id="pnM"><button data-m="pnp" class="sel">PNP</button><button data-m="npn">NPN</button><button id="pnD">Objet présent</button></div>
+   <svg id="pn" viewBox="0 0 600 300"></svg>
+   <div class="read"><span>Transistor <b id="pnTr"></b></span><span>Tension sortie S <b id="pnV"></b></span><span class="out"><span class="led" id="pnLed"></span>Entrée automate <b id="pnI"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/pnp0.jpg" alt="Détecteur 3 fils : brun, bleu, noir" loading="lazy"><figcaption>Détecteur 3 fils : brun, bleu, noir</figcaption></figure><figure><img src="img/pnp3.jpg" alt="Détecteur de proximité 3 fils, corps fileté" loading="lazy"><figcaption>Détecteur de proximité 3 fils, corps fileté</figcaption></figure><figure class="wide2"><img src="img/pnp1.jpg" alt="Raccordement 3 fils : NPN et PNP pilotant un relais en 24 V CC" loading="lazy"><figcaption>Raccordement 3 fils : NPN et PNP pilotant un relais en 24 V CC</figcaption></figure><figure class="wide2"><img src="img/pnp2.jpg" alt="NPN : la charge est entre +V et la sortie. PNP : la charge est entre la sortie et 0 V" loading="lazy"><figcaption>NPN : la charge est entre +V et la sortie. PNP : la charge est entre la sortie et 0 V</figcaption></figure></div>
+ <div class="quiz" data-m="pnp"></div>
+</div></section>
+
+<section class="mod band" id="temperature"><div class="wrap">
+ <p class="note">Les chapitres 12 à 19 complètent les fiches du cours avec d'autres capteurs courants en maintenance industrielle.</p>
+ <div class="num">Chapitre 12</div><h2>Capteurs de température</h2>
+ <p>Trois capteurs analogiques dominent en industrie (Pt100, thermocouple, thermistance CTN). On rencontre aussi des capteurs TOR (CTP de protection, bilame) et la mesure sans contact par pyromètre. Choisis un onglet, puis fais varier la température.</p>
+ <div class="ctl tabs" id="tpT" role="tablist"></div>
+ <div class="grid">
+  <div id="tpTxt" aria-live="polite"></div>
+  <div class="rig">
+   <h3 id="tpH"></h3>
+   <svg id="tmp" viewBox="0 0 600 270"></svg>
+   <div class="ctl"><label>Température réelle <input type="range" id="tmpR" min="-50" max="400" step="1" value="100"></label></div>
+   <div class="ctl" id="tpC"></div>
+   <div class="read" id="tpR"></div>
+   <p class="note" id="tpN"></p>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/tmp0.jpg" alt="Sonde de température (à gauche) et capteur de pression (à droite)" loading="lazy"><figcaption>Sonde de température (à gauche) et capteur de pression (à droite)</figcaption></figure></div>
+ <div class="quiz" data-m="tmp"></div>
+</div></section>
+
+<section class="mod band" id="analogique"><div class="wrap">
+ <div class="num">Chapitre 13</div><h2>Transmetteurs et signal 4–20 mA</h2>
+ <div class="grid">
+  <div>
+   <p>Un <strong>transmetteur</strong> associe un capteur et une électronique qui convertit la mesure en un <strong>signal normalisé</strong> transmis à l'automate : le plus souvent <strong>4–20 mA</strong>, parfois 0–10 V.</p>
+   <p>La plage de mesure est répartie linéairement : <strong>4 mA = 0 %</strong> de l'échelle, <strong>20 mA = 100 %</strong>. Soit I = 4 + 16 × (mesure / étendue).</p>
+   <h3>Pourquoi 4 mA et pas 0 ?</h3>
+   <p>C'est le « zéro vivant » : un courant inférieur à 4 mA (environ 3,6 mA et moins) signale un <strong>défaut</strong>, comme un fil coupé ou un transmetteur hors tension. Avec 0–10 V, un fil coupé se confondrait avec une mesure nulle.</p>
+   <h3>Pourquoi un courant ?</h3>
+   <p>Le courant est le même dans toute la boucle : la longueur du câble ne fausse pas la mesure et le signal résiste mieux aux parasites. Beaucoup de transmetteurs sont <strong>2 fils</strong> : ils sont alimentés par la boucle elle-même (24 V).</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : transmetteur de pression 0–10 bar</h3>
+   <svg id="ma" viewBox="0 0 600 250"></svg>
+   <div class="ctl"><label>Pression <input type="range" id="maR" min="0" max="10" step="0.1" value="6.5"></label><button id="maC">Couper le câble</button></div>
+   <div class="read"><span>Pression <b id="maP"></b></span><span>Courant <b id="maI"></b></span><span>Lu par l'automate <b id="maL"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/ma0.jpg" alt="Transmetteur de pression à connecteur M12" loading="lazy"><figcaption>Transmetteur de pression à connecteur M12</figcaption></figure><figure><img src="img/ma1.jpg" alt="Transmetteurs de pression avec afficheur" loading="lazy"><figcaption>Transmetteurs de pression avec afficheur</figcaption></figure><figure><img src="img/ma2.jpg" alt="Capteur de pression avec afficheur et touches de réglage" loading="lazy"><figcaption>Capteur de pression avec afficheur et touches de réglage</figcaption></figure></div>
+ <div class="quiz" data-m="ma"></div>
+</div></section>
+
+<section class="mod band" id="force"><div class="wrap">
+ <div class="num">Chapitre 14</div><h2>Force et pesage : jauges de contrainte</h2>
+ <div class="grid">
+  <div>
+   <p>Une <strong>jauge de contrainte</strong> est un fin fil résistif collé sur une pièce métallique (le corps d'épreuve). Quand la pièce se déforme sous une charge, la jauge s'allonge ou se raccourcit et sa <strong>résistance varie</strong> très légèrement.</p>
+   <p>Pour mesurer ces faibles variations, on monte quatre jauges en <strong>pont de Wheatstone</strong>. Le pont, alimenté sous une tension fixe (par exemple 10 V), délivre une tension de quelques millivolts proportionnelle à la charge.</p>
+   <h3>Le capteur de pesage (cellule de charge)</h3>
+   <p>Sa sensibilité s'exprime en <strong>mV/V</strong> à pleine charge : une cellule de 2 mV/V alimentée en 10 V donne 20 mV à sa charge nominale. Un <strong>amplificateur ou conditionneur</strong> transforme ce signal en 4–20 mA, 0–10 V ou en valeur numérique pour l'automate.</p>
+   <p>Applications : bascules et doseurs, contrôle de remplissage, mesure d'effort de presse, couplemètres.</p>
+  </div>
+  <div class="rig">
+   <h3>Banc d'essai : cellule 50 kg, 2 mV/V, alimentation 10 V</h3>
+   <svg id="frc" viewBox="0 0 600 250"></svg>
+   <div class="ctl"><label>Masse <input type="range" id="frcR" min="0" max="50" step="1" value="20"></label></div>
+   <div class="read"><span>Masse <b id="frcM"></b></span><span>Force <b id="frcF"></b></span><span>Sortie du pont <b id="frcU"></b></span></div>
+  </div>
+ </div>
+ <h3 class="ph-t">En vrai</h3><div class="photos"><figure><img src="img/frc0.jpg" alt="Capteurs de force (cellules de charge)" loading="lazy"><figcaption>Capteurs de force (cellules de charge)</figcaption></figure><figure><img src="img/frc1.jpg" alt="Jauges de contrainte" loading="lazy"><figcaption>Jauges de contrainte</figcaption></figure></div>
+ <div class="quiz" data-m="frc"></div>
+</div></section>
+
+<section class="mod band" id="niveau"><div class="wrap">
+ <div class="num">Chapitre 15</div><h2>Capteurs de niveau</h2>
+ <p>On distingue la <strong>détection de seuil</strong> (TOR : niveau haut, niveau bas) et la <strong>mesure continue</strong> (analogique : hauteur en mètres ou volume). Choisis une technologie, puis fais varier le niveau de la cuve.</p>
+ <div class="ctl tabs" id="nvT" role="tablist"></div>
+ <div class="grid">
+  <div id="nvTxt" aria-live="polite"></div>
+  <div class="rig">
+   <h3 id="nvH"></h3>
+   <svg id="niv" viewBox="0 0 600 280"></svg>
+   <div class="ctl"><label>Niveau <input type="range" id="nivR" min="0" max="4" step="0.05" value="2.6"></label></div>
+   <div class="ctl" id="nvC"></div>
+   <div class="read" id="nvR"></div>
+   <p class="note" id="nvN"></p>
+  </div>
+ </div>
+ <div class="quiz" data-m="niv"></div>
+</div></section>
+
+<section class="mod band" id="debit"><div class="wrap">
+ <div class="num">Chapitre 16</div><h2>Débitmètres</h2>
+ <p>Le débit volumique est le volume qui traverse une section par unité de temps : <strong>Q = v × S</strong> (vitesse moyenne × section de la conduite). Chaque technologie mesure le débit à sa façon : choisis un onglet, puis fais varier la conduite et la vitesse.</p>
+ <div class="ctl tabs" id="dbT" role="tablist"></div>
+ <div class="grid">
+  <div id="dbTxt" aria-live="polite"></div>
+  <div class="rig">
+   <h3 id="dbH"></h3>
+   <svg id="deb" viewBox="0 0 600 270"></svg>
+   <div class="ctl"><label>Conduite <select id="debD"><option value="25">DN 25</option><option value="50" selected>DN 50</option><option value="100">DN 100</option></select></label><label>Vitesse <input type="range" id="debV" min="0" max="3" step="0.1" value="1.5"></label><button id="dbPlay"></button></div>
+   <div class="ctl" id="dbC"></div>
+   <div class="read"><span>v <b id="debVv"></b></span><span>Section <b id="debS"></b></span><span>Débit <b id="debQ"></b></span></div>
+   <div class="read" id="dbR"></div>
+   <p class="note" id="dbN"></p>
+  </div>
+ </div>
+ <div class="quiz" data-m="deb"></div>
+</div></section>
+
+<section class="mod band" id="position"><div class="wrap">
+ <div class="num">Chapitre 17</div><h2>Capteurs de position analogiques</h2>
+ <p>Ils donnent une position en continu, sur toute la course, là où un détecteur ne dit que « arrivé / pas arrivé ». Choisis une technologie, puis déplace la cible.</p>
+ <div class="ctl tabs" id="psT" role="tablist"></div>
+ <div class="grid">
+  <div id="psTxt" aria-live="polite"></div>
+  <div class="rig">
+   <h3 id="psH"></h3>
+   <svg id="pot" viewBox="0 0 600 260"></svg>
+   <div class="ctl"><label id="psL">Position <input type="range" id="potR" min="0" max="100" value="35"></label><button id="psPlay"></button></div>
+   <div class="read" id="psR"></div>
+   <p class="note" id="psN"></p>
+  </div>
+ </div>
+ <div class="quiz" data-m="pot"></div>
+</div></section>
+
+<section class="mod band" id="securite"><div class="wrap">
+ <div class="num">Chapitre 18</div><h2>Sécurité, identification et vision</h2>
+ <div class="fam">
+  <div>
+   <h3>Barrières immatérielles</h3>
+   <p>Des faisceaux infrarouges parallèles forment un <strong>rideau lumineux</strong> devant une zone dangereuse. Si une main ou un corps coupe un faisceau, le module de sécurité arrête la machine. Elles se classent en type 2 ou type 4 (le plus exigeant) selon la norme IEC 61496.</p>
+   <h3>Interrupteurs de sécurité</h3>
+   <p>Placés sur les protecteurs mobiles (portes, carters), ils ont des contacts à <strong>ouverture forcée</strong> ou un codage (languette, RFID) pour ne pas être neutralisés facilement. On les raccorde à un relais ou un automate de sécurité, jamais à une simple entrée standard.</p>
+   <h3>Tapis sensibles</h3>
+   <p>Ils détectent la présence d'une personne qui marche sur une zone au sol.</p>
+  </div>
+  <div>
+   <h3>Identification RFID</h3>
+   <p>Une étiquette (tag) fixée sur la pièce ou la palette contient des données lisibles et parfois réinscriptibles par radio, sans contact ni visibilité directe. Usage : traçabilité, suivi de production, changement de recette automatique.</p>
+   <h3>Codes-barres et Datamatrix</h3>
+   <p>Lus par des lecteurs optiques ; le Datamatrix (code 2D) stocke plus d'informations dans une petite surface et peut être gravé directement sur la pièce.</p>
+   <h3>Capteurs de vision</h3>
+   <p>Une caméra et un logiciel analysent l'image : présence, position, couleur, dimensions, lecture de caractères. Ils remplacent plusieurs détecteurs pour le contrôle qualité.</p>
+  </div>
+ </div>
+ 
+ <div class="grid">
+  <div class="rig" style="position:static">
+   <h3>Banc d'essai : presse protégée</h3>
+   <svg id="sec" viewBox="0 0 640 300"></svg>
+   <div class="ctl"><label>Main de l'opérateur <input type="range" id="secH" min="0" max="100" value="20"></label><button id="secD">Ouvrir la porte</button><button id="secR" class="sel">Réarmer</button></div>
+   <div class="read"><span class="out"><span class="led" id="secL"></span><b id="secS"></b></span></div>
+  </div>
+  <div>
+   <h3 style="margin-top:0">Ce que montre le banc</h3>
+   <ul>
+    <li>La presse ne fonctionne que si la barrière n'est pas coupée <strong>et</strong> si la porte arrière est fermée.</li>
+    <li>Avance la main : dès qu'un faisceau est coupé, le module de sécurité arrête la presse.</li>
+    <li>Retirer la main ou refermer la porte <strong>ne relance pas</strong> la machine : il faut un <strong>réarmement volontaire</strong>, qui n'est accepté que si tout est redevenu sûr. Cela évite un redémarrage inattendu.</li>
+    <li>Le bouton Réarmer est refusé tant qu'un faisceau est coupé ou que la porte est ouverte.</li>
+   </ul>
+   <p class="note">Simulation simplifiée : une vraie installation se conçoit selon l'analyse de risques et les normes applicables (distance de sécurité, catégorie ou niveau de performance de la chaîne).</p>
+  </div>
+ </div>
+ <div class="quiz" data-m="sec"></div>
+</div></section>
+
+<section class="mod band" id="raccordement"><div class="wrap">
+ <div class="num">Chapitre 19</div><h2>Raccordement des capteurs : fils, broches et tensions</h2>
+ <div class="grid">
+  <div>
+   <p>Ce chapitre regroupe le raccordement de tous les capteurs du cours : choisis un capteur dans le schéma interactif ou dans le tableau récapitulatif. Les couleurs de fils et les numéros de broches des détecteurs de proximité sont normalisés (norme IEC 60947-5-2). Les connaître permet de câbler et de dépanner sans hésiter.</p>
+   <div class="scroll"><table class="stack">
+    <thead><tr><th>Fil</th><th>Code</th><th>Broche M12</th><th>Rôle</th></tr></thead>
+    <tbody>
+     <tr><td data-l="Fil"><span class="sw" style="background:#8a4b22"></span>Brun</td><td data-l="Code">BN</td><td data-l="Broche M12">1</td><td data-l="Rôle">Alimentation + (24 V CC)</td></tr>
+     <tr><td data-l="Fil"><span class="sw" style="background:#f4f4f4"></span>Blanc</td><td data-l="Code">WH</td><td data-l="Broche M12">2</td><td data-l="Rôle">Deuxième sortie (NC complémentaire) ou sortie analogique</td></tr>
+     <tr><td data-l="Fil"><span class="sw" style="background:#2f6fd6"></span>Bleu</td><td data-l="Code">BU</td><td data-l="Broche M12">3</td><td data-l="Rôle">0 V</td></tr>
+     <tr><td data-l="Fil"><span class="sw" style="background:#111"></span>Noir</td><td data-l="Code">BK</td><td data-l="Broche M12">4</td><td data-l="Rôle">Sortie TOR (NO)</td></tr>
+    </tbody></table></div>
+   <h3>Les tensions à connaître</h3>
+   <ul>
+    <li>Détecteurs CC : alimentation de <strong>10 à 30 V CC</strong> en général, <strong>24 V</strong> nominal.</li>
+    <li>Entrée TOR 24 V d'automate (IEC 61131-2, type 1) : l'état <strong>1 est garanti au-dessus de 15 V</strong>, l'état <strong>0 en dessous de 5 V</strong>.</li>
+    <li>Détecteur <strong>2 fils</strong> : il se place en série avec la charge. Passant, il fait chuter quelques volts ; bloqué, il laisse passer un petit courant résiduel. Vérifie qu'ils sont compatibles avec l'entrée de l'automate.</li>
+    <li>Signaux analogiques : <strong>4–20 mA</strong> (transmetteur souvent 2 fils, alimenté par la boucle) ou <strong>0–10 V</strong> (3 fils).</li>
+    <li>Pt100 : pas d'alimentation ; fils <strong>rouges et blancs</strong> (IEC 60751), en 2, 3 ou 4 fils.</li>
+   </ul>
+   <h3>Raccordement d'un codeur incrémental</h3>
+   <ul>
+    <li><strong>Alimentation</strong> : 5 V CC (sortie TTL / RS422) ou 10–30 V CC (sortie HTL push-pull).</li>
+    <li><strong>Signaux</strong> : voies A et B (décalées, pour le sens), voie Z (top zéro, 1 impulsion par tour).</li>
+    <li><strong>Sortie différentielle</strong> (line driver RS422) : chaque voie a son complément /A, /B, /Z. La carte compare les deux fils, ce qui rejette les parasites sur de longues distances.</li>
+    <li>Les voies se raccordent sur des <strong>entrées de comptage rapide</strong> de l'automate ou sur une carte de comptage : une entrée TOR standard, filtrée, est trop lente.</li>
+    <li>Câble <strong>blindé</strong>, blindage relié à la masse, câble séparé des câbles de puissance.</li>
+   </ul>
+   <p class="note">Les couleurs des fils des codeurs et des transmetteurs analogiques varient selon le fabricant : vérifie toujours la notice et l'étiquette du capteur.</p>
+  </div>
+  <div class="rig">
+   <h3>Schéma de raccordement interactif</h3>
+   <div class="ctl" id="rcT"></div>
+   <svg id="rc" viewBox="0 0 640 320"></svg>
+   <div class="ctl" id="rcC"></div>
+   <div class="scroll"><table id="rcTab" class="stack"><thead><tr><th>Fil</th><th>Broche</th><th>Raccordé à</th><th style="text-align:right">Tension / signal</th></tr></thead><tbody></tbody></table></div>
+   <p class="note" id="rcN"></p>
+  </div>
+ </div>
+
+ <h3>Raccordement de chaque capteur du cours</h3>
+ <div class="scroll"><table class="stack"><thead><tr><th>Capteur</th><th>Raccordement</th><th>Alimentation</th><th>Sortie</th><th>Schéma</th></tr></thead><tbody><tr><td data-l="Capteur"><strong>Interrupteur de position</strong></td><td data-l="Raccordement">2 à 4 bornes : 13-14 (NO), 21-22 (NC)</td><td data-l="Alimentation">Aucune (contact sec)</td><td data-l="Sortie">Contact TOR</td><td data-l="Schéma"><button class="rcgo" data-k="contact">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Inductif, capacitif</strong></td><td data-l="Raccordement">3 fils BN / BU / BK (existe en 2 et 4 fils)</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">TOR PNP ou NPN</td><td data-l="Schéma"><button class="rcgo" data-k="pnp3">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Magnétique ILS</strong></td><td data-l="Raccordement">2 fils (3 fils pour les versions électroniques)</td><td data-l="Alimentation">Aucune ou 24 V CC</td><td data-l="Sortie">Contact TOR</td><td data-l="Schéma"><button class="rcgo" data-k="ils">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Photoélectrique barrage</strong></td><td data-l="Raccordement">Émetteur 2 fils + récepteur 3 ou 4 fils</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">TOR PNP ou NPN</td><td data-l="Schéma"><button class="rcgo" data-k="barrage">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Photoélectrique reflex, proximité</strong></td><td data-l="Raccordement">3 ou 4 fils (NO + NC)</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">TOR</td><td data-l="Schéma"><button class="rcgo" data-k="pnp4">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Effet Hall (vitesse)</strong></td><td data-l="Raccordement">3 fils BN / BU / BK</td><td data-l="Alimentation">10–30 V CC en général</td><td data-l="Sortie">Impulsions PNP ou NPN</td><td data-l="Schéma"><button class="rcgo" data-k="pnp3">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Ultrasons</strong></td><td data-l="Raccordement">4 fils (TOR + analogique) ou 3 fils</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">TOR + 4–20 mA ou 0–10 V</td><td data-l="Schéma"><button class="rcgo" data-k="us">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Codeur incrémental</strong></td><td data-l="Raccordement">5 fils (A, B, Z) ou 8 fils avec /A, /B, /Z</td><td data-l="Alimentation">5 V ou 10–30 V CC</td><td data-l="Sortie">Impulsions</td><td data-l="Schéma"><button class="rcgo" data-k="cod">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Codeur absolu</strong></td><td data-l="Raccordement">6 fils (SSI) ou bus de terrain</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">Position en série</td><td data-l="Schéma"><button class="rcgo" data-k="ssi">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Pressostat mécanique</strong></td><td data-l="Raccordement">3 bornes : commun, NO, NC</td><td data-l="Alimentation">Aucune (contact sec)</td><td data-l="Sortie">Contact inverseur</td><td data-l="Schéma"><button class="rcgo" data-k="pres">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Pressostat électronique</strong></td><td data-l="Raccordement">3 ou 4 fils</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">TOR PNP, parfois + 4–20 mA</td><td data-l="Schéma"><button class="rcgo" data-k="pnp3">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Sonde Pt100</strong></td><td data-l="Raccordement">2, 3 ou 4 fils rouges et blancs</td><td data-l="Alimentation">Aucune (courant injecté par le module)</td><td data-l="Sortie">Résistance</td><td data-l="Schéma"><button class="rcgo" data-k="pt3">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Thermocouple K</strong></td><td data-l="Raccordement">2 fils : vert (+), blanc (−)</td><td data-l="Alimentation">Aucune</td><td data-l="Sortie">Quelques mV</td><td data-l="Schéma"><button class="rcgo" data-k="tc">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Transmetteur pression, niveau, débit</strong></td><td data-l="Raccordement">2 fils (boucle de courant)</td><td data-l="Alimentation">24 V CC par la boucle</td><td data-l="Sortie">4–20 mA</td><td data-l="Schéma"><button class="rcgo" data-k="ma2">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Transmetteur à sortie tension</strong></td><td data-l="Raccordement">3 fils</td><td data-l="Alimentation">24 V CC</td><td data-l="Sortie">0–10 V</td><td data-l="Schéma"><button class="rcgo" data-k="v10">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Cellule de charge</strong></td><td data-l="Raccordement">4 ou 6 fils</td><td data-l="Alimentation">5 à 10 V CC par le conditionneur</td><td data-l="Sortie">Quelques mV</td><td data-l="Schéma"><button class="rcgo" data-k="load">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Potentiomètre</strong></td><td data-l="Raccordement">3 fils : 2 extrémités + curseur</td><td data-l="Alimentation">Tension de référence (10 V)</td><td data-l="Sortie">0 à 10 V</td><td data-l="Schéma"><button class="rcgo" data-k="pot">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Flotteur</strong></td><td data-l="Raccordement">2 fils</td><td data-l="Alimentation">Aucune (contact)</td><td data-l="Sortie">Contact TOR</td><td data-l="Schéma"><button class="rcgo" data-k="ils">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Débitmètre à turbine</strong></td><td data-l="Raccordement">3 fils</td><td data-l="Alimentation">10–30 V CC</td><td data-l="Sortie">Impulsions</td><td data-l="Schéma"><button class="rcgo" data-k="pnp3">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Barrière immatérielle</strong></td><td data-l="Raccordement">Émetteur 2 fils + récepteur 4 fils ou plus</td><td data-l="Alimentation">24 V CC</td><td data-l="Sortie">2 sorties OSSD</td><td data-l="Schéma"><button class="rcgo" data-k="ossd">Voir</button></td></tr><tr><td data-l="Capteur"><strong>Interrupteur de sécurité</strong></td><td data-l="Raccordement">2 contacts NC (4 bornes)</td><td data-l="Alimentation">Aucune</td><td data-l="Sortie">Contacts à ouverture forcée</td><td data-l="Schéma"><button class="rcgo" data-k="porte">Voir</button></td></tr><tr><td data-l="Capteur"><strong>RFID, vision</strong></td><td data-l="Raccordement">Câble de bus (IO-Link, Profinet…)</td><td data-l="Alimentation">24 V CC</td><td data-l="Sortie">Données numériques</td><td data-l="Schéma">—</td></tr></tbody></table></div>
+ <p class="note">Le bouton « Voir » ouvre le schéma correspondant ci-dessus. Pour les capteurs sans code couleur normalisé, suis toujours la notice du fabricant.</p>
+ <h3>Exercice : câble le détecteur</h3>
+ <div class="card" id="ex"></div>
+ <div class="quiz" data-m="rac"></div>
+</div></section>
+
+<section class="mod band" id="guide"><div class="wrap">
+ <div class="num">Synthèse</div><h2>Guide de choix : que doit-on détecter ?</h2>
+ <p>L'organigramme du cours, question par question. Réponds et le guide te mène au détecteur adapté.</p>
+ <div class="wiz">
+  <div class="card" id="wizQ"></div>
+  <div><h3 style="margin-top:0">Ton parcours</h3><ol class="path" id="wizP"></ol></div>
+ </div>
+</div></section>
+</main>
+
+<footer class="band"><div class="wrap">
+ <p>Contenu tiré des fiches « Les capteurs » du pôle MEI, Lycée professionnel P&amp;M Curie, Aulnoye-Aymeries (L. Cuvelier). Les photos proviennent de ces fiches (crédits constructeurs indiqués sur certaines images). Les chapitres 12 à 19 ont été ajoutés pour compléter ces fiches. Les bancs d'essai sont des simulations simplifiées à but pédagogique.</p>
+</div></footer>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const P=(cx,cy,r,a)=>[cx+r*Math.sin(a*Math.PI/180),cy-r*Math.cos(a*Math.PI/180)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const setLed=(el,on)=>el.classList.toggle('on',!!on);
+const loops=[];
+let last=performance.now();
+function tick(t){const dt=Math.min(.05,(t-last)/1000);last=t;loops.forEach(f=>f(dt));requestAnimationFrame(tick)}
+const seg=(btns,cb)=>{const bs=[...$(btns).querySelectorAll('button[data-m],button[data-s]')];bs.forEach(b=>b.addEventListener('click',()=>{bs.forEach(x=>x.classList.toggle('sel',x===b));cb(b.dataset.m||b.dataset.s)}))};
+
+/* ---------- hero conveyor ---------- */
+const items=[{n:'Pièce acier',k:'steel',h:70,w:80,metal:1,opaque:1},{n:'Carton',k:'box',h:80,w:90,metal:0,opaque:1},{n:'Bouteille verre',k:'glass',h:88,w:46,metal:0,opaque:0},{n:'Pièce alu',k:'alu',h:70,w:80,metal:1,opaque:1}];
+const sens=[{x:290,n:'Inductif',t:'ind'},{x:520,n:'Photo reflex',t:'ph'},{x:760,n:'Ultrasons',t:'us'}];
+$('heroChips').innerHTML=sens.map((s,i)=>`<span class="chip"><span class="led" id="hl${i}"></span>${s.n}</span>`).join('');
+let hx=0,heroRun=!reduce;
+function drawObj(o,x){const y=230-o.h;
+ if(o.k==='steel')return `<rect x="${x-o.w/2}" y="${y}" width="${o.w}" height="${o.h}" rx="4" fill="#8d9ba0"/><rect x="${x-o.w/2}" y="${y}" width="${o.w}" height="10" rx="3" fill="#c4d0d3"/><rect x="${x+o.w/2-14}" y="${y+10}" width="14" height="${o.h-10}" fill="#6f7d82"/>`;
+ if(o.k==='alu')return `<rect x="${x-o.w/2}" y="${y}" width="${o.w}" height="${o.h}" rx="4" fill="#cfd8db"/><rect x="${x-o.w/2}" y="${y}" width="${o.w}" height="10" rx="3" fill="#eef3f4"/><rect x="${x+o.w/2-14}" y="${y+10}" width="14" height="${o.h-10}" fill="#aab6ba"/><text x="${x}" y="${y+45}" text-anchor="middle" style="font:700 15px Barlow;fill:#5d6b70">Al</text>`;
+ if(o.k==='box')return `<rect x="${x-o.w/2}" y="${y}" width="${o.w}" height="${o.h}" fill="#c48a4a"/><rect x="${x-o.w/2}" y="${y}" width="${o.w}" height="12" fill="#d9a466"/><rect x="${x-8}" y="${y}" width="16" height="${o.h}" fill="#e7cf9f"/><rect x="${x+o.w/2-14}" y="${y+12}" width="14" height="${o.h-12}" fill="#a8733b"/>`;
+ return `<path d="M${x-8} ${y} h16 v14 q15 8 15 26 v48 h-46 v-48 q0 -18 15 -26z" fill="#bfe9ef" fill-opacity=".55" stroke="#7cc6d1" stroke-width="2"/><rect x="${x-9}" y="${y-6}" width="18" height="8" rx="2" fill="#8a2a35"/><rect x="${x-14}" y="${y+40}" width="6" height="40" rx="3" fill="#fff" fill-opacity=".7"/>`}
+function hero(dt){
+ if(heroRun)hx=(hx+dt*80)%1000;
+ const objs=items.map((o,i)=>({o,x:((i*250+hx)%1000)-40}));
+ let s='<rect x="0" y="0" width="1000" height="300" fill="#6e1423" fill-opacity="0"/>';
+ s+='<rect x="20" y="36" width="960" height="16" rx="3" fill="#8a2a35"/><rect x="20" y="36" width="960" height="4" fill="#a8454f"/>';
+ s+='<rect x="40" y="52" width="14" height="190" fill="#8a2a35"/><rect x="946" y="52" width="14" height="190" fill="#8a2a35"/>';
+ const st=sens.map(()=>0);
+ objs.forEach(({o,x})=>{if(Math.abs(x-sens[0].x)<o.w/2+6&&o.metal)st[0]=1;if(Math.abs(x-sens[1].x)<o.w/2-2&&o.opaque)st[1]=1;if(Math.abs(x-sens[2].x)<o.w/2+4)st[2]=1});
+ // beams before objects
+ const s1=sens[1].x;s+=`<rect x="${s1+18}" y="226" width="22" height="10" fill="#ff6a13" fill-opacity=".9"/>`;
+ const cut=objs.find(({o,x})=>Math.abs(x-s1)<o.w/2-2&&o.opaque);
+ const by=cut?230-cut.o.h:228;
+ s+=`<line x1="${s1-6}" y1="128" x2="${s1-6}" y2="${by}" stroke="#ff6a13" stroke-width="3" stroke-dasharray="7 6"/>`;
+ if(!cut)s+=`<line x1="${s1+6}" y1="128" x2="${s1+6}" y2="${by}" stroke="#ff6a13" stroke-width="3" stroke-dasharray="7 6" opacity=".6"/>`;
+ const s2=sens[2].x;const ph=(performance.now()/600)%1;
+ for(let k=0;k<3;k++){const r=((ph+k/3)%1)*90+8;s+=`<path d="M${s2-r*.7} ${124+r*.7} Q${s2} ${124+r*1.05} ${s2+r*.7} ${124+r*.7}" fill="none" stroke="#ff8a80" stroke-width="2.5" opacity="${(1-((ph+k/3)%1)).toFixed(2)}"/>`}
+ // belt
+ s+='<rect x="30" y="230" width="940" height="22" rx="11" fill="#3a2224"/><rect x="30" y="230" width="940" height="5" fill="#5e3a3e"/>';
+ for(let k=0;k<12;k++){const cx=50+k*82;s+=`<circle cx="${cx}" cy="241" r="7" fill="#8a6266"/><circle cx="${cx}" cy="241" r="2.5" fill="#3a2224"/>`}
+ s+='<rect x="30" y="252" width="940" height="10" fill="#2a1a1c" opacity=".5"/>';
+ objs.forEach(({o,x})=>{if(x>-60&&x<1060)s+=drawObj(o,x)});
+ // sensors
+ const s0=sens[0].x;
+ s+=`<rect x="${s0-17}" y="52" width="34" height="96" fill="#b9c5c8"/>`;for(let k=0;k<11;k++)s+=`<rect x="${s0-17}" y="${60+k*7}" width="34" height="2" fill="#8a989c"/>`;
+ s+=`<rect x="${s0-14}" y="140" width="28" height="9" rx="2" fill="#2b2f31"/><rect x="${s0+9}" y="64" width="6" height="18" rx="2" fill="${st[0]?'#ff6a13':'#6e4a4e'}"/>`;
+ s+=`<rect x="${s1-24}" y="70" width="48" height="58" rx="5" fill="#e9eef0"/><rect x="${s1-24}" y="118" width="48" height="10" fill="#3a4245"/><circle cx="${s1+14}" cy="84" r="5" fill="${st[1]?'#ff6a13':'#6e4a4e'}"/><rect x="${s1-4}" y="52" width="8" height="18" fill="#8a2a35"/>`;
+ s+=`<rect x="${s2-20}" y="52" width="40" height="66" rx="3" fill="#8a2a35"/><rect x="${s2-22}" y="112" width="44" height="12" rx="3" fill="#cfd8db"/><rect x="${s2+11}" y="62" width="5" height="16" rx="2" fill="${st[2]?'#ff6a13':'#6e4a4e'}"/>`;
+ sens.forEach((q,i)=>{s+=`<text x="${q.x}" y="25" text-anchor="middle" style="font:600 16px Barlow;fill:#f6e3e4">${q.n}</text>`;setLed($('hl'+i),st[i])});
+ $('conv').innerHTML=s;
+ const near=objs.reduce((a,b)=>Math.abs(b.x-500)<Math.abs(a.x-500)?b:a);
+ $('heroRead').textContent=`Objet au centre : ${near.o.n}. Inductif : métaux seulement. Photoélectrique : objets opaques (le verre transparent laisse passer le faisceau). Ultrasons : tout objet, quels que soient la matière, la couleur ou la transparence.`;
+}
+loops.push(hero);
+const heroLab=()=>$('heroB').textContent=heroRun?'Pause du convoyeur':'Démarrer le convoyeur';heroLab();$('heroB').addEventListener('click',()=>{heroRun=!heroRun;heroLab()});
+
+/* ---------- chain ---------- */
+let sig='tor';
+let chRun=!reduce,chT=0,chVis=false;
+function chain(dt){
+ chT+=(dt||0)*(chRun?1:0);
+ const p=(chT/2.6)%1,dx=20+p*440,dy=92,inC=dx>=135&&dx<=270,inT=dx>=282&&dx<=417,inP=dx>=455;
+ const box=(x,y,w,t1,t2,c,hl)=>`<rect x="${x}" y="${y}" width="${w}" height="70" rx="10" class="${c}" ${hl?'stroke="var(--acc)" stroke-width="3"':''}/><text x="${x+w/2}" y="${y+31}" text-anchor="middle">${t1}</text><text x="${x+w/2}" y="${y+51}" text-anchor="middle">${t2}</text>`;
+ let s='';
+ let wv='';for(let k=0;k<=84;k+=3)wv+=(k?'L':'M')+(20+k)+' '+(52-8*Math.sin((k-chT*60)/9)).toFixed(1);
+ s+=`<text x="10" y="86" style="font-size:14px">Grandeur</text><text x="10" y="104" style="font-size:14px">physique</text><path d="${wv}" class="n sc" stroke-width="3"/>`;
+ s+=`<rect x="125" y="14" width="300" height="102" rx="14" class="n sl" stroke-width="2" stroke-dasharray="6 5"/><text x="275" y="134" text-anchor="middle" style="fill:var(--mut)">Capteur</text>`;
+ s+=box(135,30,135,"Corps","d'épreuve","ks",inC)+box(282,30,135,"Transducteur","adaptateur","ks",inT);
+ s+=`<path d="M104 52 h24" class="sk" stroke-width="2.5"/><path d="M270 65 h12" class="sk" stroke-width="2.5"/><path d="M417 65 h40" class="sa" stroke-width="3"/>`;
+ const X0=40,W=520,Y=190,H=90,off=chT*60;
+ const f=u=>{if(sig==='tor'){const m=((u%490)+490)%490;return (m>=120&&m<290)||(m>=370)?1:0}if(sig==='num'){return (((u%40)+40)%40)<20?1:0}return .5+.3*Math.sin(u/60)+.15*Math.sin(u/23)};
+ const last=f(X0+W+off);
+ s+=`<rect x="460" y="30" width="130" height="70" rx="10" class="kp" ${inP?'stroke="var(--acc)" stroke-width="3"':''}/><text x="525" y="58" text-anchor="middle" style="fill:#fff;stroke:none">Partie commande</text><text x="525" y="84" text-anchor="middle" style="fill:#ffd9c2;stroke:none;font-size:14px">reçoit : ${sig==='ana'?nf(last*10,1)+' V':last}</text>`;
+ if(chRun||p>0)s+=`<circle cx="${dx.toFixed(1)}" cy="${dy}" r="6" class="ka" stroke="var(--bg)" stroke-width="2"/>`;
+ s+=`<line x1="${X0}" y1="${Y+H}" x2="${X0+W}" y2="${Y+H}" class="sl" stroke-width="1.5"/><line x1="${X0}" y1="${Y}" x2="${X0}" y2="${Y+H}" class="sl" stroke-width="1.5"/>`;
+ let d='',prev=null;for(let k=0;k<=W;k+=2){const v=f(X0+k+off),y=sig==='ana'?Y+H-v*H:(v?Y+10:Y+H);if(prev===null)d+=`M${X0+k} ${y}`;else if(sig!=='ana'&&y!==prev)d+=` L${X0+k} ${prev} L${X0+k} ${y}`;else d+=` L${X0+k} ${y.toFixed(1)}`;prev=y}
+ const lab={tor:'Signal logique : 0 ou 1 (présence, fin de course)',num:"Train d'impulsions ou mot binaire (position, déplacement)",ana:'Valeur continue (température, pression, vitesse)'}[sig];
+ s+=`<path d="${d}" class="n sa" stroke-width="3"/><text x="${X0}" y="${Y-14}">${lab}</text><text x="${X0+W}" y="${Y+H+20}" text-anchor="end" style="font-size:13px;fill:var(--mut)">le signal défile vers la partie commande</text>`;
+ $('chain').innerHTML=s}
+seg('sigBtns',v=>{sig=v;chain(0)});chain(0);
+{const b=document.createElement('button');b.className='autob';const r=$('chain').closest('.rig');r.querySelector('h3').after(b);
+ const lab=()=>{b.textContent=chRun?'Arrêter l\'animation':'Animer le schéma';b.classList.toggle('sel',chRun)};lab();b.addEventListener('click',()=>{chRun=!chRun;lab()});
+ new IntersectionObserver(es=>es.forEach(x=>chVis=x.isIntersecting),{threshold:.2}).observe(r);
+ loops.push(dt=>{if(chVis)chain(dt)})}
+
+/* ---------- lever switch ---------- */
+function lev(){
+ const v=+$('levR').value,cx=90+v*3.6;
+ const push=Math.max(0,Math.min(1,1-Math.abs(cx-330)/80));const ang=-push*28,on=push>.55;
+ let s=`<rect x="250" y="40" width="160" height="110" rx="8" class="kp"/><rect x="250" y="40" width="160" height="14" rx="6" fill="#8a2a35"/><text x="330" y="105" text-anchor="middle" style="fill:#fff;stroke:none">Interrupteur</text>`;
+ s+=`<g transform="rotate(${ang} 330 150)"><rect x="325" y="150" width="10" height="50" class="km"/><circle cx="330" cy="204" r="13" class="k"/><circle cx="330" cy="204" r="5" class="km"/></g>`;
+ s+=`<rect x="20" y="222" width="560" height="10" class="kl"/><path d="M${cx-70} 222 L${cx-30} 212 Q${cx} 196 ${cx+30} 212 L${cx+70} 222Z" class="ka"/><text x="${cx}" y="250" text-anchor="middle" style="font-size:13px">came</text>`;
+ s+=`<line x1="420" y1="70" x2="470" y2="70" class="sk" stroke-width="2"/><line x1="420" y1="110" x2="470" y2="110" class="sk" stroke-width="2"/><line x1="470" y1="110" x2="${on?470:492}" y2="${on?72:80}" class="sk" stroke-width="3"/><circle cx="470" cy="70" r="4" class="k"/><circle cx="470" cy="110" r="4" class="k"/>`;
+ s+=`<circle cx="540" cy="90" r="22" class="${on?'ka':'kl'}"/><text x="540" y="140" text-anchor="middle">lampe</text>`;
+ $('lev').innerHTML=s;setLed($('levLed'),on);$('levV').textContent=on?'1':'0'}
+$('levR').addEventListener('input',lev);lev();
+
+/* ---------- families table ---------- */
+const fam=[['<a href="#inductif">Inductif</a>','Objets métalliques','1 à 60 mm','Supporte humidité et poussière'],['<a href="#capacitif">Capacitif</a>','Tous matériaux, liquides, poudres','Quelques mm','Pour les non conducteurs ; sensible à la saleté'],['<a href="#magnetique">Magnétique (ILS)</a>','Un aimant (piston de vérin)','Au passage','Fixé sur le vérin, informe sur l\'actionneur'],['<a href="#photo">Photoélectrique</a>','Objet coupant ou renvoyant un faisceau','1,5 m à 30 m','Grande portée ; fibres pour petites pièces'],['<a href="#hall">Effet Hall</a>','Champ magnétique, dents d\'une roue','Faible','Mesure de vitesse de rotation'],['<a href="#ultrasons">Ultrasons</a>','Tout objet, toute couleur, transparent','1 cm à plus de 10 m','Mesure aussi la distance']];
+$('famT').innerHTML=fam.map(r=>`<tr>${r.map((c,i)=>`<td data-l="${['Famille','Détecte','Portée','À retenir'][i]}">${i===0?'<strong>'+c+'</strong>':c}</td>`).join('')}</tr>`).join('');
+
+/* ---------- face sensors (inductive / capacitive) ---------- */
+function faceSim(id,mats,max,sn){
+ const sel=$(id+'M'),rng=$(id+'D');
+ sel.innerHTML=mats.map((m,i)=>`<option value="${i}">${m[0]}</option>`).join('');
+ const draw=()=>{
+  const m=mats[+sel.value],d=+rng.value,sr=sn?sn*m[1]:m[1],on=sr>0&&d<=sr;
+  const fx=170,sc=380/max,tx=fx+d*sc;
+  const amp=sn?(m[1]>0?Math.min(1,.12+.88*Math.max(0,(d-.4*sr)/(.9*sr))):1):1;
+  let s=`<rect x="20" y="95" width="140" height="90" class="km"/>`;for(let k=0;k<12;k++)s+=`<rect x="${28+k*11}" y="95" width="3" height="90" fill="#000" fill-opacity=".15"/>`;
+  s+=`<rect x="${fx-12}" y="99" width="14" height="82" class="${id==='ind'?'k':'kc'}"/><rect x="40" y="88" width="16" height="7" rx="2" class="${on?'ka':'kl'}"/>`;
+  for(let k=1;k<=4;k++){const r=k*16*(sn?1:.8);s+=`<path d="M${fx+2} ${140-r*1.4} Q${fx+2+r*1.3} 140 ${fx+2} ${140+r*1.4}" class="n sc" stroke-width="2" opacity="${(1-k*.2)*(on?.55:1)}"/>`}
+  if(sr>0)s+=`<rect x="${fx}" y="196" width="${sr*sc}" height="8" class="ka" opacity=".35"/><text x="${fx+sr*sc}" y="226" text-anchor="middle" style="font-size:13px">portée</text>`;
+  for(let k=0;k<=max;k+=5){const x=fx+k*sc;s+=`<line x1="${x}" y1="196" x2="${x}" y2="208" class="sk"/><text x="${x}" y="252" text-anchor="middle" style="font-size:13px">${k} mm</text>`}
+  s+=`<line x1="${fx}" y1="204" x2="${fx+max*sc}" y2="204" class="sk"/>`;
+  s+=`<rect x="${tx}" y="80" width="36" height="120" rx="3" fill="${m[2]}"/><rect x="${tx+26}" y="80" width="10" height="120" fill="#000" fill-opacity=".14"/><text x="${tx+18}" y="72" text-anchor="middle">${m[0]}</text>`;
+  if(sn){s+=`<text x="20" y="22" style="font-size:13px">Oscillateur</text>`;let p='';for(let x=0;x<=150;x+=3)p+=(x?'L':'M')+(20+x)+' '+(50+22*amp*Math.sin(x/5)).toFixed(1);s+=`<path d="${p}" class="n sa" stroke-width="2.5"/><line x1="20" y1="${50-13}" x2="170" y2="${50-13}" class="sm" stroke-dasharray="4 4"/><text x="176" y="${50-9}" style="font-size:13px;fill:var(--mut)">seuil</text>`}
+  $(id).innerHTML=s;
+  $(id+'Dv').textContent=d.toLocaleString('fr-FR')+' mm';$(id+'Sr').textContent=sr>0?(+sr.toFixed(1)).toLocaleString('fr-FR')+' mm':'non détecté';
+  setLed($(id+'Led'),on);$(id+'O').textContent=on?'1':'0'};
+ sel.addEventListener('change',draw);rng.addEventListener('input',draw);draw()}
+faceSim('ind',[['Acier',1,'#8d9ba0'],['Inox',.7,'#b3bfc2'],['Laiton',.5,'#c9a54a'],['Aluminium',.4,'#d5dee0'],['Cuivre',.3,'#c06a3c'],['Plastique',0,'#3f8fd6'],['Bois',0,'#a87445']],20,10);
+faceSim('cap',[['Carton',4,'#c48a4a'],['Bois',4,'#a87445'],['PVC',6,'#5b6f9e'],['Verre',7,'#9fd7df'],['Eau',10,'#3a8fd0'],['Acier',10,'#8d9ba0']],15,0);
+
+/* ---------- ILS cylinder ---------- */
+let ilsBroken=false,ilsAuto=false,ilsDir=-1;
+function ils(){
+ const p=+$('ilsR').value/100,px=50+p*200,ex=px+184;
+ let s=`<rect x="30" y="70" width="270" height="80" rx="8" class="km"/><rect x="30" y="70" width="270" height="12" rx="6" fill="#fff" fill-opacity=".3"/><rect x="22" y="62" width="18" height="96" rx="3" class="k"/><rect x="292" y="62" width="18" height="96" rx="3" class="k"/>`;
+ s+=`<rect x="${px}" y="76" width="34" height="68" class="kp"/><rect x="${px+8}" y="76" width="12" height="68" class="ka"/>`;
+ s+=`<rect x="${px+34}" y="101" width="150" height="18" class="km"/><rect x="${px+34}" y="101" width="150" height="5" fill="#fff" fill-opacity=".35"/>`;
+ s+=ilsBroken?`<path d="M${ex} 90 h30 v40 h-30z M${ex+30} 100 h10 l6 6 -8 6 4 8 h-12z" class="k"/>`:`<path d="M${ex} 90 h30 v40 h-30z M${ex+30} 100 h40 l12 10 -12 10 h-40z" class="k"/>`;
+ const drilled=!ilsBroken&&p>.97;
+ s+=`<rect x="500" y="60" width="70" height="100" class="ka" opacity=".25"/>${drilled?'<rect x="500" y="102" width="16" height="16" class="kb"/>':''}<text x="535" y="185" text-anchor="middle" style="font-size:13px">pièce</text>`;
+ const pos=[64,264],on=pos.map(x=>Math.abs(px+17-x)<22);
+ pos.forEach((x,i)=>{s+=`<rect x="${x-22}" y="46" width="44" height="18" rx="4" class="${on[i]?'ka':'kp'}"/><text x="${x}" y="34" text-anchor="middle">${i?'a1':'a0'}</text>`});
+ s+=`<text x="${px+17}" y="172" text-anchor="middle" style="font-size:13px">aimant</text>`;
+ if(ilsBroken&&p>.9)s+=`<text x="300" y="214" text-anchor="middle" style="fill:var(--bad)">a1 = 1 mais rien n'est percé</text>`;
+ $('ils').innerHTML=s;on.forEach((o,i)=>{setLed($('ilsL'+i),o);$('ilsV'+i).textContent=o?'1':'0'})}
+$('ilsR').addEventListener('input',()=>{ilsAuto=false;$('ilsC').classList.remove('sel');ils()});
+$('ilsC').addEventListener('click',()=>{ilsAuto=!ilsAuto;$('ilsC').classList.toggle('sel',ilsAuto)});
+$('ilsB').addEventListener('click',()=>{ilsBroken=!ilsBroken;$('ilsB').textContent=ilsBroken?"Réparer l'outil":"Casser l'outil";ils()});
+loops.push(dt=>{if(!ilsAuto)return;let v=+$('ilsR').value+ilsDir*dt*45;if(v<=0||v>=100)ilsDir*=-1;$('ilsR').value=Math.max(0,Math.min(100,v));ils()});
+ils();
+
+/* ---------- photo ---------- */
+let phMode='reflex';
+function ph(){
+ const y=20+(+$('phR').value/100)*170,refl=$('phS').value==='r';
+ const hit=y<140&&y+50>100;
+ let s='',on=false;
+ const em=`<rect x="20" y="90" width="80" height="60" rx="6" class="km"/><rect x="96" y="98" width="8" height="44" class="k"/>`;
+ if(phMode==='reflex'){s+=em+`<rect x="540" y="88" width="16" height="64" class="ka"/><text x="548" y="176" text-anchor="middle" style="font-size:13px">réflecteur</text>`;const e=hit?300:540;s+=`<line x1="104" y1="110" x2="${e}" y2="110" class="sa" stroke-width="3" stroke-dasharray="8 6"/>`;if(!hit)s+=`<line x1="540" y1="130" x2="104" y2="130" class="sa" stroke-width="3" stroke-dasharray="8 6" opacity=".55"/>`;on=hit}
+ if(phMode==='barrage'){s+=em+`<rect x="500" y="90" width="80" height="60" rx="6" class="km"/><rect x="496" y="98" width="8" height="44" class="k"/><text x="60" y="176" text-anchor="middle" style="font-size:13px">émetteur</text><text x="540" y="176" text-anchor="middle" style="font-size:13px">récepteur</text>`;s+=`<line x1="104" y1="120" x2="${hit?300:496}" y2="120" class="sa" stroke-width="3" stroke-dasharray="8 6"/>`;on=hit}
+ if(phMode==='prox'){s+=em;s+=`<line x1="104" y1="110" x2="${hit?300:590}" y2="110" class="sa" stroke-width="3" stroke-dasharray="8 6" opacity="${hit?1:.5}"/>`;if(hit&&refl)s+=`<line x1="300" y1="130" x2="104" y2="130" class="sa" stroke-width="3" stroke-dasharray="8 6"/>`;on=hit&&refl}
+ s+=`<rect x="300" y="${y}" width="80" height="50" rx="4" fill="${refl?'#e4ecee':'#3a4448'}" stroke="var(--ink)" stroke-width="1.5"/>`;
+ if(refl)s+=`<rect x="306" y="${y+6}" width="68" height="8" fill="#fff"/>`;
+ s+=`<line x1="340" y1="10" x2="340" y2="240" class="sl" stroke-dasharray="3 5"/><text x="390" y="${Math.max(30,y)}" style="font-size:13px">objet</text>`;
+ $('ph').innerHTML=s;$('phP').textContent={reflex:'10 m',barrage:'30 m',prox:'1,5 m'}[phMode];setLed($('phLed'),on);$('phO').textContent=on?'oui':'non'}
+seg('phM',m=>{phMode=m;ph()});$('phR').addEventListener('input',ph);$('phS').addEventListener('change',ph);ph();
+
+/* ---------- Hall ---------- */
+let hTh=0,hTrace=[],hT=0;
+function hall(dt){
+ const N=+$('halR').value;hTh=(hTh+N*6*dt)%360;hT+=dt;
+ const x=((hTh+7.5)%30+30)%30,on=x<=7.5||x>=22.5;
+ hTrace.push([hT,on]);while(hTrace.length&&hT-hTrace[0][0]>2)hTrace.shift();
+ let s=`<g transform="rotate(${hTh} 130 150)"><circle cx="130" cy="150" r="72" class="km"/>`;for(let k=0;k<12;k++)s+=`<rect x="119.5" y="58" width="21" height="22" transform="rotate(${k*30+7.5} 130 150)" class="km"/>`;s+=`<circle cx="130" cy="150" r="16" class="kb"/><rect x="126" y="134" width="8" height="10" class="kb"/></g>`;
+ s+=`<rect x="112" y="6" width="36" height="40" rx="4" class="kp"/><rect x="116" y="44" width="28" height="6" class="kc"/><text x="160" y="24" style="font-size:13px">capteur</text><circle cx="140" cy="16" r="4" class="${on?'ka':'kl'}"/>`;
+ const X0=270,W=320,Y0=90,Y1=170;
+ s+=`<text x="${X0}" y="60">Signal de sortie (2 dernières secondes)</text><line x1="${X0}" y1="${Y1}" x2="${X0+W}" y2="${Y1}" class="sl"/>`;
+ let d='';hTrace.forEach(([t,o],i)=>{const xx=X0+W-(hT-t)/2*W,yy=o?Y0:Y1;d+=i?`H${xx.toFixed(1)}V${yy}`:`M${xx.toFixed(1)} ${yy}`});
+ s+=`<path d="${d}" class="n sa" stroke-width="2.5"/><text x="${X0}" y="${Y1+28}" style="font-size:13px;fill:var(--mut)">−2 s</text><text x="${X0+W}" y="${Y1+28}" text-anchor="end" style="font-size:13px;fill:var(--mut)">maintenant</text>`;
+ $('hal').innerHTML=s;setLed($('halLed'),on);$('halN').textContent=N+' tr/min';$('halF').textContent=(12*N/60).toLocaleString('fr-FR')+' Hz'}
+loops.push(hall);
+
+/* ---------- ultrasons ---------- */
+let usPh=0;
+function us(dt){
+ const d=+$('usD').value;let a=+$('usA').value,b=+$('usB').value;if(a>b)[a,b]=[b,a];
+ const X0=70,W=490,sx=v=>X0+v/6*W,ox=sx(d),on=d>=a&&d<=b;
+ if(!reduce)usPh=(usPh+dt/2.4)%1;
+ let s=`<rect x="10" y="60" width="50" height="70" rx="6" class="kp"/><rect x="56" y="70" width="10" height="50" class="kc"/>`;
+ s+=`<rect x="${sx(a)}" y="150" width="${sx(b)-sx(a)}" height="14" class="ka" opacity=".3"/><text x="${(sx(a)+sx(b))/2}" y="188" text-anchor="middle" style="font-size:13px">fenêtre de détection</text>`;
+ for(let k=0;k<=6;k++)s+=`<line x1="${sx(k)}" y1="164" x2="${sx(k)}" y2="170" class="sk"/><text x="${sx(k)}" y="212" text-anchor="middle" style="font-size:13px">${k} m</text>`;
+ s+=`<line x1="${X0}" y1="164" x2="${X0+W}" y2="164" class="sk"/>`;
+ s+=`<rect x="${ox}" y="40" width="18" height="110" fill="#8d9ba0"/><rect x="${ox+12}" y="40" width="6" height="110" fill="#000" fill-opacity=".15"/>`;
+ const go=usPh<.5,f=go?usPh*2:(1-usPh)*2,wx=X0+(ox-X0)*f;
+ for(let k=0;k<3;k++){const xx=wx+(go?-k*9:k*9);if(xx>X0&&xx<ox)s+=`<path d="M${xx} 68 Q${xx+(go?14:-14)} 95 ${xx} 122" class="n ${go?'sc':'sa'}" stroke-width="3" opacity="${1-k*.3}"/>`}
+ s+=`<text x="${X0}" y="30" style="font-size:13px">${go?'émission':'écho'}</text>`;
+ $('us').innerHTML=s;$('usDv').textContent=d.toLocaleString('fr-FR',{minimumFractionDigits:2})+' m';$('usT').textContent=(2*d/340*1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' ms';setLed($('usLed'),on);$('usO').textContent=on?'1':'0'}
+loops.push(us);
+
+/* ---------- incremental encoder ---------- */
+let eTh=0,eDir=1,eCnt=0,ePrevA=null,eTr=[],eT=0,eLast='—';
+const hd={A:0,B:67.5,Z:0},md=(a,m)=>((a%m)+m)%m;
+function inc(dt){
+ eTh+=eDir*40*dt;eT+=dt;
+ const A=md(hd.A-eTh,30)<15,B=md(hd.B-eTh,30)<15,Z=md(hd.Z-eTh,360)<12;
+ if(ePrevA===false&&A){if(!B){eCnt++;eLast='horaire (B à 0)'}else{eCnt--;eLast='anti-horaire (B à 1)'}}
+ ePrevA=A;eTr.push([eT,A,B,Z]);while(eTr.length&&eT-eTr[0][0]>4)eTr.shift();
+ const cx=140,cy=145;let s=`<g transform="rotate(${eTh} ${cx} ${cy})"><circle cx="${cx}" cy="${cy}" r="112" fill="#2b1d1f"/>`;
+ const sector=(a0,a1,r0,r1)=>{const p=[P(cx,cy,r1,a0),P(cx,cy,r1,a1),P(cx,cy,r0,a1),P(cx,cy,r0,a0)];return `M${p[0]} A${r1} ${r1} 0 0 1 ${p[1]} L${p[2]} A${r0} ${r0} 0 0 0 ${p[3]}Z`};
+ for(let k=0;k<12;k++)s+=`<path d="${sector(k*30,k*30+15,80,104)}" fill="#f6eaea"/>`;
+ s+=`<path d="${sector(0,12,50,70)}" fill="#f6eaea"/><circle cx="${cx}" cy="${cy}" r="14" class="km"/></g>`;
+ [['A',hd.A,92,A],['B',hd.B,92,B],['Z',hd.Z,60,Z]].forEach(([n,a,r,v])=>{const [x,y]=P(cx,cy,r,a);s+=`<circle cx="${x}" cy="${y}" r="7" fill="${v?'var(--acc)':'none'}" stroke="var(--acc)" stroke-width="2.5"/>`;const [lx,ly]=P(cx,cy,r+(n==='Z'?-24:30),a+(n==='Z'?0:0));s+=`<text x="${lx}" y="${ly+5}" text-anchor="middle">${n}</text>`});
+ const X0=300,W=290;
+ [['A',1,40],['B',2,110],['Z',3,180]].forEach(([n,i,y])=>{s+=`<text x="${X0}" y="${y+10}">${n}</text>`;let d='';eTr.forEach((r,j)=>{const x=X0+24+(W-24)-(eT-r[0])/4*(W-24),yy=r[i]?y-12:y+28;d+=j?`H${x.toFixed(1)}V${yy}`:`M${x.toFixed(1)} ${yy}`});s+=`<line x1="${X0+24}" y1="${y+28}" x2="${X0+W}" y2="${y+28}" class="sl"/><path d="${d}" class="n ${n==='Z'?'sc':'sa'}" stroke-width="2.5"/>`});
+ $('inc').innerHTML=s;$('incC').textContent=eCnt;$('incA').textContent=(eCnt*30)+'°';$('incS').textContent=eLast}
+$('incB').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.d;if(v==='r'){eCnt=0;eLast='—';return}eDir=+v;$('incB').querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b))}));
+loops.push(inc);
+
+/* ---------- Gray disk ---------- */
+let gPrev=14;
+const gray=n=>n^(n>>1),bits=n=>n.toString(2).padStart(5,'0');
+function grayD(){
+ const n=+$('grR').value,cx=150,cy=150;let s='';
+ const sector=(a0,a1,r0,r1)=>{const p=[P(cx,cy,r1,a0),P(cx,cy,r1,a1),P(cx,cy,r0,a1),P(cx,cy,r0,a0)];return `M${p[0]} A${r1} ${r1} 0 0 1 ${p[1]} L${p[2]} A${r0} ${r0} 0 0 0 ${p[3]}Z`};
+ s+=`<circle cx="${cx}" cy="${cy}" r="138" fill="#f6eaea" stroke="var(--line)"/>`;
+ for(let k=0;k<32;k++){const g=gray(k);for(let b=0;b<5;b++){if(g>>(4-b)&1){const r0=38+b*20;s+=`<path d="${sector(k*11.25,(k+1)*11.25,r0,r0+20)}" fill="#2b1d1f"/>`}}}
+ s+=`<path d="${sector(n*11.25,(n+1)*11.25,36,140)}" fill="var(--acc)" fill-opacity=".35" stroke="var(--acc)" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="34" class="km"/><text x="${cx}" y="${cy+5}" text-anchor="middle">${n}</text>`;
+ const g=gray(n),gp=gray(gPrev),bp=gPrev;
+ const row=(y,lab,v,pv)=>{let r=`<text x="320" y="${y}">${lab}</text>`;bits(v).split('').forEach((c,i)=>{const ch=bits(v)[i]!==bits(pv)[i];r+=`<rect x="${320+i*50}" y="${y+10}" width="42" height="42" rx="6" class="${ch?'ka':'ks'}" stroke="var(--line)"/><text x="${341+i*50}" y="${y+38}" text-anchor="middle" style="font-size:18px">${c}</text>`});return r};
+ const cg=bits(g^gp).split('').filter(c=>c==='1').length,cb=bits(n^bp).split('').filter(c=>c==='1').length;
+ s+=row(30,`Code Gray : ${cg} bit${cg>1?'s':''} change`+(cg>1?'nt':''),g,gp)+row(130,`Binaire pur : ${cb} bit${cb>1?'s':''} change`+(cb>1?'nt':''),n,bp);
+ s+=`<text x="320" y="230" style="font-size:13px;fill:var(--mut)">Passage de ${gPrev} à ${n}. </text><text x="320" y="252" style="font-size:13px;fill:var(--mut)">Extérieur = bit de poids faible.</text><text x="320" y="274" style="font-size:13px;fill:var(--mut)">Essaie 15 → 16 ou 7 → 8.</text>`;
+ $('gray').innerHTML=s}
+const gSet=v=>{const c=+$('grR').value;v=Math.max(0,Math.min(31,v));if(v===c)return;gPrev=c;$('grR').value=v;grayD()};
+$('grR').addEventListener('input',e=>{grayD()});$('grR').addEventListener('pointerdown',()=>{gPrev=+$('grR').value});$('grR').addEventListener('keydown',()=>{gPrev=+$('grR').value});
+$('grM').addEventListener('click',()=>gSet(+$('grR').value-1));$('grP').addEventListener('click',()=>gSet(+$('grR').value+1));
+$('grR').value=16;gPrev=15;grayD();
+
+/* ---------- pressostat ---------- */
+let prMode='p';
+function pr(){
+ const pv=+$('prP').value/100,sv=+$('prS').value/100,vac=prMode==='v';
+ const P_=vac?-pv:pv*10,S_=vac?-(.2+sv*.8):sv*10,on=vac?P_<=S_:P_>=S_;
+ const ratio=Math.min(1.2,vac?pv/(.2+sv*.8):pv/sv);const lift=(vac?1:-1)*Math.min(22,ratio*18);
+ let s=`<rect x="20" y="170" width="120" height="26" class="km"/><text x="20" y="225" style="font-size:13px">${vac?'aspiration (vide)':'arrivée d\'air'}</text>`;
+ s+=`<rect x="140" y="140" width="180" height="70" rx="8" class="km"/><rect x="150" y="150" width="160" height="40" fill="var(--cy)" opacity="${.15+pv*.6}"/>`;
+ s+=`<path d="M150 140 Q230 ${140+lift} 310 140" class="n sk" stroke-width="4"/>`;
+ const ry=140+lift*.5-60;
+ s+=`<rect x="224" y="${ry}" width="12" height="60" class="k"/>`;
+ let sp='M230 '+(ry-6);const top=30,len=ry-6-top;for(let k=1;k<=8;k++)sp+=` L${k%2?214:246} ${(ry-6-len*k/8).toFixed(1)}`;s+=`<path d="${sp}" class="n sc" stroke-width="3"/><rect x="205" y="18" width="50" height="12" class="k"/><text x="265" y="28" style="font-size:13px">vis de réglage</text>`;
+ s+=`<line x1="236" y1="${ry+10}" x2="${on?400:390}" y2="${on?80:100}" class="sk" stroke-width="3"/><circle cx="400" cy="80" r="5" class="k"/><line x1="400" y1="80" x2="460" y2="80" class="sk" stroke-width="2"/><circle cx="510" cy="80" r="24" class="${on?'ka':'kl'}"/><text x="510" y="130" text-anchor="middle">voyant</text>`;
+ $('pr').innerHTML=s;const f=v=>v.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' bar';
+ $('prPv').textContent=f(P_);$('prSv').textContent=f(S_);setLed($('prLed'),on);$('prO').textContent=on?'fermé':'ouvert'}
+seg('prM',m=>{prMode=m;pr()});$('prP').addEventListener('input',pr);$('prS').addEventListener('input',pr);pr();
+
+/* ---------- PNP / NPN ---------- */
+let pnMode='pnp',pnDet=false;
+function pn(){
+ const npn=pnMode==='npn',on=pnDet,c='var(--acc)',k='var(--ink)',t=performance.now()/1000;
+ const Sy=npn?110:200;
+ let s=`<line x1="20" y1="30" x2="580" y2="30" stroke="#8a4b22" stroke-width="5"/><text x="20" y="20">+24 V</text><line x1="20" y1="275" x2="580" y2="275" stroke="#2f6fd6" stroke-width="5"/><text x="20" y="296">0 V</text>`;
+ const path=npn?`M490 30 V${Sy} H238 V128 L218 144 V160 L238 176 V219 H70 V275`:`M70 30 V86 H238 V128 L218 144 V160 L238 176 V${Sy} H490 V275`;
+ if(on)s+=`<path d="${path}" fill="none" stroke="${c}" stroke-width="9" stroke-opacity=".25" stroke-linejoin="round"/>`;
+ s+=`<rect x="40" y="70" width="260" height="165" rx="10" class="ks" stroke="var(--line)" stroke-width="2"/><text x="120" y="58">Détecteur ${npn?'NPN':'PNP'}</text>`;
+ s+=`<line x1="70" y1="30" x2="70" y2="86" stroke="#8a4b22" stroke-width="4"/><text x="62" y="52" text-anchor="end" style="font-size:13px">BN</text><line x1="70" y1="219" x2="70" y2="275" stroke="#2f6fd6" stroke-width="4"/><text x="62" y="256" text-anchor="end" style="font-size:13px">BU</text>`;
+ s+=`<line x1="70" y1="86" x2="${npn?120:238}" y2="86" stroke="#8a4b22" stroke-width="2.5"/><line x1="70" y1="219" x2="${npn?238:120}" y2="219" stroke="#2f6fd6" stroke-width="2.5"/>`;
+ s+=`<rect x="55" y="128" width="90" height="50" rx="6" class="kp"/><text x="100" y="150" text-anchor="middle" style="fill:#fff;stroke:none;font-size:13px">détection</text><circle cx="100" cy="166" r="5" fill="${on?'#ffd23f':'#6e4a4e'}"/><line x1="100" y1="86" x2="100" y2="128" class="sl" stroke-width="2"/><line x1="100" y1="178" x2="100" y2="219" class="sl" stroke-width="2"/>`;
+ s+=`<line x1="145" y1="152" x2="218" y2="152" stroke="${on?c:k}" stroke-width="${on?3.5:2}"/><text x="181" y="144" text-anchor="middle" style="font-size:12px">base</text>`;
+ s+=`<circle cx="230" cy="152" r="30" fill="none" stroke="${on?c:k}" stroke-width="2"/><line x1="218" y1="134" x2="218" y2="170" stroke="${k}" stroke-width="4"/>`;
+ const ce=on?c:k,w=on?3.5:2.5;
+ s+=`<path d="M218 144 L238 128 V${npn?Sy:86}" fill="none" stroke="${ce}" stroke-width="${w}"/><path d="M218 160 L238 176 V${npn?219:Sy}" fill="none" stroke="${ce}" stroke-width="${w}"/>`;
+ if(npn)s+=`<path d="M238 176 l-11 -1 l5 -8z" fill="${ce}"/>`;else s+=`<path d="M220 142.5 l11 1 l-5 8z" fill="${ce}"/>`;
+ s+=`<text x="${npn?244:244}" y="${npn?192:122}" style="font-size:12px">E</text><text x="244" y="${npn?122:192}" style="font-size:12px">C</text>`;
+ s+=`<line x1="238" y1="${Sy}" x2="420" y2="${Sy}" stroke="${on?c:'#222'}" stroke-width="4"/><circle cx="300" cy="${Sy}" r="4" class="k"/><text x="306" y="${Sy-10}" style="font-size:13px">BK sortie S</text>`;
+ if(on)s+=`<path d="${path}" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="6 12" stroke-dashoffset="${(-(t*40)%18).toFixed(1)}" stroke-linejoin="round" opacity=".9"/>`;
+ s+=`<rect x="420" y="${Sy-40}" width="140" height="80" rx="8" class="kp"/><text x="490" y="${Sy-8}" text-anchor="middle" style="fill:#fff;stroke:none">Entrée</text><text x="490" y="${Sy+14}" text-anchor="middle" style="fill:#fff;stroke:none">automate</text>`;
+ s+=`<line x1="490" y1="${npn?Sy-40:Sy+40}" x2="490" y2="${npn?30:275}" stroke="${on?c:k}" stroke-width="${on?4:2}"/>`;
+ s+=`<rect x="80" y="241" width="200" height="0"/><text x="82" y="258" text-anchor="start" style="font-size:14px;fill:${on?'var(--acc)':'var(--mut)'};font-weight:700">${on?'PASSANT ≈ contact fermé':'BLOQUÉ ≈ contact ouvert'}</text>`;
+ s+=`<text x="575" y="${npn?250:60}" text-anchor="end" style="font-size:13px;fill:var(--mut)">${npn?'commun au +24 V (logique négative)':'commun au 0 V (logique positive)'}</text>`;
+ $('pn').innerHTML=s;const V=npn?(on?0:24):(on?24:0);$('pnV').textContent=V+' V';setLed($('pnLed'),on);$('pnI').textContent=on?'1':'0';$('pnTr').textContent=on?'passant':'bloqué'}
+seg('pnM',m=>{pnMode=m;pn()});$('pnD').addEventListener('click',()=>{pnDet=!pnDet;$('pnD').classList.toggle('sel',pnDet);pn()});pn();
+loops.push(()=>{if(pnDet)pn()});
+
+
+/* ---------- température ---------- */
+const nf=(v,d)=>v.toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const TP={
+ pt:{n:'Pt100',h:'Sonde Pt100 et câblage',t:`<h3 style="margin-top:0">Principe : une résistance de platine</h3><p>La résistance d'un fil de platine augmente avec la température : <strong>100 Ω à 0 °C</strong>, environ <strong>138,5 Ω à 100 °C</strong>.</p><p><strong>R ≈ 100 × (1 + 0,00385 × T)</strong></p><h3>Le câblage compte</h3><ul><li><strong>2 fils</strong> : la résistance des câbles s'ajoute à celle de la sonde. 1 Ω de câble donne environ 2,6 °C d'erreur.</li><li><strong>3 fils</strong> : le module mesure la résistance d'un fil et la retranche (les fils doivent être identiques). C'est le montage industriel courant.</li><li><strong>4 fils</strong> : le courant passe par deux fils, la tension est mesurée par les deux autres. Compensation complète, pour la métrologie.</li></ul><h3>Usage</h3><ul><li>Précise et stable, de −200 à +600 °C environ.</li><li>Classes de précision A et B (IEC 60751). La Pt1000 (1 000 Ω à 0 °C) est dix fois moins sensible à la résistance des câbles.</li></ul>`,note:'Résistance de 0,5 Ω par fil de câble, valeur d\'exemple.'},
+ tc:{n:'Thermocouple',h:'Thermocouple type K et soudure froide',t:`<h3 style="margin-top:0">Principe : l'effet Seebeck</h3><p>Deux métaux différents soudés à une extrémité (la <strong>soudure chaude</strong>) produisent une petite tension qui dépend de l'<strong>écart</strong> de température avec l'autre extrémité (la <strong>soudure froide</strong>, aux bornes du module).</p><p>Type K : environ <strong>41 µV/°C</strong>. U ≈ 0,041 × (T chaude − T froide) en mV.</p><h3>La compensation de soudure froide</h3><p>Le module mesure la température de ses bornes et l'ajoute au résultat. Sans cette compensation, la mesure serait fausse de la température ambiante.</p><h3>Types courants (couleur du fil +, le − est blanc)</h3><ul><li><strong>K</strong> (vert) : usage général, jusqu'à environ 1 200 °C.</li><li><strong>J</strong> (noir) : jusqu'à environ 750 °C.</li><li><strong>T</strong> (marron) : basses températures.</li><li><strong>S</strong> (orange) : platine, jusqu'à environ 1 600 °C (fours).</li></ul><p>Raccordement avec un <strong>câble de compensation</strong> du même type, en respectant la polarité.</p>`,note:'Pente moyenne de 41 µV/°C : valeurs approchées.'},
+ ctn:{n:'CTN',h:'Thermistance CTN 10 kΩ',t:`<h3 style="margin-top:0">Principe : une résistance qui chute</h3><p>Une CTN (coefficient de température négatif) est faite d'oxydes métalliques semi-conducteurs : sa résistance <strong>diminue fortement</strong> quand la température augmente.</p><p>La courbe n'est pas linéaire (exponentielle) : le module ou le programme doit la linéariser.</p><h3>Usage</h3><ul><li>Très sensible et bon marché, plage limitée (environ −40 à +150 °C).</li><li>Électroménager, climatisation, chauffage, batteries, électronique de puissance.</li><li>Valeur courante : 10 kΩ à 25 °C.</li></ul>`,note:'R25 = 10 kΩ et B = 3 950 K : valeurs d\'exemple.'},
+ ctp:{n:'CTP moteur',h:'Sondes CTP dans un moteur',t:`<h3 style="margin-top:0">Principe : une résistance qui bondit</h3><p>Une CTP (coefficient de température positif) garde une résistance faible, puis celle-ci <strong>augmente brutalement</strong> autour de sa <strong>température nominale de fonctionnement (TNF)</strong>.</p><p>On l'utilise comme un <strong>détecteur TOR</strong> de surchauffe plutôt que pour mesurer.</p><h3>Protection des moteurs</h3><ul><li>Trois sondes (une par phase) sont noyées dans les bobinages et câblées en série.</li><li>Elles sont reliées à un <strong>relais de protection</strong> (ou à l'entrée CTP d'un variateur) qui coupe le moteur quand la résistance devient trop grande.</li><li>Un fil coupé donne aussi une résistance infinie : le moteur s'arrête, en sécurité.</li></ul>`,note:'TNF = 130 °C et seuil du relais à 3 kΩ : valeurs d\'exemple. Suis la notice du relais.'},
+ ir:{n:'Pyromètre',h:'Pyromètre infrarouge',t:`<h3 style="margin-top:0">Principe : capter le rayonnement</h3><p>Tout objet émet un rayonnement infrarouge qui augmente avec sa température. Le pyromètre le concentre avec une optique sur un détecteur : il mesure <strong>sans contact</strong>.</p><h3>L'émissivité ε</h3><p>Un objet réel émet moins qu'un corps idéal : c'est son <strong>émissivité</strong>, entre 0 et 1. Il faut la régler sur le pyromètre selon la surface. Les métaux polis (ε faible) réfléchissent l'environnement et sont difficiles à mesurer.</p><h3>Usage</h3><ul><li>Objets en mouvement, très chauds, dangereux ou inaccessibles : fours, laminoirs, verre, maintenance électrique.</li><li>La zone visée doit être plus petite que l'objet (rapport distance / diamètre de visée).</li></ul>`,note:'Émissivités indicatives ; calcul simplifié qui néglige le rayonnement ambiant réfléchi.'},
+ bi:{n:'Bilame',h:'Thermostat à bilame',t:`<h3 style="margin-top:0">Principe : deux métaux qui se dilatent différemment</h3><p>Deux lames de métaux différents sont soudées l'une sur l'autre. En chauffant, l'une se dilate plus que l'autre : le bilame se <strong>courbe</strong> et ouvre (ou ferme) un contact.</p><p>C'est un <strong>thermostat TOR</strong>. Le contact se referme seulement quand la température est redescendue d'un écart : le <strong>différentiel</strong> (hystérésis), qui évite les battements.</p><h3>Usage</h3><ul><li>Radiateurs, chauffe-eau, fer à repasser.</li><li>Protecteurs thermiques intégrés aux bobinages de petits moteurs et transformateurs.</li><li>Déclencheur thermique des disjoncteurs et relais thermiques.</li></ul>`,note:'Différentiel de 5 °C, valeur d\'exemple.'}};
+let tpK='pt',tpW=2,tpTf=20,tpCJ=true,tpEm=.95,tpEs=.95,tpSeuil=80,tpOpen=false;
+$('tpT').innerHTML=Object.entries(TP).map(([k,d])=>`<button role="tab" data-m="${k}"${k===tpK?' class="sel" aria-selected="true"':''}>${d.n}</button>`).join('');
+function tpUI(){const d=TP[tpK];$('tpTxt').innerHTML=d.t;$('tpH').textContent=d.h;$('tpN').textContent=d.note;
+ const C=$('tpC');
+ if(tpK==='pt'){C.innerHTML=`<label>Câblage <select id="tpF"><option value="2">2 fils</option><option value="3">3 fils</option><option value="4">4 fils</option></select></label>`;$('tpF').value=tpW;$('tpF').onchange=e=>{tpW=+e.target.value;tmp()}}
+ else if(tpK==='tc'){C.innerHTML=`<label>Soudure froide (ambiance) <input type="range" id="tpF" min="0" max="40" value="${tpTf}"></label><button id="tpG"${tpCJ?' class="sel"':''}>${tpCJ?'Compensation active':'Compensation désactivée'}</button>`;$('tpF').oninput=e=>{tpTf=+e.target.value;tmp()};$('tpG').onclick=()=>{tpCJ=!tpCJ;tpUI();tmp()}}
+ else if(tpK==='ir'){C.innerHTML=`<label>Surface visée <select id="tpF"><option value="0.95">Peinture mate (ε ≈ 0,95)</option><option value="0.8">Acier oxydé (ε ≈ 0,8)</option><option value="0.1">Aluminium poli (ε ≈ 0,1)</option></select></label><label>ε réglé sur l'appareil <input type="range" id="tpG" min="0.1" max="1" step="0.05" value="${tpEs}"></label>`;$('tpF').value=String(tpEm);$('tpF').onchange=e=>{tpEm=+e.target.value;tmp()};$('tpG').oninput=e=>{tpEs=+e.target.value;tmp()}}
+ else if(tpK==='bi'){C.innerHTML=`<label>Consigne <input type="range" id="tpF" min="30" max="200" value="${tpSeuil}"></label>`;$('tpF').oninput=e=>{tpSeuil=+e.target.value;tmp()}}
+ else C.innerHTML=''}
+seg('tpT',k=>{tpK=k;$('tpT').querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===k));tpUI();tmp()});
+function plot(o){const {X0,X1,Y0,Y1,t0,t1,y0,y1,f,T,lab,yt,xt,fmt,log}=o,tx=v=>X0+(v-t0)/(t1-t0)*(X1-X0),ty=v=>{const a=log?Math.log10(v):v,b0=log?Math.log10(y0):y0,b1=log?Math.log10(y1):y1;return Y1-(a-b0)/(b1-b0)*(Y1-Y0)};
+ let s=`<line x1="${X0}" y1="${Y1}" x2="${X1}" y2="${Y1}" class="sk"/><line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y1}" class="sk"/><text x="${X0}" y="${Y0-12}" style="font-size:13px">${lab}</text>`;
+ xt.forEach(v=>s+=`<line x1="${tx(v)}" y1="${Y1}" x2="${tx(v)}" y2="${Y1+6}" class="sk"/><text x="${tx(v)}" y="${Y1+22}" text-anchor="middle" style="font-size:13px">${v} °C</text>`);
+ yt.forEach(v=>s+=`<line x1="${X0}" y1="${ty(v)}" x2="${X1}" y2="${ty(v)}" class="sl" stroke-dasharray="3 4"/><text x="${X0-6}" y="${ty(v)+4}" text-anchor="end" style="font-size:13px">${fmt?fmt(v):v}</text>`);
+ let d='';for(let k=0;k<=60;k++){const t=t0+(t1-t0)*k/60,v=Math.max(y0,Math.min(y1,f(t)));d+=(k?'L':'M')+tx(t).toFixed(1)+' '+ty(v).toFixed(1)}
+ s+=`<path d="${d}" class="n sa" stroke-width="3"/>`;
+ if(T>=t0&&T<=t1){const v=Math.max(y0,Math.min(y1,f(T)));s+=`<circle cx="${tx(T)}" cy="${ty(v)}" r="7" class="ka" stroke="var(--bg)" stroke-width="2"/>`}
+ return s}
+const vessel=(T,lab)=>{const t=Math.max(0,Math.min(1,(T+50)/450));return `<rect x="20" y="110" width="150" height="130" rx="10" class="km"/><rect x="30" y="120" width="130" height="110" rx="6" fill="color-mix(in srgb,var(--acc) ${Math.round(t*90)}%,var(--cy))" opacity=".8"/><rect x="88" y="40" width="14" height="160" rx="7" class="k"/><rect x="78" y="28" width="34" height="20" rx="4" class="kp"/><text x="95" y="20" text-anchor="middle" style="font-size:13px">${lab}</text>`};
+function tmp(){
+ const T=+$('tmpR').value;let s='',R=[];
+ if(tpK==='pt'){
+  const Rs=100*(1+.00385*T),Rl=tpW===2?1:0,Rm=Rs+Rl,Td=(Rm/100-1)/.00385;
+  s+=vessel(T,'Pt100')+plot({X0:270,X1:580,Y0:30,Y1:210,t0:-50,t1:400,y0:80,y1:260,f:t=>100*(1+.00385*t),T,lab:'R (Ω) de la Pt100',yt:[100,150,200,250],xt:[0,100,200,300,400]});
+  s+=`<text x="95" y="262" text-anchor="middle" style="font-size:13px">câblage ${tpW} fils</text>`;
+  R=[['R de la sonde',nf(Rs,1)+' Ω'],['R mesurée',nf(Rm,1)+' Ω'],['T affichée',nf(Td,1)+' °C'],['Erreur',(Rl?'+':'')+nf(Td-T,1)+' °C']]}
+ if(tpK==='tc'){
+  const U=.041*(T-tpTf),Td=tpCJ?U/.041+tpTf:U/.041;
+  s+=`<rect x="20" y="60" width="190" height="150" rx="10" class="km"/><rect x="30" y="70" width="170" height="130" rx="6" fill="color-mix(in srgb,var(--acc) ${Math.round(Math.max(0,Math.min(1,(T+50)/450))*90)}%,var(--cy))" opacity=".8"/><circle cx="110" cy="150" r="9" class="k"/><text x="110" y="232" text-anchor="middle" style="font-size:13px">soudure chaude ${T} °C</text>`;
+  s+=`<path d="M110 150 C 200 60, 300 60, 420 105" class="n" stroke="#2e9e4f" stroke-width="5"/><path d="M110 150 C 200 200, 300 160, 420 145" class="n" stroke="#d9dde0" stroke-width="5"/><text x="270" y="60" text-anchor="middle" style="font-size:13px">fil + (vert)</text><text x="300" y="196" text-anchor="middle" style="font-size:13px">fil − (blanc)</text>`;
+  s+=`<rect x="420" y="80" width="160" height="100" rx="10" class="kp"/><circle cx="430" cy="105" r="5" class="kb"/><circle cx="430" cy="145" r="5" class="kb"/><text x="500" y="112" text-anchor="middle" style="fill:#fff;stroke:none">Module</text><text x="500" y="134" text-anchor="middle" style="fill:#f3d9da;stroke:none;font-size:13px">bornes à ${tpTf} °C</text><text x="500" y="164" text-anchor="middle" style="fill:#fff;stroke:none;font-size:18px">${nf(Td,0)} °C</text><text x="500" y="204" text-anchor="middle" style="font-size:13px">soudure froide</text>`;
+  R=[['Tension',nf(U,2)+' mV'],['T affichée',nf(Td,0)+' °C'],['Erreur',nf(Td-T,0)+' °C']]}
+ if(tpK==='ctn'){
+  const f=t=>10000*Math.exp(3950*(1/(t+273.15)-1/298.15)),ok=T>=-40&&T<=150,Rv=f(Math.max(-40,Math.min(150,T)));
+  s+=vessel(T,'CTN')+plot({X0:280,X1:580,Y0:30,Y1:210,t0:-40,t1:150,y0:100,y1:400000,f,T,lab:'R (Ω), échelle logarithmique',yt:[100,1000,10000,100000],xt:[0,50,100,150],fmt:v=>v>=1000?v/1000+' k':v,log:true});
+  R=[['R',ok?(Rv>=1000?nf(Rv/1000,2)+' kΩ':nf(Rv,0)+' Ω'):'hors plage'],['Plage','−40 à 150 °C']]}
+ if(tpK==='ctp'){
+  const r1=t=>100+4000/(1+Math.exp(-(t-130)/3)),Rt=3*r1(T),trip=Rt>3000;
+  s+=`<rect x="20" y="60" width="200" height="140" rx="16" class="kp"/>`;for(let k=0;k<9;k++)s+=`<rect x="${34+k*20}" y="76" width="12" height="108" rx="5" fill="#b87333"/>`;
+  [[60,110],[110,140],[160,110]].forEach(([x,y],i)=>s+=`<circle cx="${x}" cy="${y}" r="9" fill="${T>=125?'var(--acc)':'var(--cy)'}" stroke="#fff" stroke-width="2"/>`);
+  s+=`<text x="120" y="222" text-anchor="middle" style="font-size:13px">bobinage, 3 sondes en série</text><path d="M220 130 H330" class="sk" stroke-width="3"/>`;
+  s+=`<rect x="330" y="90" width="100" height="80" rx="8" class="ks" stroke="var(--line)" stroke-width="2"/><text x="380" y="125" text-anchor="middle">Relais</text><text x="380" y="145" text-anchor="middle" style="font-size:13px">CTP</text>`;
+  s+=`<circle cx="500" cy="130" r="34" class="${trip?'kl':'ka'}"/><text x="500" y="186" text-anchor="middle" style="font-size:13px">${trip?'moteur coupé':'moteur en marche'}</text><text x="500" y="136" text-anchor="middle" style="font-size:15px;fill:${trip?'var(--ink)':'#fff'};stroke:none">M</text><path d="M430 130 H466" class="sk" stroke-width="3"/>`;
+  R=[['R des 3 sondes',Rt>=1000?nf(Rt/1000,2)+' kΩ':nf(Rt,0)+' Ω'],['Relais',trip?'déclenché':'enclenché']]}
+ if(tpK==='ir'){
+  const K=T+273.15,Kr=K*Math.pow(tpEm/tpEs,.25),Tr=Kr-273.15,t=Math.max(0,Math.min(1,(T+50)/450));
+  s+=`<rect x="400" y="60" width="170" height="150" rx="8" fill="color-mix(in srgb,var(--acc) ${Math.round(t*90)}%,${tpEm<.3?'#cfd8db':'#5b6164'})"/><text x="485" y="232" text-anchor="middle" style="font-size:13px">objet à ${T} °C</text>`;
+  for(let k=0;k<4;k++)s+=`<path d="M${390-k*40} ${100} q-10 15 0 30 q10 15 0 30" class="n sa" stroke-width="2.5" opacity="${(.2+tpEm*.8).toFixed(2)}"/>`;
+  s+=`<path d="M150 120 L400 80 L400 190 L150 150Z" fill="var(--cy)" opacity=".12"/><path d="M40 110 h110 v50 h-110z" class="kp"/><path d="M60 160 l-10 50 h30 l10 -50z" class="kp"/><rect x="50" y="118" width="70" height="26" rx="4" fill="#1f0b0d"/><text x="85" y="137" text-anchor="middle" style="fill:#7cf2a0;stroke:none;font-size:15px">${nf(Tr,0)} °C</text>`;
+  R=[['Température lue',nf(Tr,0)+' °C'],['Erreur',(Tr-T>=0?'+':'')+nf(Tr-T,0)+' °C'],['ε réel / ε réglé',nf(tpEm,2)+' / '+nf(tpEs,2)]]}
+ if(tpK==='bi'){
+  if(!tpOpen&&T>=tpSeuil)tpOpen=true;if(tpOpen&&T<=tpSeuil-5)tpOpen=false;
+  const c=Math.max(-.3,Math.min(1.6,(T-20)/120));
+  s+=`<rect x="40" y="150" width="40" height="60" class="kp"/><text x="60" y="232" text-anchor="middle" style="font-size:13px">fixation</text>`;
+  const ex=80+300,ey=150-c*60;s+=`<path d="M80 160 Q230 ${160-c*30} ${ex} ${ey+10}" class="n" stroke="#c9a54a" stroke-width="8"/><path d="M80 168 Q230 ${168-c*30} ${ex} ${ey+18}" class="n" stroke="#9aa9ad" stroke-width="8"/><text x="230" y="${200-c*20}" text-anchor="middle" style="font-size:13px">laiton (dilate plus) / acier</text>`;
+  s+=`<circle cx="${ex}" cy="${ey+8}" r="7" class="k"/><circle cx="${ex+4}" cy="${tpOpen?150:ey+8}" r="7" class="${tpOpen?'kl':'k'}"/><rect x="${ex-6}" y="${tpOpen?100:ey-40}" width="0" height="0"/>`;
+  s+=`<path d="M392 150 H460 V110 H520" class="n sk" stroke-width="3"/><circle cx="545" cy="110" r="22" class="${tpOpen?'kl':'ka'}"/><text x="545" y="150" text-anchor="middle" style="font-size:13px">chauffage</text><circle cx="392" cy="150" r="6" class="k"/>`;
+  R=[['Consigne',tpSeuil+' °C'],['Contact',tpOpen?'ouvert : chauffage coupé':'fermé : chauffage en marche'],['Refermeture à',(tpSeuil-5)+' °C']]}
+ $('tmp').innerHTML=s;$('tpR').innerHTML=R.map(([l,v])=>`<span>${l} <b>${v}</b></span>`).join('')}
+$('tmpR').addEventListener('input',tmp);tpUI();tmp();
+
+/* ---------- 4-20 mA ---------- */
+let maCut=false;
+function ma(){
+ const p=+$('maR').value,I=maCut?0:4+16*p/10;
+ let s=`<rect x="20" y="70" width="110" height="90" rx="10" class="kp"/><text x="75" y="110" text-anchor="middle" style="fill:#fff;stroke:none">Transmetteur</text><text x="75" y="132" text-anchor="middle" style="fill:#fff;stroke:none">0–10 bar</text><rect x="60" y="160" width="30" height="30" class="km"/>`;
+ s+=`<path d="M130 95 H${maCut?190:250}" class="n sa" stroke-width="4"/>${maCut?'<path d="M210 95 H250" class="n sa" stroke-width="4"/><text x="200" y="80" text-anchor="middle" style="fill:var(--bad)">coupé</text>':''}<path d="M130 135 H250" class="n sk" stroke-width="3"/>`;
+ s+=`<rect x="250" y="70" width="90" height="90" rx="10" class="ks" stroke="var(--line)"/><text x="295" y="110" text-anchor="middle">Entrée</text><text x="295" y="130" text-anchor="middle">analogique</text>`;
+ const X0=380,X1=580,ix=v=>X0+v/24*(X1-X0);
+ s+=`<text x="${X0}" y="40">Courant de boucle</text><rect x="${X0}" y="60" width="${X1-X0}" height="34" rx="4" class="ks" stroke="var(--line)"/><rect x="${X0}" y="60" width="${ix(I)-X0}" height="34" rx="4" class="${I<3.6?'kl':'ka'}"/>`;
+ [4,12,20].forEach(v=>s+=`<line x1="${ix(v)}" y1="94" x2="${ix(v)}" y2="104" class="sk"/><text x="${ix(v)}" y="122" text-anchor="middle" style="font-size:13px">${v} mA</text>`);
+ s+=`<rect x="${X0}" y="140" width="${ix(4)-X0}" height="14" fill="var(--bad)" opacity=".35"/><text x="${X0}" y="176" style="font-size:13px">zone de défaut (&lt; 4 mA)</text><text x="${ix(4)}" y="200" style="font-size:13px">0 % → 4 mA, 100 % → 20 mA</text>`;
+ $('ma').innerHTML=s;$('maP').textContent=nf(p,1)+' bar';$('maI').textContent=nf(I,2)+' mA';$('maL').textContent=I<3.6?'défaut fil coupé':nf((I-4)/16*100,0)+' %'}
+$('maR').addEventListener('input',ma);$('maC').addEventListener('click',()=>{maCut=!maCut;$('maC').textContent=maCut?'Reconnecter':'Couper le câble';$('maC').classList.toggle('sel',maCut);ma()});ma();
+
+/* ---------- force ---------- */
+function frc(){
+ const m=+$('frcR').value,b=m/50*16,U=20*m/50;
+ let s=`<rect x="30" y="120" width="60" height="100" class="km"/><rect x="20" y="215" width="80" height="12" class="k"/>`;
+ s+=`<path d="M90 120 Q230 ${120+b*.4} 350 ${120+b} L350 ${150+b} Q230 ${150+b*.4} 90 150Z" fill="#b8c4c7" stroke="var(--ink)" stroke-width="1.5"/>`;
+ s+=`<rect x="150" y="${113+b*.15}" width="50" height="8" fill="color-mix(in srgb,var(--acc) ${Math.round(m*2)}%,var(--cy))"/><text x="175" y="${100+b*.15}" text-anchor="middle" style="font-size:13px">jauges</text>`;
+ const h=10+m*1.1;s+=`<rect x="${312}" y="${120+b-h}" width="60" height="${h}" rx="3" class="kp"/><text x="342" y="${120+b-h-8}" text-anchor="middle">${m} kg</text>`;
+ const cx=490,cy=120;s+=`<path d="M${cx} ${cy-60} L${cx+60} ${cy} L${cx} ${cy+60} L${cx-60} ${cy}Z" class="n sk" stroke-width="2"/>`;
+ [[cx-30,cy-30],[cx+30,cy-30],[cx+30,cy+30],[cx-30,cy+30]].forEach(([x,y],i)=>s+=`<rect x="${x-12}" y="${y-6}" width="24" height="12" transform="rotate(${i%2?45:-45} ${x} ${y})" class="ks" stroke="var(--ink)"/>`);
+ s+=`<text x="${cx}" y="${cy-70}" text-anchor="middle" style="font-size:13px">+10 V</text><text x="${cx}" y="${cy+82}" text-anchor="middle" style="font-size:13px">0 V</text><line x1="${cx-60}" y1="${cy}" x2="${cx+60}" y2="${cy}" class="sa" stroke-width="2" stroke-dasharray="4 4"/><text x="${cx}" y="${cy-6}" text-anchor="middle" style="font-size:13px">${nf(U,1)} mV</text><text x="${cx}" y="236" text-anchor="middle" style="font-size:13px">pont de Wheatstone</text>`;
+ $('frc').innerHTML=s;$('frcM').textContent=m+' kg';$('frcF').textContent=nf(m*9.81,0)+' N';$('frcU').textContent=nf(U,1)+' mV'}
+$('frcR').addEventListener('input',frc);frc();
+
+/* ---------- niveau ---------- */
+const NV={
+ flo:{n:'Flotteur',tor:1,h:'Flotteurs haut et bas, pompe de remplissage',t:`<h3 style="margin-top:0">Principe : il monte avec le liquide</h3><p>Le flotteur suit la surface. Arrivé au niveau voulu, il bascule un contact : souvent un <strong>aimant</strong> qui ferme un <strong>ILS</strong> le long d'une tige, ou une « poire » qui bascule un micro-rupteur.</p><h3>Commande d'une pompe</h3><p>Avec deux flotteurs, l'automate démarre la pompe de remplissage au niveau bas et l'arrête au niveau haut. Entre les deux, elle garde son état : c'est une <strong>mémoire</strong>, qui évite les démarrages à répétition.</p><h3>Usage</h3><ul><li>Simple, économique, sans alimentation (contact sec).</li><li>Pièces mobiles : à éviter avec les liquides chargés, collants ou très visqueux.</li></ul>`,note:'Niveaux bas à 0,8 m et haut à 3,2 m : valeurs d\'exemple.'},
+ ele:{n:'Électrodes',tor:1,h:'Électrodes conductives et relais de niveau',t:`<h3 style="margin-top:0">Principe : le liquide ferme le circuit</h3><p>Des tiges métalliques de longueurs différentes plongent dans la cuve. Un <strong>relais de niveau</strong> applique une faible tension alternative entre une électrode de référence (ou la cuve métallique) et les autres.</p><p>Quand le liquide touche une électrode, un petit courant passe : le niveau est détecté. La tension alternative évite l'<strong>électrolyse</strong> qui rongerait les électrodes.</p><h3>Usage</h3><ul><li>Uniquement les liquides <strong>conducteurs</strong> : eau, eaux usées, boissons.</li><li>Pas d'huile ni d'eau déminéralisée.</li><li>Pas de pièce mobile, plusieurs niveaux avec une seule sonde.</li></ul>`,note:'Électrodes haut à 3,2 m et bas à 0,8 m. Relais avec mémoire : remplissage entre bas et haut.'},
+ vib:{n:'Lames vibrantes',tor:1,h:'Détecteur à lames vibrantes',t:`<h3 style="margin-top:0">Principe : une fourche qui change de note</h3><p>Une <strong>fourche</strong> est mise en vibration à sa fréquence de résonance par un élément piézoélectrique. Quand le produit la recouvre, la vibration est freinée : la <strong>fréquence baisse</strong> et la sortie bascule.</p><h3>Usage</h3><ul><li>Liquides de presque toute nature (conducteurs ou non, mousseux, visqueux) et, selon les modèles, poudres et granulés.</li><li>Aucune pièce en mouvement visible, peu sensible aux dépôts, pas de réglage.</li><li>Protection contre le débordement et la marche à sec des pompes.</li></ul>`,note:'Fourche installée à 3 m ; fréquences de l\'ordre du kilohertz, valeurs d\'exemple. Animation ralentie.'},
+ hyd:{n:'Hydrostatique',h:'Capteur de pression au fond de la cuve',t:`<h3 style="margin-top:0">Principe : le poids de la colonne de liquide</h3><p>Un capteur de pression placé au fond mesure la pression due à la hauteur de liquide :</p><p><strong>P = ρ × g × h</strong> (ρ masse volumique, g ≈ 9,81 m/s², h hauteur). Pour de l'eau, environ <strong>98 mbar par mètre</strong>.</p><h3>À savoir</h3><ul><li>La mesure dépend de la <strong>masse volumique</strong> : il faut la connaître et la régler.</li><li>Cuve fermée sous pression : on utilise un capteur <strong>différentiel</strong> (bas et haut de la cuve).</li><li>Existe en sonde immergée suspendue à son câble (forages, puits, cuves).</li></ul>`,note:'Transmetteur réglé de 0 à 4 m d\'eau (0 à 392 mbar). Avec un autre liquide, l\'affichage se trompe si la masse volumique n\'est pas corrigée.'},
+ us:{n:'Ultrasons',h:'Capteur de niveau à ultrasons',t:`<h3 style="margin-top:0">Principe : l'écho sur la surface</h3><p>Monté en haut de la cuve, le capteur émet une onde ultrasonore et mesure le temps de retour de l'écho :</p><p><strong>distance = v × t / 2</strong>, avec v ≈ 340 m/s dans l'air. <strong>Niveau = hauteur de montage − distance</strong>.</p><h3>À savoir</h3><ul><li>Sans contact avec le produit : liquides agressifs, eaux usées, granulés.</li><li>Une <strong>zone morte</strong> juste sous le capteur ne peut pas être mesurée.</li><li>Gêné par la mousse épaisse, la vapeur, les poussières et les variations de température de l'air.</li></ul>`,note:'Capteur à 4,3 m du fond, zone morte de 0,3 m : valeurs d\'exemple. Animation ralentie.'},
+ rad:{n:'Radar',h:'Capteur de niveau radar',t:`<h3 style="margin-top:0">Principe : un écho à la vitesse de la lumière</h3><p>Comme l'ultrason, mais avec des <strong>micro-ondes</strong> qui voyagent à 300 000 km/s : l'aller-retour dure quelques nanosecondes. Les capteurs récents travaillent souvent vers 80 GHz, avec un faisceau très étroit.</p><h3>Radar guidé</h3><p>Une variante envoie l'onde le long d'une <strong>tige ou d'un câble</strong> plongé dans la cuve : mesure fiable avec mousse, turbulences ou cuves encombrées.</p><h3>À savoir</h3><ul><li>Pas gêné par la vapeur, la pression, la température ou la poussière.</li><li>Liquides et solides, grandes hauteurs (plusieurs dizaines de mètres).</li><li>Plus cher que l'ultrason, mais devenu la référence en mesure continue.</li></ul>`,note:'Animation très ralentie : la vraie impulsion fait l\'aller-retour en quelques nanosecondes.'},
+ cap:{n:'Capacitif',h:'Sonde capacitive de niveau',t:`<h3 style="margin-top:0">Principe : un condensateur qui se remplit</h3><p>Une tige isolée et la paroi de la cuve (ou un tube) forment un <strong>condensateur</strong>. Le liquide remplace l'air entre les deux : la <strong>capacité augmente</strong> avec la hauteur immergée.</p><h3>À savoir</h3><ul><li>Pas de pièce mobile, convient aux liquides et à certains solides en vrac.</li><li>Il faut <strong>étalonner</strong> à vide et à plein : la mesure dépend du produit.</li><li>Les dépôts collants sur la tige faussent la mesure.</li></ul>`,note:'50 pF à vide, 100 pF par mètre d\'eau : valeurs d\'exemple.'}};
+let nvK='flo',nvPump=true,nvRel=true,nvRho=1000,nvCond=true,nvPh=0;
+$('nvT').innerHTML=Object.entries(NV).map(([k,d])=>`<button role="tab" data-m="${k}"${k===nvK?' class="sel" aria-selected="true"':''}>${d.n}${d.tor?' (TOR)':''}</button>`).join('');
+function nvUI(){const d=NV[nvK];$('nvTxt').innerHTML=d.t;$('nvH').textContent=d.h;$('nvN').textContent=d.note;const C=$('nvC');
+ if(nvK==='hyd'){C.innerHTML=`<label>Liquide <select id="nvF"><option value="1000">Eau, 1 000 kg/m³</option><option value="850">Fioul, 850 kg/m³</option><option value="1260">Glycérine, 1 260 kg/m³</option></select></label>`;$('nvF').value=nvRho;$('nvF').onchange=e=>{nvRho=+e.target.value;niv(0)}}
+ else if(nvK==='ele'){C.innerHTML=`<label>Liquide <select id="nvF"><option value="1">Eau (conductrice)</option><option value="0">Huile (non conductrice)</option></select></label>`;$('nvF').value=nvCond?'1':'0';$('nvF').onchange=e=>{nvCond=e.target.value==='1';niv(0)}}
+ else C.innerHTML=''}
+seg('nvT',k=>{nvK=k;$('nvT').querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===k));nvUI();niv(0)});
+function niv(dt){
+ const h=+$('nivR').value,X=190,W=210,Yb=255,Ht=200,ly=Yb-h/4*Ht,yOf=v=>Yb-v/4*Ht;
+ nvPh=(nvPh+(dt||0)*(reduce?0:.5))%1;
+ const liq=nvK==='ele'&&!nvCond||nvK==='hyd'&&nvRho===850?'#c9a227':nvK==='hyd'&&nvRho===1260?'#9fd7df':'#3a8fd0';
+ let s=`<rect x="${X}" y="${Yb-Ht-14}" width="${W}" height="${Ht+14}" class="ks" stroke="var(--ink)" stroke-width="3"/><rect x="${X+2}" y="${ly}" width="${W-4}" height="${Yb-ly}" fill="${liq}" opacity=".55"/>`;
+ if(h>0&&!reduce){let w='';for(let k=0;k<=W-4;k+=6)w+=(k?'L':'M')+(X+2+k)+' '+(ly+2*Math.sin(k/14+nvPh*12)).toFixed(1);s+=`<path d="${w}" class="n" stroke="#fff" stroke-width="2" opacity=".7"/>`}
+ for(let k=0;k<=4;k++){const y=yOf(k);s+=`<line x1="${X-10}" y1="${y}" x2="${X}" y2="${y}" class="sk"/><text x="${X-16}" y="${y+5}" text-anchor="end" style="font-size:13px">${k} m</text>`}
+ let R=[];
+ const outLed=(x,y,on,l)=>`<circle cx="${x}" cy="${y}" r="9" class="${on?'ka':'kl'}"/><text x="${x+16}" y="${y+5}" style="font-size:13px">${l}</text>`;
+ if(nvK==='flo'||nvK==='ele'){
+  const hi=h>=3.2,lo=h>=.8;
+  if(nvK==='flo'){if(!lo)nvPump=true;if(hi)nvPump=false;
+   [[3.2,'haut',hi],[.8,'bas',lo]].forEach(([lv,n,on])=>{const y=yOf(lv),fy=on?y-12:y+6;s+=`<line x1="${X+W}" y1="${y}" x2="${X+W+16}" y2="${y}" class="sk" stroke-width="2"/><line x1="${X+W-6}" y1="${y}" x2="${X+W-34}" y2="${fy+6}" class="sk" stroke-width="2"/><circle cx="${X+W-40}" cy="${fy+6}" r="10" class="${on?'ka':'kl'}"/><text x="${X+W+22}" y="${y+5}" style="font-size:13px">flotteur ${n} : ${on?1:0}</text>`});
+   R=[['Flotteur bas',lo?'1':'0'],['Flotteur haut',hi?'1':'0'],['Pompe',nvPump?'en marche':'arrêtée']]}
+  else{const c=nvCond;if(c){if(!lo)nvRel=true;if(hi)nvRel=false}
+   [[X+60,.1,'réf.'],[X+100,.8,'bas'],[X+140,3.2,'haut']].forEach(([x,lv,l])=>{const y=yOf(lv),wet=c&&h>=lv;s+=`<line x1="${x}" y1="${Yb-Ht-14}" x2="${x}" y2="${y}" stroke="${wet?'var(--acc)':'var(--metal)'}" stroke-width="5"/><text x="${x}" y="${Yb-Ht-22}" text-anchor="middle" style="font-size:13px">${l}</text>`});
+   s+=`<rect x="${X+35}" y="${Yb-Ht-62}" width="130" height="26" rx="5" class="kp"/><text x="${X+100}" y="${Yb-Ht-42}" text-anchor="middle" style="fill:#fff;stroke:none;font-size:13px">relais de niveau</text>`;
+   R=[['Électrode basse',c&&lo?'mouillée':'à sec'],['Électrode haute',c&&hi?'mouillée':'à sec'],['Remplissage',c?(nvRel?'en marche':'arrêté'):'aucune détection : liquide isolant']];if(!c)nvRel=true}
+  const on=nvK==='flo'?nvPump:nvRel&&nvCond;
+  s+=`<path d="M86 ${Yb-20} H120 V${Yb+14} H${X+30} V${Yb}" class="n sk" stroke-width="6"/><circle cx="60" cy="${Yb-20}" r="26" class="${on?'ka':'kl'}"/><text x="60" y="${Yb-15}" text-anchor="middle" style="font-size:15px;fill:${on?'#fff':'var(--ink)'};stroke:none">P</text><text x="60" y="${Yb-56}" text-anchor="middle" style="font-size:13px">pompe</text>`}
+ if(nvK==='vib'){
+  const lv=3,y=yOf(lv),cov=h>=lv+.08,f=cov?850:1200,amp=reduce?0:3*Math.sin(nvPh*Math.PI*2*(cov?8:14));
+  s+=`<rect x="${X+W}" y="${y-14}" width="70" height="28" rx="4" class="kp"/><rect x="${X+W-60}" y="${y-9+amp}" width="62" height="6" rx="3" class="km"/><rect x="${X+W-60}" y="${y+3-amp}" width="62" height="6" rx="3" class="km"/>`;
+  let d='';for(let k=0;k<=100;k+=3)d+=(k?'L':'M')+(485+k)+' '+(150-22*Math.sin(k/(cov?9:6)+nvPh*20)).toFixed(1);s+=`<path d="${d}" class="n sa" stroke-width="2.5"/><text x="485" y="112" style="font-size:13px">${f} Hz</text>`;
+  s+=outLed(485,205,cov,cov?'couvert':'libre');
+  R=[['Fourche',cov?'immergée':'dans l\'air'],['Fréquence',f+' Hz'],['Sortie',cov?'1':'0']]}
+ if(nvK==='hyd'){
+  const P=nvRho*9.81*h/100,shown=Math.min(4,P/98.1);
+  s+=`<rect x="${X+20}" y="${Yb}" width="30" height="18" class="kp"/><line x1="${X+35}" y1="${Yb+18}" x2="${X+35}" y2="${Yb+24}" class="sk"/>`;
+  for(let k=0;k<4;k++){const yy=ly+(Yb-ly)*(k+.5)/4;if(h>.2)s+=`<path d="M${X+35} ${yy} v${Math.max(4,(Yb-ly)/10)}" class="sa" stroke-width="${1+k}" opacity=".7"/>`}
+  s+=`<text x="${X+W+12}" y="${Yb-6}" style="font-size:13px">capteur de pression</text><text x="${X+W+12}" y="${Yb+14}" style="font-size:13px">${nf(P,0)} mbar</text>`;
+  R=[['Pression au fond',nf(P,0)+' mbar'],['Sortie 4–20 mA',nf(4+16*Math.min(1,P/392.4),1)+' mA'],['Niveau affiché',nf(shown,2)+' m'+(nvRho!==1000?' (réglé pour l\'eau)':'')]]}
+ if(nvK==='us'||nvK==='rad'){
+  const top=4.3,d=top-h,ys=yOf(top),sx=X+W/2,dead=.3,bad=nvK==='us'&&d<dead;
+  s+=`<rect x="${sx-22}" y="${ys-26}" width="44" height="26" rx="4" class="kp"/><text x="${sx+30}" y="${ys-8}" style="font-size:13px">${nvK==='us'?'capteur ultrasons':'radar'}</text>`;
+  if(nvK==='us')s+=`<rect x="${X+2}" y="${ys}" width="${W-4}" height="${dead/4*Ht}" fill="var(--bad)" opacity=".15"/><text x="${X+W+12}" y="${ys+12}" style="font-size:13px">zone morte</text>`;
+  const go=nvPh<.5,f=go?nvPh*2:(1-nvPh)*2,py=ys+(ly-ys)*f;
+  if(!reduce&&h>0)for(let k=0;k<3;k++){const yy=py+(go?-k*7:k*7);if(yy>ys&&yy<ly)s+=nvK==='us'?`<path d="M${sx-30} ${yy} Q${sx} ${yy+(go?10:-10)} ${sx+30} ${yy}" class="n ${go?'sc':'sa'}" stroke-width="2.5" opacity="${1-k*.3}"/>`:`<path d="M${sx-18} ${yy} L${sx-6} ${yy+(go?6:-6)} L${sx+6} ${yy} L${sx+18} ${yy+(go?6:-6)}" class="n ${go?'sc':'sa'}" stroke-width="2.5" opacity="${1-k*.3}"/>`}
+  s+=`<line x1="${X+W+100}" y1="${ys}" x2="${X+W+100}" y2="${ly}" class="sk"/><text x="${X+W+106}" y="${(ys+ly)/2+5}" style="font-size:13px">${nf(d,2)} m</text>`;
+  const t=nvK==='us'?2*d/340*1000:2*d/3e8*1e9;
+  R=[['Distance mesurée',bad?'zone morte : non mesurable':nf(d,2)+' m'],['Temps aller-retour',nvK==='us'?nf(t,1)+' ms':nf(t,1)+' ns'],['Niveau = 4,3 − distance',bad?'—':nf(h,2)+' m']]}
+ if(nvK==='cap'){
+  const C=50+100*h,sx=X+W/2;
+  s+=`<rect x="${sx-5}" y="${Yb-Ht-40}" width="10" height="${Ht+30}" rx="4" class="k"/><rect x="${sx-14}" y="${Yb-Ht-52}" width="28" height="18" rx="3" class="kp"/><text x="${sx+22}" y="${Yb-Ht-38}" style="font-size:13px">sonde (tige isolée)</text>`;
+  for(let k=0;k<6;k++){const yy=Yb-Ht+10+k*32;s+=`<line x1="${sx+8}" y1="${yy}" x2="${X+W-4}" y2="${yy}" class="${yy>ly?'sa':'sc'}" stroke-width="1.5" stroke-dasharray="3 4" opacity=".8"/>`}
+  R=[['Capacité',nf(C,0)+' pF'],['Sortie 4–20 mA',nf(4+16*h/4,1)+' mA'],['Niveau',nf(h,2)+' m']]}
+ $('niv').innerHTML=s;$('nvR').innerHTML=R.map(([l,v])=>`<span>${l} <b>${v}</b></span>`).join('')}
+$('nivR').addEventListener('input',()=>niv(0));nvUI();loops.push(niv);
+
+/* ---------- débit ---------- */
+const DB={
+ em:{n:'Électromagnétique',h:'Débitmètre électromagnétique',t:`<h3 style="margin-top:0">Principe : la loi de Faraday</h3><p>Deux <strong>bobines</strong> créent un champ magnétique B à travers le tube. Le liquide, s'il est <strong>conducteur</strong>, se comporte comme un conducteur en mouvement : une tension apparaît entre deux <strong>électrodes</strong> placées sur la paroi.</p><p><strong>U = B × D × v</strong> : la tension est proportionnelle à la vitesse, donc au débit.</p><h3>Usage</h3><ul><li>Eau, eaux usées, boues, acides, produits alimentaires.</li><li>Aucune pièce dans le tube : pas de perte de charge ni d'usure.</li><li>Ne fonctionne pas avec les liquides non conducteurs (huiles, hydrocarbures), ni avec les gaz.</li><li>Sortie 4–20 mA et impulsions.</li></ul>`,note:'B = 0,01 T, valeur choisie pour l\'illustration. Le transmetteur amplifie ce signal très faible.'},
+ tu:{n:'Turbine',h:'Débitmètre à turbine',t:`<h3 style="margin-top:0">Principe : une hélice qui compte</h3><p>Le fluide fait tourner un <strong>rotor à ailettes</strong> à une vitesse proportionnelle au débit. Un capteur (inductif ou à effet Hall) placé sur le corps détecte le passage de chaque pale et délivre un <strong>train d'impulsions</strong>.</p><p><strong>f = K × Q</strong>, où K est le facteur du débitmètre en impulsions par litre, donné par le fabricant. En comptant les impulsions, l'automate obtient le volume écoulé (totalisateur).</p><h3>Usage</h3><ul><li>Liquides propres et peu visqueux : eau, carburants, comptage et dosage.</li><li>Pièces en mouvement : usure, un filtre en amont est souvent nécessaire.</li></ul>`,note:'K = 50 impulsions par litre, valeur d\'exemple. Le signal est affiché au ralenti.'},
+ vo:{n:'Vortex',h:'Débitmètre vortex',t:`<h3 style="margin-top:0">Principe : les tourbillons de Kármán</h3><p>Un <strong>obstacle</strong> placé en travers de l'écoulement provoque des <strong>tourbillons</strong> qui se détachent alternativement de chaque côté. Un capteur (souvent piézoélectrique) compte ces tourbillons.</p><p><strong>f = St × v / d</strong> : la fréquence est proportionnelle à la vitesse (St ≈ 0,2, nombre de Strouhal ; d, largeur de l'obstacle).</p><h3>Usage</h3><ul><li>Vapeur, gaz et liquides : très utilisé en chaufferie.</li><li>Aucune pièce mobile.</li><li>Il faut une vitesse minimale pour que les tourbillons se forment, et des longueurs droites avant et après.</li></ul>`,note:'Obstacle de largeur d = 0,28 × D, valeur d\'exemple. Animation au ralenti.'},
+ co:{n:'Coriolis',h:'Débitmètre massique Coriolis',t:`<h3 style="margin-top:0">Principe : un tube qui se tord</h3><p>Le fluide traverse un ou deux <strong>tubes mis en vibration</strong>. En mouvement dans le tube vibrant, la masse de fluide subit la <strong>force de Coriolis</strong> : le tube se tord légèrement, et les capteurs d'entrée et de sortie ne vibrent plus en même temps.</p><p>Le <strong>décalage dans le temps</strong> entre les deux signaux est proportionnel au <strong>débit massique</strong> (kg/h). La fréquence de vibration donne en plus la <strong>masse volumique</strong>.</p><h3>Usage</h3><ul><li>Dosage précis, chimie, agroalimentaire, carburants.</li><li>Très précis, indépendant de la viscosité, mais coûteux et encombrant en grands diamètres.</li></ul>`,note:'Décalage exagéré pour être visible : en réalité, il ne dure que quelques microsecondes.'},
+ pa:{n:'Contrôleur à palette',h:'Contrôleur de circulation à palette',t:`<h3 style="margin-top:0">Principe : une palette qui bascule un contact</h3><p>Une <strong>palette</strong> plonge dans le fluide. Le courant la fait pivoter ; au-delà d'un <strong>seuil réglable</strong>, elle actionne un <strong>micro-rupteur</strong>.</p><p>Ce n'est pas un débitmètre mais un <strong>détecteur TOR</strong> : il indique seulement s'il y a assez de débit.</p><h3>Usage</h3><ul><li>Vérifier la circulation dans un circuit de refroidissement.</li><li>Protéger une pompe contre la marche à sec.</li><li>Il existe aussi des contrôleurs thermiques (calorimétriques), sans pièce mobile.</li></ul>`,note:'Seuil exprimé en vitesse pour simplifier ; le fabricant donne le seuil en débit selon le diamètre.'}};
+let dbRun=!reduce,dbP=Array.from({length:46},(_,i)=>({u:i/46+Math.random()*.02,r:(Math.random()*2-1)*.92})),dbK='em',debX=0,dbA=0,dbVol=0,dbTr=[],dbTT=0,dbVx=[],dbVt=0,dbSide=1,dbCond=true,dbRho=1000,dbSeuil=1;
+$('dbT').innerHTML=Object.entries(DB).map(([k,d])=>`<button role="tab" data-m="${k}"${k===dbK?' class="sel" aria-selected="true"':''}>${d.n}</button>`).join('');
+function dbUI(){const d=DB[dbK];$('dbTxt').innerHTML=d.t;$('dbH').textContent=d.h;$('dbN').textContent=d.note;
+ $('dbC').innerHTML=dbK==='em'?`<label>Liquide <select id="dbF"><option value="1">Eau (conductrice)</option><option value="0"${dbCond?'':' selected'}>Huile (non conductrice)</option></select></label>`
+ :dbK==='co'?`<label>Fluide <select id="dbF"><option value="1000">Eau, 1 000 kg/m³</option><option value="850">Huile, 850 kg/m³</option><option value="1030">Lait, 1 030 kg/m³</option></select></label>`
+ :dbK==='pa'?`<label>Seuil <input type="range" id="dbF" min="0.2" max="2.5" step="0.1" value="${dbSeuil}"></label>`
+ :dbK==='tu'?`<button id="dbF">Remettre le totalisateur à zéro</button>`:'';
+ const f=$('dbF');if(!f)return;
+ if(dbK==='em')f.addEventListener('change',()=>dbCond=f.value==='1');
+ if(dbK==='co'){f.value=dbRho;f.addEventListener('change',()=>dbRho=+f.value)}
+ if(dbK==='pa')f.addEventListener('input',()=>dbSeuil=+f.value);
+ if(dbK==='tu')f.addEventListener('click',()=>dbVol=0)}
+seg('dbT',k=>{dbK=k;dbTr=[];dbVx=[];$('dbT').querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===k));dbUI();deb(0)});
+function deb(dt){
+ const D=+$('debD').value,v=+$('debV').value,S=Math.PI*(D/1000)**2/4,Q=v*S*3600,QL=v*S*1000;
+ const mv=dbRun?1:0;debX=(debX+v*60*dt*mv)%40;dbTT+=dt*mv;
+ const hh=30+D*.8,cy=dbK==='co'?205:110,y0=cy-hh/2;
+ const fluid=dbK==='em'&&!dbCond?'#c9a227':'#3a8fd0';
+ const pipe=(x0,x1)=>`<rect x="${x0}" y="${y0-8}" width="${x1-x0}" height="${hh+16}" class="km"/><rect x="${x0}" y="${y0}" width="${x1-x0}" height="${hh}" fill="${fluid}" opacity=".45"/>`;
+ let s=dbK==='co'?pipe(20,164)+pipe(436,580):pipe(20,580);
+ const arrows=()=>'';
+ const coPath=[[20,cy],[150,cy],[150,30],[450,30],[450,cy],[580,cy]],coL=[];let coT=0;for(let i=1;i<coPath.length;i++){const l=Math.hypot(coPath[i][0]-coPath[i-1][0],coPath[i][1]-coPath[i-1][1]);coL.push(l);coT+=l}
+ const L=dbK==='co'?coT:560;
+ dbP.forEach(p=>{const prof=1.25*(1-p.r**4);p.u+=v*prof*dt*mv*90/L;if(p.u>1){p.u-=1;p.r=(Math.random()*2-1)*.92}});
+ const drawP=()=>{let a='';const wv=dbK==='co'?Math.sin(dbTT*6)*8:0;
+  dbP.forEach(p=>{let x,y,dx=1,dy=0;
+   if(dbK==='co'){let d=p.u*coT,i=0;while(i<coL.length-1&&d>coL[i]){d-=coL[i];i++}const [ax,ay]=coPath[i],[bx_,by]=coPath[i+1],f=d/coL[i];dx=(bx_-ax)/coL[i];dy=(by-ay)/coL[i];const w=(i>=1&&i<=3)?(5+D*.03):hh/2*.85,inLoop=(i>=1&&i<=3)&&!(i===1&&ay+(by-ay)*f>cy-10)&&!(i===3&&ay+(by-ay)*f>cy-10);x=ax+(bx_-ax)*f-dy*p.r*w;y=ay+(by-ay)*f+dx*p.r*w+(inLoop?wv:0)}
+   else{x=20+p.u*560;y=cy+p.r*hh/2*.85;
+    if(dbK==='vo'&&x>222&&v>.2){const d=.28*D/1000,f=.2*v/d,fv=Math.min(4,f/8);y+=Math.sin((x-222)/18-dbTT*fv*2*Math.PI)*Math.min(8,(x-222)*.08)*(1-Math.abs(p.r)*.5)}
+    if(dbK==='tu'&&Math.abs(x-300)<18)return}
+   const sp=v*1.25*(1-p.r**4),tail=4+sp*7;
+   a+=`<line x1="${(x-dx*tail).toFixed(1)}" y1="${(y-dy*tail).toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" stroke-linecap="round"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="#fff"/>`});return a};
+ if(dbK!=='co')s+=drawP();
+ const R=[];
+ if(dbK==='em'){
+  s+=arrows(20,575);
+  const B=.01,U=dbCond?B*(D/1000)*v*1000:0;
+  s+=`<rect x="250" y="${y0-40}" width="100" height="28" rx="5" class="kp"/><rect x="250" y="${y0+hh+12}" width="100" height="28" rx="5" class="kp"/><text x="300" y="${y0-50}" text-anchor="middle" style="font-size:13px">bobines</text>`;
+  for(let k=0;k<4;k++){const x=262+k*25;s+=`<line x1="${x}" y1="${y0-10}" x2="${x}" y2="${y0+hh+10}" class="sc" stroke-width="2" stroke-dasharray="4 4"/>`}
+  s+=`<text x="360" y="${y0+hh+30}" style="font-size:13px">champ B</text><circle cx="300" cy="${cy}" r="9" class="ka" stroke="var(--bg)" stroke-width="2"/><text x="315" y="${cy+5}" style="font-size:13px">électrodes</text>`;
+  s+=`<rect x="430" y="${y0-48}" width="140" height="34" rx="6" class="ks" stroke="var(--line)"/><text x="500" y="${y0-26}" text-anchor="middle">U = ${nf(U,2)} mV</text>`;
+  R.push(['Tension aux électrodes',nf(U,2)+' mV'],['État',dbCond?'mesure possible':'aucun signal : liquide non conducteur'])}
+ if(dbK==='tu'){
+  const K=50,f=K*QL;dbA+=mv*f/K*dt*90;dbVol+=QL*dt*mv;
+  s+=arrows(20,250)+arrows(350,575);
+  s+=`<rect x="296" y="${y0+6}" width="8" height="${hh-12}" class="k"/>`;
+  for(let k=0;k<4;k++){const a=(dbA+k*90)%360,c=Math.cos(a*Math.PI/180),h=(hh/2-8)*c;s+=`<rect x="285" y="${Math.min(cy,cy-h)}" width="30" height="${Math.abs(h)}" rx="3" fill="#cfd8db" stroke="#55666b" opacity="${.5+.5*Math.abs(c)}"/>`}
+  const pulse=((dbA%90)+90)%90<20;
+  s+=`<rect x="280" y="${y0-38}" width="40" height="30" rx="4" class="kp"/><circle cx="312" cy="${y0-30}" r="4" class="${pulse?'ka':'kl'}"/><text x="330" y="${y0-18}" style="font-size:13px">capteur de pales</text>`;
+  dbTr.push([dbTT,pulse]);while(dbTr.length&&dbTT-dbTr[0][0]>3)dbTr.shift();
+  const X0=40,W=520,Ya=225,Yb=255;let d='';dbTr.forEach(([t,o],i)=>{const x=X0+W-(dbTT-t)/3*W,y=o?Ya:Yb;d+=i?`H${x.toFixed(1)}V${y}`:`M${x.toFixed(1)} ${y}`});
+  s+=`<path d="${d}" class="n sa" stroke-width="2.5"/><text x="${X0}" y="${Ya-8}" style="font-size:13px">impulsions (ralenti)</text>`;
+  R.push(['Fréquence f = K × Q',nf(f,0)+' Hz'],['Volume totalisé',nf(dbVol,1)+' L'])}
+ if(dbK==='vo'){
+  const d=.28*D/1000,f=v>.2?.2*v/d:0,fv=Math.min(4,f/8);
+  s+=arrows(20,190);
+  const bx=200;s+=`<path d="M${bx} ${y0} L${bx+22} ${y0} L${bx+11} ${y0+hh} L${bx} ${y0+hh}Z" class="k"/><text x="${bx}" y="${y0-14}" style="font-size:13px">obstacle</text>`;
+  if(dbRun&&fv>0){dbVt+=dt;if(dbVt>1/(2*fv)){dbVt=0;dbSide*=-1;dbVx.push({x:bx+28,y:cy+dbSide*hh*.22,s:dbSide})}}
+  dbVx.forEach(o=>o.x+=v*70*dt*mv);dbVx=dbVx.filter(o=>o.x<570);
+  dbVx.forEach(o=>{const r=Math.min(hh*.2,6+(o.x-bx)*.05);s+=`<path d="M${o.x+r} ${o.y} A${r} ${r} 0 1 ${o.s>0?1:0} ${o.x-r} ${o.y} A${r*.6} ${r*.6} 0 1 ${o.s>0?1:0} ${o.x+r*.2} ${o.y}" class="n" stroke="#fff" stroke-width="2.5"/>`});
+  s+=`<rect x="420" y="${y0-34}" width="34" height="26" rx="4" class="kp"/><text x="462" y="${y0-16}" style="font-size:13px">capteur piézo</text>`;
+  R.push(['Fréquence des tourbillons',v>.2?nf(f,0)+' Hz':'trop lent : pas de tourbillons'],['Obstacle d',nf(d*1000,0)+' mm'])}
+ if(dbK==='co'){
+  const Qm=dbRho*Q,ph=Math.min(1.2,Qm/20000),amp=8,w=dbTT*6;
+  s+=arrows(20,150)+arrows(450,575);
+  const off=Math.sin(w)*amp;
+  s+=`<path d="M150 ${cy-10} V${60+off} Q150 ${30+off} 180 ${30+off} H420 Q450 ${30+off} 450 ${60+off} V${cy-10}" fill="none" stroke="var(--metal)" stroke-width="${12+D*.08}"/><path d="M150 ${cy-10} V${60+off} Q150 ${30+off} 180 ${30+off} H420 Q450 ${30+off} 450 ${60+off} V${cy-10}" fill="none" stroke="${fluid}" stroke-opacity=".5" stroke-width="${6+D*.05}"/>`;
+  s+=drawP();
+  s+=`<rect x="290" y="12" width="20" height="14" class="ka"/><text x="300" y="8" text-anchor="middle" style="font-size:13px">excitateur</text>`;
+  const sens=[[150,'entrée',0],[450,'sortie',ph]];
+  sens.forEach(([x,l])=>s+=`<rect x="${x-24}" y="${82+off}" width="16" height="26" rx="3" class="kp"/><text x="${x<300?x-30:x+30}" y="${100+off}" ${x<300?'text-anchor="end"':''} style="font-size:13px">capteur ${l}</text>`);
+  const X0=190,W=220,Y=125;let p1='',p2='';for(let k=0;k<=W;k+=4){const t=k/W*4*Math.PI;p1+=(k?'L':'M')+(X0+k)+' '+(Y+14*Math.sin(t+w)).toFixed(1);p2+=(k?'L':'M')+(X0+k)+' '+(Y+14*Math.sin(t+w-ph)).toFixed(1)}
+  s+=`<path d="${p1}" class="n sc" stroke-width="2.5"/><path d="${p2}" class="n sa" stroke-width="2.5"/><text x="300" y="${Y-24}" text-anchor="middle" style="font-size:13px">signaux entrée (rouge) et sortie (orange)</text>`;
+  R.push(['Débit massique Qm = ρ × Q',nf(Qm,0)+' kg/h'],['Décalage entrée / sortie',Qm>0?'proportionnel à Qm':'nul : pas de débit'])}
+ if(dbK==='pa'){
+  const on=v>=dbSeuil,ang=Math.min(55,v/3*55);
+  s+=arrows(20,575);
+  s+=`<rect x="270" y="${y0-44}" width="60" height="36" rx="5" class="kp"/><circle cx="318" cy="${y0-34}" r="5" class="${on?'ka':'kl'}"/><text x="340" y="${y0-22}" style="font-size:13px">micro-rupteur</text>`;
+  s+=`<g transform="rotate(${-ang} 300 ${y0-8})"><rect x="297" y="${y0-8}" width="6" height="${hh*.75}" class="k"/><rect x="288" y="${y0-8+hh*.45}" width="24" height="${hh*.3}" rx="3" class="ka"/></g>`;
+  s+=`<text x="300" y="${y0+hh+34}" text-anchor="middle" style="font-size:13px">palette</text>`;
+  R.push(['Seuil réglé',nf(dbSeuil,1)+' m/s'],['Contact',on?'fermé : débit suffisant':'ouvert : débit insuffisant'])}
+ s+=`<text x="20" y="${dbK==='co'?y0-18:y0-56}">DN ${D}</text>`;
+ $('deb').innerHTML=s;$('debVv').textContent=nf(v,1)+' m/s';$('debS').textContent=nf(S*1e4,1)+' cm²';$('debQ').textContent=nf(Q,1)+' m³/h';
+ $('dbR').innerHTML=R.map(([l,v])=>`<span>${l} <b>${v}</b></span>`).join('')}
+dbUI();
+const dbPB=()=>{$('dbPlay').textContent=dbRun?'Pause':'Animer le fluide';$('dbPlay').classList.toggle('sel',!dbRun)};dbPB();$('dbPlay').addEventListener('click',()=>{dbRun=!dbRun;dbPB()});
+loops.push(deb);
+
+/* ---------- potentiomètre ---------- */
+function potS(x){
+ const U=10*x/100,X0=60,X1=460,cx=X0+x/100*(X1-X0);
+ let s=`<rect x="${X0}" y="100" width="${X1-X0}" height="26" rx="4" fill="#3a3330"/>`;for(let k=0;k<20;k++)s+=`<line x1="${X0+10+k*20}" y1="104" x2="${X0+10+k*20}" y2="122" stroke="#6b5f58" stroke-width="2"/>`;
+ s+=`<path d="M${X0} 113 H30 V40 H500 V60" class="n" stroke="#8a4b22" stroke-width="3"/><text x="34" y="32">+10 V</text><path d="M${X1} 113 H${X1+20} V190 H30" class="n" stroke="#2f6fd6" stroke-width="3"/><text x="34" y="210">0 V</text>`;
+ s+=`<path d="M${cx} 100 V70 H500" class="n sa" stroke-width="3"/><path d="M${cx-10} 90 L${cx} 100 L${cx+10} 90Z" class="ka"/><rect x="${cx-28}" y="132" width="56" height="20" rx="4" class="kp"/><text x="${cx}" y="170" text-anchor="middle" style="font-size:13px">pièce mobile</text>`;
+ s+=`<circle cx="530" cy="120" r="40" class="ks" stroke="var(--ink)" stroke-width="2"/><text x="530" y="126" text-anchor="middle" style="font-size:16px">${nf(U,2)} V</text><path d="M500 60 Q530 60 530 80 M500 70 H510" class="n sk" stroke-width="2"/><path d="M530 160 V190 H${X1+20}" class="n" stroke="#2f6fd6" stroke-width="3"/>`;
+ return [s,[['Position x',x+' mm'],['Us = 10 × x / 100',nf(U,2)+' V']]]}
+const PS={
+ pot:{n:'Potentiomètre',h:'Potentiomètre linéaire 100 mm, 10 V',l:'Position du curseur',t:`<h3 style="margin-top:0">Principe : un diviseur de tension</h3><p>Une <strong>piste résistive</strong> est alimentée sous une tension U. Un <strong>curseur</strong>, lié à la pièce mobile, frotte sur la piste et prélève une tension proportionnelle à sa position :</p><p><strong>Us = U × x / L</strong></p><h3>Usage</h3><ul><li>Simple et bon marché : manettes, positions de vannes, petites machines.</li><li>Le curseur frotte : usure, bruit électrique sur une piste encrassée.</li><li>Alimenter les extrémités par une tension de référence stable.</li></ul>`,note:'Course L = 100 mm, alimentation 10 V.'},
+ lvdt:{n:'LVDT',h:'LVDT, course ± 10 mm',l:'Position du noyau',t:`<h3 style="margin-top:0">Principe : un transformateur différentiel</h3><p>Un <strong>primaire</strong> alimenté en alternatif (quelques kHz) et deux <strong>secondaires</strong> montés en opposition entourent un <strong>noyau</strong> magnétique lié à la pièce.</p><ul><li>Noyau au centre : les deux tensions secondaires sont égales, la sortie est <strong>nulle</strong>.</li><li>Noyau déplacé : une tension augmente, l'autre diminue. L'<strong>amplitude</strong> de la sortie donne le déplacement, sa <strong>phase</strong> donne le sens.</li></ul><h3>Usage</h3><ul><li>Sans contact ni usure, résolution très fine.</li><li>Métrologie, contrôle dimensionnel, asservissements, servovalves.</li><li>Un conditionneur transforme le signal en 4–20 mA ou 0–10 V.</li></ul>`,note:'Sensibilité de 100 mV/mm, valeur d\'exemple.'},
+ tri:{n:'Laser triangulation',h:'Laser par triangulation, 30 à 100 mm',l:'Distance de la cible',t:`<h3 style="margin-top:0">Principe : un triangle de lumière</h3><p>Un laser projette un point sur la cible. Une <strong>lentille</strong>, placée à côté sous un angle, renvoie la lumière diffusée sur un <strong>récepteur linéaire</strong> (barrette CCD, CMOS ou PSD).</p><p>Quand la cible s'éloigne, le point se déplace sur le récepteur : sa position donne la distance.</p><h3>Usage</h3><ul><li>Courtes distances (quelques mm à quelques centaines de mm), précision jusqu'au micromètre.</li><li>Mesure d'épaisseur, de planéité, de profil, de battement.</li><li>Sensible à la couleur et à la brillance de la surface.</li></ul>`,note:'Plage de mesure 30 à 100 mm, valeur d\'exemple.'},
+ tof:{n:'Laser temps de vol',h:'Laser par temps de vol',l:'Distance de la cible',t:`<h3 style="margin-top:0">Principe : chronométrer la lumière</h3><p>Le capteur envoie une <strong>impulsion lumineuse</strong> et mesure le temps qu'elle met à revenir après réflexion sur la cible :</p><p><strong>d = c × t / 2</strong>, avec c = 300 000 km/s. Pour 1 m, l'aller-retour dure environ <strong>6,7 ns</strong> : l'électronique doit être extrêmement rapide.</p><h3>Usage</h3><ul><li>Distances de quelques dizaines de centimètres à plusieurs dizaines de mètres (plus avec un réflecteur).</li><li>Positionnement de transstockeurs, ponts roulants, mesure de niveau.</li><li>Respecter la classe du laser (sécurité oculaire).</li></ul>`,note:'Animation très ralentie : la vraie impulsion fait l\'aller-retour en quelques nanosecondes.'},
+ mag:{n:'Magnétostrictif',h:'Capteur magnétostrictif, course 1 000 mm',l:'Position de l\'aimant',t:`<h3 style="margin-top:0">Principe : une onde qui revient de l'aimant</h3><p>Un fil <strong>guide d'ondes</strong> est tendu dans une tige. Un <strong>aimant</strong> (curseur ou piston de vérin) se déplace le long de la tige, sans contact.</p><ul><li>La tête envoie une impulsion de courant dans le fil.</li><li>À l'endroit de l'aimant, les deux champs magnétiques se combinent et créent une <strong>onde de torsion</strong> (effet magnétostrictif).</li><li>L'onde revient vers la tête à environ <strong>2 800 m/s</strong> : le temps mesuré donne la position.</li></ul><h3>Usage</h3><ul><li>Position <strong>absolue</strong> : pas de prise d'origine à la mise sous tension.</li><li>Intégré dans les vérins hydrauliques : presses, machines d'injection.</li><li>Courses jusqu'à plusieurs mètres, sans usure.</li></ul>`,note:'Vitesse de l\'onde de 2 800 m/s, ordre de grandeur courant. Animation ralentie.'}};
+let psK='pot',psRun=!reduce,psPh=0;
+$('psT').innerHTML=Object.entries(PS).map(([k,d])=>`<button role="tab" data-m="${k}"${k===psK?' class="sel" aria-selected="true"':''}>${d.n}</button>`).join('');
+function psUI(){const d=PS[psK];$('psTxt').innerHTML=d.t;$('psH').textContent=d.h;$('psN').textContent=d.note;$('psL').firstChild.textContent=d.l+' ';$('psPlay').hidden=!(psK==='tof'||psK==='mag');psPB()}
+const psPB=()=>{$('psPlay').textContent=psRun?'Pause':'Animer';$('psPlay').classList.toggle('sel',!psRun)};
+seg('psT',k=>{psK=k;psPh=0;$('psT').querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===k));psUI();pot(0)});
+$('psPlay').addEventListener('click',()=>{psRun=!psRun;psPB()});
+function pot(dt){
+ const p=+$('potR').value/100;let s='',R=[];
+ if(psK==='pot'){[s,R]=potS(Math.round(p*100))}
+ if(psK==='lvdt'){
+  const x=(p-.5)*20,a1=.5+x/40,a2=.5-x/40,ph=performance.now()/1000*(psRun?4:0);
+  s+=`<rect x="120" y="70" width="360" height="70" rx="8" class="ks" stroke="var(--line)" stroke-width="2"/>`;
+  [[130,'S1',a1],[250,'P',1],[370,'S2',a2]].forEach(([x0,l,a])=>{for(let k=0;k<9;k++)s+=`<ellipse cx="${x0+8+k*11}" cy="105" rx="5" ry="33" fill="none" stroke="${l==='P'?'#c0392b':'#b87333'}" stroke-width="3"/>`;s+=`<text x="${x0+50}" y="60" text-anchor="middle">${l==='P'?'primaire':'secondaire '+l}</text>`});
+  const cx=300+x*12;s+=`<rect x="${cx-60}" y="96" width="120" height="18" rx="4" class="k"/><rect x="${cx+60}" y="102" width="${560-cx-60}" height="6" class="km"/><rect x="${555}" y="88" width="14" height="34" class="kp"/><text x="${cx}" y="160" text-anchor="middle" style="font-size:13px">noyau</text><line x1="300" y1="150" x2="300" y2="166" class="sk" stroke-dasharray="3 3"/>`;
+  const wave=(y,a,c,lab)=>{let d='';for(let k=0;k<=170;k+=4)d+=(k?'L':'M')+(30+k)+' '+(y-16*a*Math.sin(k/14+ph)).toFixed(1);return `<path d="${d}" class="n" stroke="${c}" stroke-width="2.5"/><text x="208" y="${y+5}" style="font-size:13px">${lab}</text>`};
+  const out=a1-a2;
+  s+=wave(192,a1,'#b87333','S1')+wave(236,a2,'var(--cy)','S2');
+  let d='';for(let k=0;k<=200;k+=4)d+=(k?'L':'M')+(330+k)+' '+(205-26*out*Math.sin(k/14+ph)).toFixed(1);s+=`<path d="${d}" class="n sa" stroke-width="3"/><line x1="330" y1="205" x2="530" y2="205" class="sl"/><text x="535" y="210" style="font-size:13px">sortie</text>`;
+  R=[['Déplacement',(x>0?'+':'')+nf(x,1)+' mm'],['Sortie S1 − S2',nf(Math.abs(x)*100,0)+' mV'],['Phase',Math.abs(x)<.05?'—':x>0?'en phase avec S1':'en opposition']]}
+ if(psK==='tri'){
+  const dmm=30+p*70,sy=96+(dmm-30)/70*130,sx=430,L=[250,66];
+  s+=`<text x="470" y="14" text-anchor="end" style="font-size:13px">tête de mesure</text><rect x="110" y="20" width="360" height="46" rx="6" class="kp"/>`;
+  s+=`<rect x="130" y="30" width="110" height="10" fill="#fff"/>`;for(let i=1;i<11;i++)s+=`<line x1="${130+i*10}" y1="30" x2="${130+i*10}" y2="40" stroke="#8a989c"/>`;
+  s+=`<text x="185" y="58" text-anchor="middle" style="fill:#f3d9da;stroke:none;font-size:13px">récepteur</text><text x="${sx}" y="58" text-anchor="middle" style="fill:#f3d9da;stroke:none;font-size:13px">laser</text>`;
+  s+=`<rect x="300" y="${sy}" width="260" height="18" class="km"/><rect x="300" y="${sy}" width="260" height="5" fill="#fff" fill-opacity=".35"/><text x="560" y="${sy+36}" text-anchor="end" style="font-size:13px">cible</text>`;
+  s+=`<line x1="${sx}" y1="66" x2="${sx}" y2="${sy}" stroke="#e8452c" stroke-width="3"/><circle cx="${sx}" cy="${sy}" r="5" fill="#e8452c"/>`;
+  const k=(L[1]-sy)/(L[0]-sx),xr=Math.max(130,Math.min(240,L[0]+(35-L[1])/k));
+  s+=`<line x1="${sx}" y1="${sy}" x2="${L[0]}" y2="${L[1]}" stroke="#e8452c" stroke-width="2" stroke-dasharray="6 4"/><line x1="${L[0]}" y1="${L[1]}" x2="${xr}" y2="35" stroke="#e8452c" stroke-width="2" stroke-dasharray="6 4"/><ellipse cx="${L[0]}" cy="${L[1]}" rx="18" ry="5" class="kc"/><text x="${L[0]-24}" y="${L[1]+20}" text-anchor="end" style="font-size:13px">lentille</text><circle cx="${xr}" cy="35" r="5" fill="#e8452c"/>`;
+  s+=`<line x1="500" y1="66" x2="500" y2="${sy}" class="sk"/><line x1="494" y1="${sy}" x2="506" y2="${sy}" class="sk"/><text x="508" y="${(66+sy)/2+5}" style="font-size:13px">${nf(dmm,0)} mm</text>`;
+  R=[['Distance',nf(dmm,1)+' mm'],['Point sur le récepteur',nf((240-xr)/110*100,0)+' %'],['Sortie 4–20 mA',nf(4+16*p,1)+' mA']]}
+ if(psK==='tof'){
+  const dm=.3+p*19.7,tx=110+p*440;if(psRun)psPh=(psPh+dt*.6)%1;
+  s+=`<rect x="20" y="90" width="80" height="70" rx="8" class="kp"/><text x="60" y="180" text-anchor="middle" style="font-size:13px">capteur</text><rect x="${tx}" y="60" width="24" height="130" class="km"/><text x="${tx+12}" y="210" text-anchor="middle" style="font-size:13px">cible</text>`;
+  s+=`<line x1="100" y1="125" x2="${tx}" y2="125" stroke="#e8452c" stroke-width="1" stroke-dasharray="3 6" opacity=".6"/>`;
+  const go=psPh<.5,f=go?psPh*2:(1-psPh)*2,px=100+(tx-100)*f;s+=`<rect x="${px-14}" y="${go?113:129}" width="28" height="8" rx="4" fill="#e8452c"/><text x="${px}" y="${go?104:153}" text-anchor="middle" style="font-size:13px">${go?'aller':'retour'}</text>`;
+  for(let k=0;k<=20;k+=5){const x=110+k/20*440;s+=`<line x1="${x}" y1="232" x2="${x}" y2="240" class="sk"/><text x="${x}" y="256" text-anchor="middle" style="font-size:13px">${k} m</text>`}s+=`<line x1="110" y1="236" x2="550" y2="236" class="sk"/>`;
+  R=[['Distance',nf(dm,2)+' m'],['Temps aller-retour',nf(2*dm/3e8*1e9,1)+' ns']]}
+ if(psK==='mag'){
+  const xm=p*1000,mx=120+p*430;if(psRun)psPh=(psPh+dt*.5)%1;
+  s+=`<rect x="20" y="85" width="100" height="80" rx="8" class="kp"/><text x="70" y="185" text-anchor="middle" style="font-size:13px">tête</text><rect x="120" y="115" width="440" height="20" rx="4" class="km"/><line x1="120" y1="125" x2="560" y2="125" class="sk" stroke-width="1.5"/><text x="340" y="58" text-anchor="middle" style="font-size:13px">tige guide d'ondes</text><line x1="340" y1="64" x2="340" y2="113" class="sm" stroke-dasharray="3 3"/>`;
+  s+=`<rect x="${mx-16}" y="100" width="32" height="50" rx="6" class="ka"/><text x="${mx}" y="172" text-anchor="middle" style="font-size:13px">aimant</text>`;
+  const go=psPh<.5,f=go?psPh*2:(1-psPh)*2,px=120+(mx-120)*f;
+  if(go)s+=`<rect x="${px-10}" y="119" width="20" height="12" rx="3" fill="var(--cy)"/><text x="${px}" y="210" text-anchor="middle" style="font-size:13px">impulsion de courant</text>`;
+  else{for(let k=0;k<4;k++)s+=`<path d="M${px+k*6} 113 q4 12 0 24" class="n" stroke="var(--acc)" stroke-width="2.5"/>`;s+=`<text x="${px}" y="210" text-anchor="middle" style="font-size:13px">onde de torsion</text>`}
+  R=[['Position',nf(xm,0)+' mm'],['Temps de retour',nf(xm/1000/2800*1e6,0)+' µs'],['Sortie 4–20 mA',nf(4+16*p,1)+' mA']]}
+ $('pot').innerHTML=s;$('psR').innerHTML=R.map(([l,v])=>`<span>${l} <b>${v}</b></span>`).join('')}
+$('potR').addEventListener('input',()=>pot(0));psUI();loops.push(pot);
+
+
+/* ---------- sécurité ---------- */
+let secArm=false,secDoor=true,secRam=0,secDirR=1,secMsg='',secWhy='Prête : appuie sur Réarmer';
+function secState(){const p=+$('secH').value,tip=20+p*3.6,cut=tip>150;return{p,tip,cut}}
+function sec(dt){
+ const {tip,cut}=secState();
+ if(secArm&&(cut||!secDoor)){secArm=false;secWhy=cut?'Arrêt : faisceau coupé':'Arrêt : porte ouverte'}
+ if(secArm&&!reduce){secRam+=secDirR*dt*1.2;if(secRam>1||secRam<0){secDirR*=-1;secRam=Math.max(0,Math.min(1,secRam))}}
+ let s=`<rect x="0" y="262" width="640" height="38" class="kl"/>`;
+ s+=`<rect x="390" y="40" width="200" height="22" class="kp"/><rect x="390" y="40" width="22" height="222" class="kp"/><rect x="568" y="40" width="22" height="222" class="kp"/><rect x="412" y="228" width="156" height="34" class="km"/>`;
+ const ry=70+secRam*90;s+=`<rect x="474" y="62" width="32" height="${ry-62}" class="km"/><rect x="440" y="${ry}" width="100" height="40" rx="3" class="k"/>`;
+ s+=`<rect x="460" y="212" width="60" height="16" class="ka" opacity=".5"/>`;
+ s+=secDoor?`<rect x="592" y="70" width="12" height="160" fill="#3a8fd0" opacity=".6"/>`:`<rect x="604" y="70" width="34" height="12" fill="#3a8fd0" opacity=".6" transform="rotate(-60 604 76)"/>`;
+ s+=`<rect x="596" y="58" width="22" height="12" rx="2" class="${secDoor?'kc':'kl'}"/><text x="606" y="50" text-anchor="middle" style="font-size:13px">porte</text>`;
+ s+=`<rect x="142" y="60" width="16" height="200" rx="3" class="kp"/><rect x="322" y="60" width="16" height="200" rx="3" class="kp"/><text x="150" y="50" text-anchor="middle" style="font-size:13px">émetteur</text><text x="330" y="50" text-anchor="middle" style="font-size:13px">récepteur</text>`;
+ for(let k=0;k<9;k++){const y=74+k*22,hit=cut&&y>=128&&y<=176;s+=`<line x1="158" y1="${y}" x2="${hit?tip-10:322}" y2="${y}" class="sa" stroke-width="2" stroke-dasharray="6 5" opacity="${hit?1:.55}"/>`}
+ s+=`<path d="M0 140 H${tip-36} q10 -8 26 -6 l14 4 q8 3 6 10 l-4 22 q-2 8 -12 8 H0Z" fill="#e0a87c" stroke="#a8693f" stroke-width="2"/><rect x="0" y="134" width="${Math.max(0,tip-90)}" height="50" fill="#7a2533"/>`;
+ s+=`<rect x="190" y="268" width="110" height="26" rx="4" class="kp"/><text x="245" y="286" text-anchor="middle" style="fill:#fff;stroke:none;font-size:13px">module sécurité</text><circle cx="290" cy="236" r="0"/>`;
+ $('sec').innerHTML=s;
+ const txt=secArm?'Presse en marche':secWhy;$('secS').textContent=txt;setLed($('secL'),secArm);
+ $('secR').classList.toggle('sel',!secArm)}
+$('secD').addEventListener('click',()=>{secDoor=!secDoor;$('secD').textContent=secDoor?'Ouvrir la porte':'Fermer la porte'});
+$('secR').addEventListener('click',()=>{const {cut}=secState();if(cut)secWhy='Réarmement refusé : faisceau coupé';else if(!secDoor)secWhy='Réarmement refusé : porte ouverte';else secArm=true});
+loops.push(sec);
+
+
+/* ---------- raccordement ---------- */
+const WC={BN:['#8a4b22','Brun'],BU:['#2f6fd6','Bleu'],BK:['#111111','Noir'],WH:['#f4f4f4','Blanc'],RD:['#d62828','Rouge'],GY:['#8a8f93','Fil'],'+V':['#c0392b','+V',1],'0V':['#2f6fd6','0 V',1],A:['#2e9e4f','Voie A',1],B:['#d4a800','Voie B',1],Z:['#8a8f93','Voie Z',1],GN:['#2e9e4f','Vert'],CK:['#7b4fd6','Horloge',1],DT:['#e07b00','Données',1],EX:['#c0392b','Excitation',1],SG:['#2e9e4f','Signal',1],SN:['#8a8f93','Sense',1]};
+const RT={
+ pnp3:{n:'3 fils PNP',card:'Entrées TOR',com:'0',w:[['BN',1,'+24 V','p24'],['BU',3,'0 V','p0'],['BK',4,'Entrée I0.0','i0']],v:(d)=>['24 V','0 V',d?'24 V → 1':'0 V → 0'],note:'PNP : en détection, la sortie noire passe au +24 V. Le commun des entrées est au 0 V (logique positive).'},
+ npn3:{n:'3 fils NPN',card:'Entrées TOR',com:'24',w:[['BN',1,'+24 V','p24'],['BU',3,'0 V','p0'],['BK',4,'Entrée I0.0','i0']],v:(d)=>['24 V','0 V',d?'0 V → 1':'24 V → 0'],note:'NPN : en détection, la sortie noire passe au 0 V. Le commun des entrées est au +24 V (logique négative).'},
+ pnp4:{n:'4 fils NO + NC',card:'Entrées TOR',com:'0',w:[['BN',1,'+24 V','p24'],['WH',2,'Entrée I0.1','i1'],['BU',3,'0 V','p0'],['BK',4,'Entrée I0.0','i0']],v:(d)=>['24 V',d?'0 V → 0':'24 V → 1','0 V',d?'24 V → 1':'0 V → 0'],note:'Sorties complémentaires PNP : le noir (NO) et le blanc (NC) sont toujours dans des états opposés. Utile pour surveiller le détecteur.'},
+ dc2:{n:'2 fils CC',card:'Entrées TOR',com:'0',w:[['BN',null,'+24 V','p24'],['BU',null,'Entrée I0.0','i0']],v:(d)=>['24 V',d?'≈ 20 V → 1':'≈ 0 V → 0'],note:'Le détecteur 2 fils est en série avec l\'entrée. Passant : chute de tension de quelques volts. Bloqué : petit courant résiduel. Valeurs typiques ; brochage M12 selon le fabricant.'},
+ ma2:{n:'4–20 mA 2 fils',card:'Entrée analogique',com:'0',an:'mA',w:[['BN',null,'+24 V','p24'],['GY',null,'Entrée I+ (mA)','i0']],v:(d,x)=>['24 V',nf(4+16*x,1)+' mA'],note:'Transmetteur 2 fils : il est alimenté par la boucle de courant. Le courant (4 à 20 mA) traverse l\'entrée analogique et revient au 0 V. Couleurs selon le fabricant.'},
+ v10:{n:'0–10 V 3 fils',card:'Entrée analogique',com:'0',an:'V',w:[['BN',1,'+24 V','p24'],['WH',2,'Entrée U+ (V)','i0'],['BU',3,'0 V','p0']],v:(d,x)=>['24 V',nf(10*x,1)+' V','0 V'],note:'Sortie tension 0–10 V référencée au 0 V commun. Un fil coupé donne 0 V, confondu avec une mesure nulle. Couleurs selon le fabricant.'},
+ cod:{n:'Codeur incrémental',card:'Comptage rapide',com:'0',an:'R',w:[['+V',null,'+24 V','p24'],['0V',null,'0 V','p0'],['A',null,'Entrée I0.0','i0'],['B',null,'Entrée I0.1','i1'],['Z',null,'Entrée I0.2','i2']],v:(d,x)=>{const th=x*360,a=md(hd.A-th,30)<15,b=md(hd.B-th,30)<15,z=md(hd.Z-th,360)<12,f=v=>v?'24 V → 1':'0 V → 0';return['24 V','0 V',f(a),f(b),f(z)]},note:'Codeur HTL (push-pull 10–30 V) : A et B, décalées, vont sur des entrées de comptage rapide ; Z (1 impulsion par tour) sert de top zéro. Couleurs et brochage propres à chaque fabricant : suis la notice. Câble blindé, blindage relié à la masse.'},
+ contact:{n:'Interrupteur de position',box:'Interrupteur',b:['Non actionné','Actionné'],card:'Entrées TOR',com:'0',w:[['GY',null,'+24 V','p24','13','Borne 13 (NO)'],['GY',null,'Entrée I0.0','i0','14','Borne 14 (NO)'],['GY',null,'+24 V','p24','21','Borne 21 (NC)'],['GY',null,'Entrée I0.1','i1','22','Borne 22 (NC)']],v:d=>['24 V',d?'24 V → 1':'0 V → 0','24 V',d?'0 V → 0':'24 V → 1'],note:'Contact NO entre les bornes 13-14, contact NC entre 21-22 (repérage normalisé des contacts). Le contact est sec : il ne demande pas d\'alimentation propre. Le NC à ouverture forcée sert aux fonctions de sécurité.'},
+ ils:{n:'ILS / flotteur 2 fils',box:'Détecteur ILS',b:['Aimant éloigné','Aimant en face'],card:'Entrées TOR',com:'0',w:[['BN',null,'+24 V','p24'],['BU',null,'Entrée I0.0','i0']],v:d=>['24 V',d?'≈ 21 V → 1':'0 V → 0'],note:'L\'ILS est un contact sec en série avec l\'entrée. Les modèles avec LED sont polarisés (brun au +) et font chuter quelques volts. Un flotteur à contact se raccorde de la même façon.'},
+ barrage:{n:'Photo barrage',box:'Émetteur + récepteur',b:['Faisceau libre','Faisceau coupé'],card:'Entrées TOR',com:'0',w:[['BN',1,'+24 V','p24','E BN','Émetteur brun (BN)'],['BU',3,'0 V','p0','E BU','Émetteur bleu (BU)'],['BN',1,'+24 V','p24','R BN','Récepteur brun (BN)'],['BU',3,'0 V','p0','R BU','Récepteur bleu (BU)'],['BK',4,'Entrée I0.0','i0','R BK','Récepteur noir (BK)']],v:d=>['24 V','0 V','24 V','0 V',d?'24 V → 1':'0 V → 0'],note:'L\'émetteur n\'a que son alimentation (2 fils). Le récepteur est un détecteur 3 fils, ici PNP réglé pour passer à 1 quand le faisceau est coupé. Reflex et proximité : un seul boîtier 3 ou 4 fils.'},
+ us:{n:'Ultrasons TOR + 4–20 mA',box:'Ultrasons',an:'D',al:'Distance de l\'objet',card:'Automate',com:'0',w:[['BN',1,'+24 V','p24'],['WH',2,'Entrée ana. (mA)','i1'],['BU',3,'0 V','p0'],['BK',4,'Entrée I0.0','i0']],v:(d,x)=>['24 V',nf(4+16*x,1)+' mA','0 V',x<.5?'24 V → 1':'0 V → 0'],note:'Exemple courant : sortie TOR PNP sur le noir (objet plus proche que le seuil, ici à mi-portée) et sortie 4–20 mA proportionnelle à la distance sur le blanc. Selon le modèle, la sortie analogique est en 0–10 V.'},
+ pres:{n:'Pressostat mécanique',box:'Pressostat',b:['Pression < seuil','Pression > seuil'],card:'Entrées TOR',com:'0',w:[['GY',null,'+24 V','p24','C','Commun (C)'],['GY',null,'Entrée I0.0','i0','NO','Contact NO'],['GY',null,'Entrée I0.1','i1','NC','Contact NC']],v:d=>['24 V',d?'24 V → 1':'0 V → 0',d?'0 V → 0':'24 V → 1'],note:'Contact inverseur : le commun au +24 V, le NO se ferme au-dessus du seuil, le NC s\'ouvre. Le repérage des bornes dépend du fabricant. Un pressostat électronique se câble comme un détecteur 3 fils PNP, parfois avec une sortie 4–20 mA en plus.'},
+ tc:{n:'Thermocouple K',box:'Thermocouple',card:'Module thermocouple',com:null,an:'T',al:'Température',w:[['GN',null,'Borne +','i0','+','Fil + (vert)'],['WH',null,'Borne −','i1','−','Fil − (blanc)']],v:(d,x)=>{const T=Math.round(-50+x*450);return[nf(.041*T,2)+' mV à '+T+' °C','']},note:'Code couleur IEC 60584 du type K : gaine verte, fil + vert, fil − blanc. Respecte la polarité et prolonge avec un câble de compensation du même type jusqu\'au module, qui corrige la soudure froide.'},
+ load:{n:'Cellule de charge 6 fils',box:'Cellule de charge',card:'Conditionneur',com:null,an:'M',al:'Charge (0 à 50 kg)',w:[['EX',null,'Excitation +','i0','Exc+','Excitation +'],['EX',null,'Excitation −','i1','Exc−','Excitation −'],['SG',null,'Signal +','i2','Sig+','Signal +'],['SG',null,'Signal −','i3','Sig−','Signal −'],['SN',null,'Sense +','i4','Sen+','Sense +'],['SN',null,'Sense −','i5','Sen−','Sense −']],v:(d,x)=>['10 V','0 V',nf(20*x,1)+' mV','','10 V reçus',''],note:'Cellule 2 mV/V, 50 kg, excitation 10 V : la tension entre Signal + et Signal − va de 0 à 20 mV. Les fils Sense mesurent la tension réellement reçue par la cellule pour compenser les pertes en ligne ; en 4 fils, ils sont pontés sur l\'excitation. Couleurs selon le fabricant.'},
+ pot:{n:'Potentiomètre',box:'Potentiomètre',card:'Entrée analogique',com:null,an:'P',al:'Position du curseur',w:[['GY',null,'Réf. +10 V','i0','P1','Extrémité 1'],['GY',null,'Entrée U+','i1','C','Curseur'],['GY',null,'0 V module','i2','P2','Extrémité 2']],v:(d,x)=>['10 V',nf(10*x,2)+' V','0 V'],note:'Les extrémités de la piste reçoivent une tension de référence stable (ici 10 V) ; le curseur donne Us = 10 × x / L. Inverser les extrémités inverse le sens de mesure.'},
+ ssi:{n:'Codeur absolu SSI',box:'Codeur absolu',card:'Module SSI',com:'0',an:'R',al:'Position de l\'arbre',w:[['+V',null,'+24 V','p24'],['0V',null,'0 V','p0'],['CK',null,'Horloge +','i0','Clk+','Horloge +'],['CK',null,'Horloge −','i1','Clk−','Horloge −'],['DT',null,'Données +','i2','D+','Données +'],['DT',null,'Données −','i3','D−','Données −']],v:(d,x)=>{const n=Math.min(31,Math.floor(x*32)),g=n^(n>>1);return['24 V','0 V','impulsions','inversées','Gray '+g.toString(2).padStart(5,'0'),'inversées']},note:'Le module envoie des salves d\'horloge ; le codeur répond en série avec sa position, souvent en code Gray. Horloge et données sont des paires différentielles torsadées. Brochage selon le fabricant ; beaucoup de codeurs absolus récents passent par un bus de terrain.'},
+ ossd:{n:'Barrière immatérielle',box:'Récepteur barrière',b:['Zone libre','Faisceau coupé'],card:'Module sécurité',com:'0',w:[['BN',null,'+24 V','p24'],['BU',null,'0 V','p0'],['BK',null,'Entrée S1','i0','OSSD1','OSSD1'],['WH',null,'Entrée S2','i1','OSSD2','OSSD2']],v:d=>['24 V','0 V',d?'0 V':'24 V',d?'0 V':'24 V'],note:'Deux sorties de sécurité OSSD redondantes : 24 V quand la zone est libre, 0 V dès qu\'un faisceau est coupé. Elles vont au module ou à l\'automate de sécurité, jamais à une entrée standard. L\'émetteur n\'a que son alimentation. Couleurs et brochage selon le fabricant.'},
+ porte:{n:'Interrupteur de sécurité',box:'Interrupteur porte',b:['Porte fermée','Porte ouverte'],card:'Relais sécurité',com:null,w:[['GY',null,'Borne S11','i0','11','Contact NC 1 (11)'],['GY',null,'Borne S12','i1','12','Contact NC 1 (12)'],['GY',null,'Borne S21','i2','21','Contact NC 2 (21)'],['GY',null,'Borne S22','i3','22','Contact NC 2 (22)']],v:d=>Array(4).fill(d?'contact ouvert':'contact fermé'),note:'Deux contacts NC à ouverture forcée, chacun sur un canal du relais de sécurité, qui détecte aussi un court-circuit entre canaux. Les bornes S11-S12 / S21-S22 sont un exemple : suis la notice du relais.'},
+ pt3:{n:'Pt100 3 fils',card:'Module température',com:null,an:'T',w:[['RD',null,'Borne A','i0'],['RD',null,'Borne A\' (compensation)','i1'],['WH',null,'Borne B','i2']],v:(d,x)=>{const T=Math.round(-50+x*450);return['R = '+nf(100*(1+.00385*T),1)+' Ω à '+T+' °C','','']},note:'Pas d\'alimentation : le module injecte un petit courant et mesure la résistance. Le 2e fil rouge sert à compenser la résistance des câbles. Couleurs IEC 60751 : rouge d\'un côté, blanc de l\'autre.'}};
+let rcK='pnp3',rcD=false,rcX=.5;
+const RG=[['Détecteurs TOR',['pnp3','npn3','pnp4','dc2','contact','ils','barrage','us','pres']],['Capteurs analogiques',['ma2','v10','pt3','tc','load','pot']],['Codeurs',['cod','ssi']],['Sécurité',['ossd','porte']]];
+$('rcT').innerHTML='<label>Capteur <select id="rcS">'+RG.map(([g,ks])=>`<optgroup label="${g}">${ks.map(k=>`<option value="${k}">${RT[k].n}</option>`).join('')}</optgroup>`).join('')+'</select></label>';
+const rcGo=k=>{rcK=k;rcD=false;$('rcS').value=k;rcUI();rc()};
+$('rcS').addEventListener('change',e=>rcGo(e.target.value));
+function rcUI(){const t=RT[rcK];
+ const bl=t.b||['Pas d\'objet','Objet présent'];
+ $('rcC').innerHTML=t.an?`<label>${t.al||(t.an==='T'?'Température':t.an==='R'?'Rotation de l\'arbre':'Mesure')} <input type="range" id="rcX" min="0" max="1" step="0.01" value="${rcX}"></label>`:`<button id="rcD"${rcD?' class="sel"':''}>${rcD?bl[1]:bl[0]}</button><span class="note">Clique pour changer l'état</span>`;
+ if(t.an)$('rcX').addEventListener('input',e=>{rcX=+e.target.value;rc()});else $('rcD').addEventListener('click',()=>{rcD=!rcD;rcUI();rc()})}
+function rc(){
+ const t=RT[rcK],n=t.w.length,vals=t.v(rcD,rcX),sp=n>4?30:36,Y0=(n>4?168:150)-((n-1)*sp)/2;
+ let s='';
+ if(t.com!==null||t.w.some(w=>w[3]==='p24'))s+=`<line x1="20" y1="30" x2="620" y2="30" stroke="#8a4b22" stroke-width="4"/><text x="20" y="20">+24 V</text><line x1="20" y1="295" x2="620" y2="295" stroke="#2f6fd6" stroke-width="4"/><text x="20" y="315">0 V</text>`;
+ const sh=(n-1)*sp+80,top=Y0-56;
+ s+=`<rect x="30" y="${top}" width="150" height="${sh}" rx="10" class="kp"/><text x="105" y="${top+20}" text-anchor="middle" style="fill:#fff;stroke:none">${t.box||(rcK==='pt3'?'Sonde Pt100':rcK==='cod'?'Codeur':rcK==='ma2'||rcK==='v10'?'Transmetteur':'Détecteur')}</text>${t.box?'':`<text x="105" y="${top+38}" text-anchor="middle" style="fill:#f3d9da;stroke:none;font-size:13px">${t.n}</text>`}`;
+ const iy=[];
+ const ct=Math.min(70,Y0-44);s+=`<rect x="450" y="${ct}" width="160" height="${260-ct}" rx="10" class="ks" stroke="var(--line)" stroke-width="2"/><text x="530" y="${ct+22}" text-anchor="middle">${t.card}</text>`;
+ t.w.forEach((w,i)=>{const y=Y0+i*sp,col=(WC[w[0]]||['#555'])[0],x=210+i*26,dst=w[3];let d;
+  if(dst==='p24')d=`M180 ${y} H${x} V30`;else if(dst==='p0')d=`M180 ${y} H${x} V295`;else d=`M180 ${y} H450`;
+  s+=`<path d="${d}" fill="none" stroke="var(--line)" stroke-width="8" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${col}" stroke-width="5" stroke-linejoin="round"/><circle cx="180" cy="${y}" r="4" class="k"/>`;
+  s+=`<text x="174" y="${y+5}" text-anchor="end" style="fill:#fff;stroke:none;font-size:13px">${w[4]||((w[0]==='GY'?'':w[0])+(w[1]?' '+w[1]:''))}</text>`;
+  if(dst[0]==='p')s+=`<circle cx="${x}" cy="${dst==='p24'?30:295}" r="5" class="k"/>`;
+  else{s+=`<circle cx="450" cy="${y}" r="6" class="kb" stroke="var(--ink)" stroke-width="2"/><text x="462" y="${y+5}" style="font-size:13px">${w[2].replace('Entrée ','')}</text>`;
+   if(vals[i])s+=`<text x="436" y="${y-7}" text-anchor="end" style="font-size:13px;fill:var(--acc)">${vals[i]}</text>`}});
+ if(t.com==='0')s+=`<path d="M590 260 V295" class="sk" stroke-width="3"/><text x="586" y="282" text-anchor="end" style="font-size:13px">commun 0 V</text>`;
+ if(t.com==='24')s+=`<path d="M590 70 V30" class="sk" stroke-width="3"/><text x="586" y="58" text-anchor="end" style="font-size:13px">commun +24 V</text>`;
+ $('rc').innerHTML=s;
+ $('rcTab').tBodies[0].innerHTML=t.w.map((w,i)=>`<tr><td data-l="Fil"><span><span class="sw" style="background:${WC[w[0]][0]}"></span>${w[5]||(w[0]==='GY'?'Signal':WC[w[0]][2]?WC[w[0]][1]:WC[w[0]][1]+' ('+w[0]+')')}</span></td><td data-l="Broche">${w[1]??'—'}</td><td data-l="Raccordé à">${w[2]}</td><td data-l="Tension / signal">${vals[i]||'—'}</td></tr>`).join('');
+ $('rcN').textContent=t.note}
+rcUI();rc();
+document.querySelectorAll('.rcgo').forEach(b=>b.addEventListener('click',()=>{rcGo(b.dataset.k);$('rc').closest('.rig').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}));
+
+/* ---------- exercice ---------- */
+const EX=[{t:'pnp3',q:'Câble un détecteur 3 fils PNP sur l\'entrée I0.0 d\'un automate en logique positive.'},{t:'npn3',q:'Câble un détecteur 3 fils NPN sur l\'entrée I0.0 d\'un automate en logique négative.'},{t:'pnp4',q:'Câble un détecteur 4 fils : sortie NO sur I0.0, sortie NC sur I0.1.'}];
+const DST=['+24 V','0 V','Entrée I0.0','Entrée I0.1','Ne pas raccorder'];
+let exI=0;
+function ex(){const e=EX[exI],t=RT[e.t];
+ $('ex').innerHTML=`<p style="font-weight:600">${e.q}</p>`+t.w.map((w,i)=>`<div class="exrow"><span><span class="sw" style="background:${WC[w[0]][0]}"></span>${WC[w[0]][1]} (${w[0]})</span><select id="exs${i}" aria-label="Destination du fil ${WC[w[0]][1]}"><option value="">Choisir…</option>${DST.map(d=>`<option>${d}</option>`).join('')}</select><span id="exf${i}"></span></div>`).join('')+`<div class="ctl"><button id="exV" class="sel">Vérifier</button><button id="exN">Autre exercice</button></div><p class="fb" id="exR"></p>`;
+ $('exV').onclick=()=>{let ok=0;t.w.forEach((w,i)=>{const v=$('exs'+i).value,good=v===w[2];ok+=good;const f=$('exf'+i);f.className=good?'ok':'ko';f.textContent=good?'Correct':(v?'Non : '+w[2]:'À compléter')});
+  $('exR').innerHTML=ok===t.w.length?`<strong>Bravo, câblage correct.</strong> ${t.note}`:`<strong>${ok}/${t.w.length} fils corrects.</strong> Aide-toi du tableau des couleurs ci-dessus.`};
+ $('exN').onclick=()=>{exI=(exI+1)%EX.length;ex()}}
+ex();
+
+/* ---------- quizzes ---------- */
+const Q={
+ gen:[["Un dispositif qui délivre un signal logique 0 ou 1 s'appelle…",["Un détecteur","Un codeur","Un capteur analogique"],0,"TOR = détecteur ; numérique = codeur ; analogique = capteur."],["Quelle partie transforme la grandeur captée en signal de sortie ?",["Le corps d'épreuve","Le transducteur-adaptateur","La partie commande"],1,"Le corps d'épreuve capte, le transducteur-adaptateur convertit."],["Pour mesurer le déplacement d'un mobile, on utilise surtout…",["Des détecteurs par contact","Des codeurs optiques","Des pressostats"],1,"Les codeurs optiques donnent position et déplacement."]],
+ contact:[["Le signal de sortie d'un interrupteur de position est…",["Tout ou rien","Analogique","Un train d'impulsions"],0,"Il ouvre ou ferme un circuit : TOR."],["Un interrupteur de position est actionné par…",["Le déplacement d'un organe de commande","Un champ magnétique","Une onde ultrasonore"],0,"Galet, levier ou poussoir déplacé par l'objet."]],
+ sc:[["Combien de familles de détecteurs de proximité électriques distingue le cours ?",["4","6","8"],1,"Inductif, capacitif, magnétique, photoélectrique, effet Hall, ultrasons."],["Quel est le nom du détecteur de proximité pneumatique ?",["Capteur à fuite","Vacuostat","Codeur"],0,"Pour des usages particuliers : le capteur à fuite."]],
+ ind:[["Un détecteur inductif détecte…",["Uniquement les objets métalliques","Tous les matériaux","Les liquides"],0,"Il faut un métal pour créer des courants induits."],["Que provoque l'objet métallique dans le champ ?",["Des courants induits qui arrêtent les oscillations","Une réflexion de lumière","Une hausse de pression"],0,"Les courants induits contrarient le champ : l'oscillateur décroche."],["Plage de distance de détection des inductifs ?",["0,1 à 1 mm","1 à 60 mm","1 à 10 m"],1,"De 1 à 60 mm selon le modèle et le métal."]],
+ cap:[["On choisit surtout un capacitif pour détecter…",["Des objets non conducteurs","Des objets lointains","En ambiance poussiéreuse"],0,"Verre, plastique, liquides : ce que l'inductif ne voit pas."],["Distance de détection typique pour du carton ?",["4 mm","7 mm","10 mm"],0,"Carton et bois : 4 mm."],["Pourquoi sont-ils délicats à mettre en œuvre ?",["Sensibles aux saletés et poussières","Ils ne détectent que l'acier","Leur portée est trop grande"],0,"On ne les emploie que si aucune autre technologie ne convient."]],
+ mag:[["ILS signifie…",["Interrupteur à lame souple","Indicateur lumineux de sécurité","Inductif linéaire standard"],0,"Une lame souple fermée par l'aimant du piston."],["L'outil est cassé mais la tige est sortie. Que sait la partie commande ?",["Que la tige est sortie","Que l'outil est cassé","Rien du tout"],0,"L'ILS informe sur l'actionneur, pas sur le travail réalisé."]],
+ ph:[["Portée maximale du système barrage ?",["1,5 m","10 m","30 m"],2,"Barrage 30 m, reflex 10 m, proximité 1,5 m."],["Dans quel procédé est-ce l'objet qui renvoie le faisceau ?",["Reflex","Barrage","Proximité"],2,"La cible doit être réfléchissante."],["Pourquoi la lumière est-elle émise à fréquence fixe ?",["Pour être insensible à la lumière ambiante","Pour augmenter la portée","Pour reconnaître les couleurs"],0,"Le récepteur ne retient que la lumière modulée."],["Portée d'une fibre optique en proximité ?",["20 mm","300 mm","1,5 m"],0,"20 mm en proximité, 300 mm en barrage."]],
+ hall:[["En quelle année l'effet Hall a-t-il été découvert ?",["1879","1920","1969"],0,"Par Edwin Hall, en 1879."],["Roue de 12 dents à 300 tr/min : fréquence du signal ?",["25 Hz","60 Hz","3 600 Hz"],1,"f = 12 × 300 / 60 = 60 Hz."],["Un capteur à effet Hall est sensible…",["À un champ magnétique","À la lumière","À la pression"],0,"Présence d'un aimant ou variation de flux."]],
+ us:[["Le principe de détection repose sur…",["Le temps entre émission et écho","La variation d'un champ magnétique","La coupure d'un faisceau"],0,"Le microcontrôleur mesure l'intervalle émission–écho."],["Objet à 1,7 m, v = 340 m/s. Temps aller-retour ?",["5 ms","10 ms","20 ms"],1,"t = 2 × 1,7 / 340 = 0,01 s = 10 ms."],["Fréquence des ondes émises ?",["20 à 50 Hz","200 à 500 kHz","2 à 5 GHz"],1,"Ultrasons de 200 à 500 kHz."]],
+ cod:[["Comment un codeur incrémental donne-t-il le sens de rotation ?",["Grâce à la voie Z","Grâce au décalage entre A et B","Grâce au nombre de pistes"],1,"La voie qui change d'état en premier indique le sens."],["Codeur absolu à 5 pistes : combien de positions ?",["5","10","32"],2,"2⁵ = 32 positions par tour."],["Avantage du code Gray ?",["Un seul bit change entre deux positions","Calculs plus simples","Moins de pistes"],0,"Pas de position aberrante si les têtes sont mal alignées."],["À quoi sert la piste Z ?",["Une impulsion par tour, pour compter les tours","Donner le sens","Mesurer la pression"],0,"Elle sert aussi d'origine."]],
+ pr:[["Un pressostat délivre une information quand…",["La pression dépasse un seuil","La pression est nulle","La température monte"],0,"Le seuil est souvent réglable."],["Le seuil d'un pressostat mécanique se règle par…",["L'effort du ressort","La couleur de la membrane","La longueur du câble"],0,"Plus le ressort est comprimé, plus le seuil est haut."],["Plage courante d'un vacuostat ?",["−0,2 à −1 bar","0 à 10 bar","−10 à −20 bar"],0,"Il détecte une dépression par rapport à l'atmosphère."]],
+ pnp:[["Couleur du fil de sortie d'un détecteur 3 fils ?",["Brun","Bleu","Noir"],2,"Brun +24 V, bleu 0 V, noir sortie."],["Détecteur PNP en détection : la sortie est à…",["+24 V","0 V","12 V"],0,"PNP : sortie au +24 V, logique positive."],["Automate en logique négative : quel détecteur ?",["PNP","NPN","Peu importe"],1,"NPN : sortie au 0 V en détection."]]
+};
+
+Object.assign(Q,{
+ rac:[["Où raccorde-t-on les voies A et B d'un codeur incrémental ?",["Sur des entrées de comptage rapide","Sur des entrées TOR standard","Sur une entrée analogique"],0,"Une entrée standard est filtrée et trop lente pour compter les impulsions."],["À quoi servent les voies /A, /B, /Z d'un codeur RS422 ?",["Transmission différentielle, meilleure immunité aux parasites","Doubler la résolution","Alimenter le codeur"],0,"La carte compare chaque voie à son complément."],["Sur un détecteur 4 fils, le fil blanc (WH) est…",["La sortie complémentaire (NC)","L'alimentation +","Le 0 V"],0,"Brun +, bleu 0 V, noir sortie NO, blanc sortie NC."],["Sur un connecteur M12, la broche 3 correspond…",["Au 0 V, fil bleu","Au +24 V, fil brun","À la sortie, fil noir"],0,"Broches 1 BN, 2 WH, 3 BU, 4 BK."],["Comment raccorde-t-on un détecteur 2 fils ?",["En série avec la charge (entrée automate)","En parallèle sur l'alimentation","Uniquement sur un connecteur 3 broches"],0,"Il se comporte comme un interrupteur placé dans le circuit de l'entrée."],["Couleurs normalisées d'une Pt100 3 fils ?",["Rouge, rouge, blanc","Brun, bleu, noir","Jaune, vert, rouge"],0,"IEC 60751 : rouge d'un côté de la résistance, blanc de l'autre."],["Entrée TOR 24 V type 1 : à partir de quelle tension l'état 1 est-il garanti ?",["5 V","15 V","30 V"],1,"État 1 au-dessus de 15 V, état 0 en dessous de 5 V."]],
+ tmp:[["Pt100 câblée en 2 fils avec 1 Ω de câble au total. Erreur ?",["Environ +2,6 °C","Aucune","Environ −26 °C"],0,"1 Ω / 0,385 Ω par °C ≈ 2,6 °C en trop. D'où les montages 3 et 4 fils."],["Thermocouple sans compensation de soudure froide, ambiance à 20 °C. Le module affiche…",["Environ 20 °C de moins que la réalité","La bonne valeur","Environ 20 °C de plus"],0,"La tension ne dépend que de l'écart entre soudure chaude et soudure froide."],["Quand la température monte, la résistance d'une CTN…",["Diminue","Augmente","Ne change pas"],0,"CTN : coefficient de température négatif."],["Un pyromètre réglé à ε = 0,95 vise de l'aluminium poli (ε ≈ 0,1). La lecture est…",["Beaucoup trop basse","Juste","Beaucoup trop haute"],0,"La surface émet peu : il faut régler l'émissivité réelle."],["Résistance d'une Pt100 à 0 °C ?",["0 Ω","100 Ω","1 000 Ω"],1,"Pt100 : 100 Ω à 0 °C, d'où son nom."],["Pourquoi câbler une Pt100 en 3 ou 4 fils ?",["Pour compenser la résistance des câbles","Pour doubler la portée","Pour l'alimenter en 230 V"],0,"Sinon la résistance des fils s'ajoute à la mesure."],["Un thermocouple produit…",["Une petite tension liée à l'écart de température","Une variation de résistance","Un train d'impulsions"],0,"Effet Seebeck : quelques dizaines de µV par °C."]],
+ ma:[["Transmetteur 0–10 bar en 4–20 mA : courant à 5 bar ?",["10 mA","12 mA","14 mA"],1,"I = 4 + 16 × 5/10 = 12 mA."],["L'automate lit 0 mA. Que conclure ?",["Défaut : fil coupé ou transmetteur hors tension","La pression est nulle","La pression est maximale"],0,"Le zéro de mesure est à 4 mA : en dessous, c'est un défaut."],["Avantage d'un signal en courant ?",["La longueur du câble ne fausse pas la mesure","Il ne demande aucune alimentation","Il est numérique"],0,"Le courant est le même dans toute la boucle."]],
+ frc:[["Une jauge de contrainte transforme une déformation en…",["Variation de résistance","Variation de pression","Signal lumineux"],0,"Le fil résistif s'allonge ou se raccourcit."],["Cellule 2 mV/V alimentée en 10 V, à pleine charge : sortie ?",["2 mV","20 mV","200 mV"],1,"2 mV/V × 10 V = 20 mV."],["Dans quel montage place-t-on les jauges ?",["Pont de Wheatstone","Montage Darlington","Diviseur capacitif"],0,"Le pont rend mesurables de très faibles variations."]],
+ niv:[["Électrodes conductives dans de l'huile : que se passe-t-il ?",["Aucune détection : l'huile ne conduit pas","Détection normale","La pompe tourne en continu"],0,"Les électrodes ne fonctionnent qu'avec des liquides conducteurs."],["Pourquoi un capteur hydrostatique réglé pour l'eau se trompe-t-il avec du fioul ?",["La pression dépend de la masse volumique","Le fioul est trop chaud","Le fioul bloque le capteur"],0,"P = ρ × g × h : à hauteur égale, le fioul pèse moins."],["Quel capteur de niveau n'est pas gêné par la vapeur et la température ?",["Le radar","L'ultrason","Le flotteur"],0,"Les micro-ondes ne dépendent pas de l'air traversé."],["Capteur hydrostatique au fond d'une cuve d'eau de 2 m de hauteur : pression ?",["Environ 20 mbar","Environ 196 mbar","Environ 2 bar"],1,"98 mbar par mètre d'eau, soit environ 196 mbar."],["Un flotteur donne une information…",["TOR (seuil)","Analogique continue","Numérique sur 8 bits"],0,"Il bascule un contact à un niveau donné."],["Cuve de 5 m, le radar mesure 1,5 m jusqu'à la surface. Niveau ?",["1,5 m","3,5 m","6,5 m"],1,"Niveau = 5 − 1,5 = 3,5 m."]],
+ deb:[["Turbine avec K = 50 impulsions par litre, f = 100 Hz. Débit ?",["2 L/s","50 L/s","5 000 L/s"],0,"Q = f / K = 100 / 50 = 2 L/s."],["Quel débitmètre convient à la vapeur, sans pièce mobile ?",["Vortex","Turbine","Électromagnétique"],0,"Les tourbillons se forment aussi dans les gaz et la vapeur."],["Un contrôleur à palette donne…",["Une information TOR : débit suffisant ou non","Le débit en m³/h","La masse volumique"],0,"C'est un détecteur à seuil, pas un débitmètre."],["Le débitmètre électromagnétique fonctionne avec…",["Des liquides conducteurs","Tous les gaz","Les poudres"],0,"Loi de Faraday : le liquide doit conduire l'électricité."],["Quel débitmètre mesure directement un débit massique ?",["Coriolis","À turbine","Électromagnétique"],0,"Les tubes vibrants sont déformés selon la masse qui passe."]],
+ pot:[["LVDT : le noyau est exactement au centre. Tension de sortie ?",["Nulle","Maximale","Égale à celle du primaire"],0,"Les deux secondaires, en opposition, se compensent."],["Laser temps de vol : cible à 3 m. Durée de l'aller-retour ?",["10 ns","20 ns","20 µs"],1,"t = 2 × 3 / 300 000 000 = 20 ns."],["Avantage du capteur magnétostrictif ?",["Position absolue, sans contact ni usure","Il ne demande aucune alimentation","Il mesure la température"],0,"Pas de prise d'origine à la mise sous tension."],["Potentiomètre 200 mm alimenté en 10 V, curseur à 50 mm : Us ?",["2,5 V","5 V","7,5 V"],0,"Us = 10 × 50 / 200 = 2,5 V."],["Principal défaut du potentiomètre ?",["Usure par frottement du curseur","Il ne mesure que les métaux","Il demande une fibre optique"],0,"Le LVDT ou le magnétostrictif mesurent sans contact."]],
+ sec:[["Une barrière immatérielle sert à…",["Protéger les personnes d'une zone dangereuse","Mesurer un débit","Lire un code-barres"],0,"La coupure d'un faisceau arrête la machine."],["Un interrupteur de sécurité se raccorde à…",["Un relais ou automate de sécurité","N'importe quelle entrée standard","Un variateur de vitesse"],0,"La chaîne de sécurité doit être surveillée."],["La barrière a coupé la presse. On retire la main : que se passe-t-il ?",["La presse reste arrêtée jusqu'au réarmement","La presse repart seule","La barrière se désactive"],0,"Un réarmement volontaire évite tout redémarrage inattendu."],["Avantage de la RFID sur le code-barres ?",["Lecture sans visibilité directe, données réinscriptibles","Elle est toujours moins chère","Elle ne nécessite aucun lecteur"],0,"L'étiquette se lit par radio."]]
+});
+let st={};try{st=JSON.parse(localStorage.getItem('capteursQuiz')||'{}')}catch(e){st={}}
+const total=Object.values(Q).reduce((a,q)=>a+q.length,0);
+function score(){const v=Object.values(st);$('score').textContent=`Score ${v.filter(x=>x.ok).length}/${total}`;try{localStorage.setItem('capteursQuiz',JSON.stringify(st))}catch(e){}}
+document.querySelectorAll('.quiz').forEach(el=>{const m=el.dataset.m;
+ el.innerHTML='<h3>Vérifie tes acquis</h3>'+Q[m].map((q,i)=>`<div class="q" data-k="${m}-${i}"><p>${i+1}. ${q[0]}</p><div class="opts">${q[1].map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div><div class="fb" aria-live="polite"></div></div>`).join('');
+ el.querySelectorAll('.q').forEach(qe=>{const k=qe.dataset.k,[mm,ii]=k.split('-'),q=Q[mm][+ii];
+  const show=j=>{qe.querySelectorAll('button').forEach(b=>{const bj=+b.dataset.j;b.classList.toggle('good',bj===q[2]);b.classList.toggle('wrong',bj===j&&j!==q[2])});qe.querySelector('.fb').innerHTML=`<strong>${j===q[2]?'Bonne réponse.':'Pas tout à fait.'}</strong> ${q[3]}`};
+  if(st[k])show(st[k].j);
+  qe.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const j=+b.dataset.j;if(!st[k])st[k]={j,ok:j===q[2]};show(j);score()}))})});
+score();
+
+/* ---------- guide de choix ---------- */
+const T={
+ solide:["L'objet à détecter est-il solide ?","contact","liquide"],
+ contact:["Un contact physique avec l'objet est-il possible ?","masse","metal"],
+ masse:["Sa masse est-elle supérieure à 500 g ?","duree","metal"],
+ duree:["La durée de passage est-elle supérieure à 1,5 ms ?","freq","metal"],
+ freq:["La fréquence de passage est-elle inférieure à 1 Hz ?","R_contact","metal"],
+ metal:["L'objet est-il métallique ?","d48","d15"],
+ d48:["La distance de détection est-elle inférieure à 48 mm ?","espace","R_photo"],
+ espace:["L'espace de montage est-il important ?","R_ind","R_photo"],
+ d15:["La distance de détection est-elle supérieure à 15 mm ?","R_photo","R_cap"],
+ liquide:["Est-ce un liquide ?","niv","gaz"],
+ niv:["Y a-t-il un seul niveau à détecter ?","acc1","acc2"],
+ acc1:["Le liquide est-il accessible ?","R_capd","R_flot"],
+ acc2:["Le liquide est-il accessible ?","R_flotm","R_us"],
+ gaz:["Est-ce un gaz ?","R_pres","R_opa"]};
+const R={R_contact:["Interrupteur de position électromécanique","contact"],R_ind:["Détecteur de proximité inductif","inductif"],R_photo:["Détecteur photoélectrique (direct ou reflex)","photo"],R_cap:["Détecteur de proximité capacitif","capacitif"],R_capd:["Détecteur capacitif direct (niveau)","capacitif"],R_flot:["Flotteur","guide"],R_flotm:["Flotteur multiple","guide"],R_us:["Détecteur à ultrasons","ultrasons"],R_pres:["Pressostat ou vacuostat","pression"],R_opa:["Produit pulvérulent : détection par opacité","photo"]};
+let path=[];
+function wiz(){
+ const cur=path.length?path[path.length-1].next:'solide';
+ $('wizP').innerHTML=path.length?path.map(p=>`<li>${T[p.id][0]}<span>${p.a?'Oui':'Non'}</span></li>`).join(''):'<li>Commence par la première question.</li>';
+ if(R[cur]){const r=R[cur];$('wizQ').innerHTML=`<div class="res"><div class="note">Solution proposée</div><div class="ask">${r[0]}</div></div>${r[1]!=='guide'?`<p><a href="#${r[1]}">Revoir le chapitre correspondant</a></p>`:'<p class="note">Les flotteurs ne sont pas détaillés dans ce cours.</p>'}<div class="yn"><button id="wB">Question précédente</button><button id="wR" class="sel">Recommencer</button></div>`}
+ else{$('wizQ').innerHTML=`<div class="note">Question ${path.length+1}</div><div class="ask">${T[cur][0]}</div><div class="yn"><button id="wY">Oui</button><button id="wN">Non</button>${path.length?'<button id="wB">Retour</button>':''}</div>`;
+  $('wY').onclick=()=>{path.push({id:cur,a:1,next:T[cur][1]});wiz()};$('wN').onclick=()=>{path.push({id:cur,a:0,next:T[cur][2]});wiz()}}
+ if($('wB'))$('wB').onclick=()=>{path.pop();wiz()};if($('wR'))$('wR').onclick=()=>{path=[];wiz()}}
+path=[{id:'solide',a:1,next:'contact'},{id:'contact',a:0,next:'metal'}];wiz();
+
+
+/* ---------- animation automatique des bancs ---------- */
+const AU=[
+ {id:'levR',p:5},{id:'indD',p:8},{id:'capD',p:8},{id:'phR',p:5},{id:'usD',p:10,r:[.3,5.5]},
+ {id:'prP',p:8},{id:'grR',p:16,set:v=>gSet(Math.round(v))},{id:'pnD',p:4,tog:1},
+ {id:'tmpR',p:12,r:()=>({pt:[-20,380],tc:[20,380],ctn:[-30,140],ctp:[90,160],ir:[50,380],bi:[20,Math.min(220,tpSeuil+25)]})[tpK]},
+ {id:'maR',p:8},{id:'frcR',p:7},{id:'nivR',p:12},{id:'potR',p:8},
+ {id:'rcX',p:8,dyn:1,alt:'rcD'}];
+AU.forEach(a=>{const el=$(a.id)||$(a.alt);if(!el)return;a.rig=el.closest('.rig');a.on=!reduce;a.ph=Math.random();a.vis=false;
+ const b=document.createElement('button');b.className='autob';a.b=b;const h=a.rig.querySelector('h3');h.after(b);
+ const lab=()=>{b.textContent=a.on?'Arrêter l\'animation':'Animer le banc';b.classList.toggle('sel',a.on)};a.lab=lab;lab();
+ b.addEventListener('click',()=>{a.on=!a.on;lab()});
+ a.rig.addEventListener('pointerdown',e=>{if(e.target.matches('input[type=range],select')&&a.on){a.on=false;lab()}});
+ a.rig.addEventListener('keydown',e=>{if(e.target.matches('input[type=range]')&&a.on){a.on=false;lab()}});
+ new IntersectionObserver(es=>es.forEach(x=>a.vis=x.isIntersecting),{threshold:.3}).observe(a.rig)});
+if(!reduce){const ilsGo=()=>{if(!ilsAuto)$('ilsC').click()};ilsGo()}
+loops.push(dt=>{AU.forEach(a=>{if(!a.on||!a.vis)return;
+ let el=$(a.id);if(!el&&a.alt)el=$(a.alt);if(!el)return;
+ if(el.tagName==='BUTTON'){a.ph+=dt/a.p*2;if(a.ph>=1){a.ph=0;el.click()}return}
+ a.ph=(a.ph+dt/a.p)%1;const r=typeof a.r==='function'?a.r():a.r||[+el.min,+el.max];
+ const v=r[0]+(r[1]-r[0])*(.5-.5*Math.cos(2*Math.PI*a.ph));
+ if(a.set){a.set(v);return}
+ const st=+el.step||1,q=Math.round(v/st)*st;if(+el.value!==q){el.value=q;el.dispatchEvent(new Event('input'))}})});
+hero(0);hall(0);us(0);inc(0);deb(0);sec(0);
+requestAnimationFrame(t=>{last=t;tick(t)});
+}
+</script>
+</body>
+</html>

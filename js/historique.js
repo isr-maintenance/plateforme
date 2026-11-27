@@ -91,6 +91,7 @@ function histFichier(f){
   if(f.startsWith('css/')) return 'Apparence (couleurs, mise en page)';
   if(f.startsWith('tests/')) return 'Tests automatiques';
   if(f.startsWith('outils/atelier-dessin/')) return 'Outil : Atelier de dessin technique';
+  if(f.startsWith('outils/capteurs/')) return 'Outil : Cours interactif sur les capteurs';
   if((m=/^outils\/([^/]+)/.exec(f))) return 'Outil : '+m[1].replace(/\.html$/,'').replace(/-/g,' ');
   if(f.startsWith('icons/')) return 'Icônes';
   return f;
