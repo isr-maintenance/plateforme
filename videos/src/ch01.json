@@ -1,0 +1,75 @@
+{
+ "id": "ch01-eclairage",
+ "titre": "Éclairage d’un local",
+ "chapitre": "CHAPITRE 1 · ÉCLAIRAGE D’UN LOCAL",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "e_intro",
+   "texte": "Dans cette capsule, tu vas allumer une lampe d’un seul endroit : les éléments d’un circuit, le circuit fermé, le court-circuit, les conducteurs et les isolants.",
+   "voix": "Dans cette capsule, tu vas allumer une lampe d’un seul endroit : les éléments d’un circuit, le circuit fermé, le court-circuit, les conducteurs et les isolants."
+  },
+  {
+   "cle": "s02",
+   "scene": "e_besoin",
+   "texte": "On veut éclairer la chaufferie de l’atelier : un petit local, une seule porte, et une lampe qu’on allume d’un seul endroit.",
+   "voix": "On veut éclairer la chaufferie de l’atelier : un petit local, une seule porte, et une lampe qu’on allume d’un seul endroit."
+  },
+  {
+   "cle": "s03",
+   "scene": "e_elem",
+   "texte": "Il faut une source de courant, 230 V : c’est l’alimentation. Et du fil : c’est le conducteur.",
+   "voix": "Il faut une source de courant, deux cent trente volts : c’est l’alimentation. Et du fil : c’est le conducteur."
+  },
+  {
+   "cle": "s04",
+   "scene": "e_elem",
+   "texte": "Une lampe : c’est le récepteur. Et un interrupteur simple : c’est l’organe de commande.",
+   "voix": "Une lampe : c’est le récepteur. Et un interrupteur simple : c’est l’organe de commande."
+  },
+  {
+   "cle": "s05",
+   "scene": "e_ferme",
+   "texte": "Circuit fermé : le courant fait le tour complet du circuit, et la lampe éclaire.",
+   "voix": "Circuit fermé : le courant fait le tour complet du circuit, et la lampe éclaire.",
+   "flux": true
+  },
+  {
+   "cle": "s06",
+   "scene": "e_ouvert",
+   "texte": "Circuit ouvert : à la moindre interruption, le courant ne passe plus et la lampe s’éteint.",
+   "voix": "Circuit ouvert : à la moindre interruption, le courant ne passe plus et la lampe s’éteint."
+  },
+  {
+   "cle": "s07",
+   "scene": "e_court",
+   "texte": "Si on relie les deux bornes de la lampe avec un fil de cuivre, c’est un court-circuit : le récepteur n’est plus dans le circuit. Danger !",
+   "voix": "Si on relie les deux bornes de la lampe avec un fil de cuivre, c’est un court-circuit : le récepteur n’est plus dans le circuit. Danger !",
+   "flux": true
+  },
+  {
+   "cle": "s08",
+   "scene": "e_cond",
+   "texte": "On raccorde avec du cuivre, bon conducteur. Autour, du plastique : un isolant, qui protège l’utilisateur du courant.",
+   "voix": "On raccorde avec du cuivre, bon conducteur. Autour, du plastique : un isolant, qui protège l’utilisateur du courant."
+  },
+  {
+   "cle": "s09",
+   "scene": "e_tri",
+   "texte": "Conducteurs : cuivre, aluminium, or, argent. Isolants : PVC, caoutchouc, verre, porcelaine, air sec, papier.",
+   "voix": "Conducteurs : cuivre, aluminium, or, argent. Isolants : pé vé cé, caoutchouc, verre, porcelaine, air sec, papier."
+  },
+  {
+   "cle": "s10",
+   "scene": "e_recap",
+   "texte": "À retenir : alimentation, conducteur, récepteur, commande. Circuit fermé, la lampe éclaire ; ouvert, elle s’éteint ; court-circuit, danger.",
+   "voix": "À retenir : alimentation, conducteur, récepteur, commande. Circuit fermé, la lampe éclaire ; ouvert, elle s’éteint ; court-circuit, danger."
+  },
+  {
+   "cle": "s11",
+   "scene": "e_recap",
+   "texte": "À toi de jouer : le rôle de chaque élément, les trois situations du circuit, et conducteur ou isolant.",
+   "voix": "À toi de jouer : le rôle de chaque élément, les trois situations du circuit, et conducteur ou isolant."
+  }
+ ]
+}

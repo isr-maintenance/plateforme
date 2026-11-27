@@ -39,6 +39,7 @@ defAF(12, {
   caps:[
     {id:'A12a', sec:'12.1', t:'Les caractéristiques du circuit série', quiz:['A12aq1','A12aq2'], ex:{keys:['A12vf'], lbl:'Vrai ou faux ?'},
      body:()=>`${progRef(['Décrire un montage série, parallèle et mixte (CM2D)','Calculer les courants, tensions et résistances équivalentes de ces montages (CM2D)'],'p. 26')}
+      ${window.capVideo('videos/ch12-serie/capsule.mp4','Le circuit série (2 min 11)',1)}
       <p class="lead">Dans un circuit série, il n’y a qu’un seul chemin pour le courant.</p>
       <ul><li>Il y a <b>un seul courant</b> dans tous les éléments : ${fm('I1 = I2 = I3 = … = IT')}</li>
       <li>Chaque élément a <b>sa propre tension</b>, proportionnelle à sa résistance : ${fm('U1 = R1 . I')}, ${fm('U2 = R2 . I')}…</li>
@@ -79,6 +80,7 @@ defAF(13, {
   caps:[
     {id:'A13a', sec:'13.1 — 13.2', t:'L’expérience et les formules', quiz:['A13aq1','A13aq2'], ex:{keys:['A13exp'], lbl:'Les mesures de l’expérience'},
      body:()=>`${progRef(['Définir et calculer la chute de tension en ligne (CM2D)'],'p. 27')}
+      ${window.capVideo('videos/ch13-chute/capsule.mp4','La chute de tension en ligne (2 min 36)',1)}
       <p class="lead">On réalise un circuit : un générateur, un récepteur, une ligne bifilaire.</p>
       <ul><li>Près du générateur, on mesure U<sub>G</sub> = <b>6 V</b> ; près du récepteur, U<sub>R</sub> = <b>4,8 V</b>.</li><li>On fait glisser une ampoule de 6,3 V le long des fils : son éclat diminue en allant du générateur vers le récepteur.</li></ul>
       ${exbox('a13exp','Que vaut la chute de tension dans l’expérience ?')}
@@ -117,6 +119,7 @@ defAF(14, {
   caps:[
     {id:'A14a', sec:'14.1 — 14.2', t:'Les caractéristiques du circuit parallèle', quiz:['A14aq1','A14aq2'], ex:{keys:['A14vf'], lbl:'Vrai ou faux ?'},
      body:()=>`${progRef(['Décrire un montage parallèle (CM2D)','Citer des applications pratiques (CM2D)','Calculer les grandeurs équivalentes d’un tel montage (CM2D)'],'p. 26')}
+      ${window.capVideo('videos/ch14-parallele/capsule.mp4','Le circuit parallèle (2 min 15)',1)}
       <ul><li>Il y a <b>une seule tension</b> aux bornes de toutes les parties du circuit : ${fm('UT = U1 = U2 = U3 = … = Un')}</li>
       <li>Chaque élément a <b>son propre courant</b> : ${fm('I1 = U / R1')}, ${fm('I2 = U / R2')}…</li>
       <li><b>Les courants s’additionnent</b> : ${fm('IT = I1 + I2 + I3 + … + In')}</li>
@@ -156,6 +159,7 @@ defAF(15, {
   caps:[
     {id:'A15a', sec:'15.1 — 15.4', t:'La résistance équivalente et la méthode', quiz:['A15aq1','A15aq2'], ex:{keys:['A15dem'], lbl:'La réduction pas à pas'},
      body:()=>`${progRef(['Décrire un montage mixte (série + parallèle)','Calculer courants, tensions et résistances équivalentes d’un montage mixte'],'p. 26')}
+      ${window.capVideo('videos/ch15-mixtes/capsule.mp4','Les circuits mixtes (1 min 45)',1)}
       <p class="lead">Un homme fort est-il capable de produire le même travail que trois hommes de force moyenne ? Oui. Pour les résistances, c’est pareil : il existe une résistance qui, à elle seule, remplace 2, 5 ou 100 autres résistances.</p>
       ${defBox('Définition','La résistance équivalente (Réqu) est la résistance qui, à elle seule, produit les mêmes effets que toutes les autres résistances prises ensemble : mêmes effets sur l’intensité et sur le dégagement de chaleur.')}
       <div class="grid g2" style="gap:10px">${fbox('Réqu = R1 + R2 + R3','montage série : les résistances s’additionnent')}${fbox('1 / Réqu = 1/R1 + 1/R2 + … + 1/Rn','montage parallèle : les inverses s’additionnent')}</div>

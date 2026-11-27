@@ -1,0 +1,73 @@
+{
+ "id": "ch02-circuit",
+ "titre": "Le circuit électrique",
+ "chapitre": "CHAPITRE 2 · LE CIRCUIT ÉLECTRIQUE",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "c2_intro",
+   "texte": "Dans cette capsule, tu vas voir les éléments d’un circuit, lire un schéma avec des symboles normalisés, et distinguer circuit ouvert et circuit fermé.",
+   "voix": "Dans cette capsule, tu vas voir les éléments d’un circuit, lire un schéma avec des symboles normalisés, et distinguer circuit ouvert et circuit fermé."
+  },
+  {
+   "cle": "s02",
+   "scene": "c2_def",
+   "texte": "Le circuit électrique, ce sont des conducteurs qui relient les bornes du générateur à celles du récepteur, avec un interrupteur pour l’ouvrir ou le fermer.",
+   "voix": "Le circuit électrique, ce sont des conducteurs qui relient les bornes du générateur à celles du récepteur, avec un interrupteur pour l’ouvrir ou le fermer."
+  },
+  {
+   "cle": "s03",
+   "scene": "c2_elem",
+   "texte": "La source produit l’électricité. Les conducteurs amènent le courant aux récepteurs. Les isolants ne laissent passer le courant que très difficilement.",
+   "voix": "La source produit l’électricité. Les conducteurs amènent le courant aux récepteurs. Les isolants ne laissent passer le courant que très difficilement."
+  },
+  {
+   "cle": "s04",
+   "scene": "c2_elem",
+   "texte": "Les récepteurs transforment l’énergie électrique. Les appareils de commande ouvrent ou ferment le circuit. Les appareils de sécurité protègent le circuit.",
+   "voix": "Les récepteurs transforment l’énergie électrique. Les appareils de commande ouvrent ou ferment le circuit. Les appareils de sécurité protègent le circuit."
+  },
+  {
+   "cle": "s05",
+   "scene": "c2_ener",
+   "texte": "Chaque récepteur transforme l’énergie électrique : la lampe en lumière, le radiateur en chaleur, le moteur en mouvement, l’accumulateur en énergie chimique.",
+   "voix": "Chaque récepteur transforme l’énergie électrique : la lampe en lumière, le radiateur en chaleur, le moteur en mouvement, l’accumulateur en énergie chimique."
+  },
+  {
+   "cle": "s06",
+   "scene": "c2_sch",
+   "texte": "Un schéma électrique remplace le dessin par des symboles normalisés : la source, le fusible, l’interrupteur, la lampe.",
+   "voix": "Un schéma électrique remplace le dessin par des symboles normalisés : la source, le fusible, l’interrupteur, la lampe."
+  },
+  {
+   "cle": "s07",
+   "scene": "c2_sch",
+   "texte": "Le courant part de la borne plus, traverse le fusible, l’interrupteur, la lampe, et revient à la borne moins.",
+   "voix": "Le courant part de la borne plus, traverse le fusible, l’interrupteur, la lampe, et revient à la borne moins."
+  },
+  {
+   "cle": "s08",
+   "scene": "c2_ouvf",
+   "texte": "Circuit ouvert : l’interrupteur est ouvert, la lampe est éteinte. Circuit fermé : l’interrupteur est fermé, la lampe est allumée.",
+   "voix": "Circuit ouvert : l’interrupteur est ouvert, la lampe est éteinte. Circuit fermé : l’interrupteur est fermé, la lampe est allumée."
+  },
+  {
+   "cle": "s09",
+   "scene": "c2_tv",
+   "texte": "L’interrupteur simple a deux positions : 0 pour ouvert, 1 pour fermé. La lampe suit : 0 éteinte, 1 allumée.",
+   "voix": "L’interrupteur simple a deux positions : zéro pour ouvert, un pour fermé. La lampe suit : zéro éteinte, un allumée."
+  },
+  {
+   "cle": "s10",
+   "scene": "c2_recap",
+   "texte": "À retenir : source, conducteurs, récepteur, commande et sécurité. Le schéma utilise des symboles normalisés.",
+   "voix": "À retenir : source, conducteurs, récepteur, commande et sécurité. Le schéma utilise des symboles normalisés."
+  },
+  {
+   "cle": "s11",
+   "scene": "c2_recap",
+   "texte": "À toi de jouer : range les appareils, retrouve l’énergie produite, lis le schéma et complète la table de vérité.",
+   "voix": "À toi de jouer : range les appareils, retrouve l’énergie produite, lis le schéma et complète la table de vérité."
+  }
+ ]
+}

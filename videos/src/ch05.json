@@ -1,0 +1,79 @@
+{
+ "id": "ch05-mesures",
+ "titre": "Utilisation des appareils de mesures électriques",
+ "chapitre": "CHAPITRE 5 · APPAREILS DE MESURES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "a_intro",
+   "texte": "Dans cette capsule, tu vas apprendre à utiliser correctement le voltmètre, l’ampèremètre et l’aummètre, en sécurité.",
+   "voix": "Dans cette capsule, tu vas apprendre à utiliser correctement le voltmètre, l’ampèremètre et l’aummètre, en sécurité."
+  },
+  {
+   "cle": "s02",
+   "scene": "a_volt",
+   "texte": "Le voltmètre mesure une tension. On le branche en parallèle, aux bornes où l’on veut la mesurer.",
+   "voix": "Le voltmètre mesure une tension. On le branche en parallèle, aux bornes où l’on veut la mesurer."
+  },
+  {
+   "cle": "s03",
+   "scene": "a_avant",
+   "texte": "Avant de mesurer : le genre de tension, alternative ou continue ; la classe de l’appareil ; et le calibre.",
+   "voix": "Avant de mesurer : le genre de tension, alternative ou continue ; la classe de l’appareil ; et le calibre."
+  },
+  {
+   "cle": "s04",
+   "scene": "a_classe",
+   "texte": "Classe 0,1 à 0,5 : mesures précises, au laboratoire. Classe 1 à 1,5 : mesures courantes. Plus le chiffre est petit, plus l’appareil est précis.",
+   "voix": "Classe zéro virgule un à zéro virgule cinq : mesures précises, au laboratoire. Classe un à un virgule cinq : mesures courantes. Plus le chiffre est petit, plus l’appareil est précis."
+  },
+  {
+   "cle": "s05",
+   "scene": "a_calibre",
+   "texte": "Le calibre doit toujours être supérieur à la tension à mesurer. Si elle est inconnue, on commence par le calibre le plus élevé.",
+   "voix": "Le calibre doit toujours être supérieur à la tension à mesurer. Si elle est inconnue, on commence par le calibre le plus élevé."
+  },
+  {
+   "cle": "s06",
+   "scene": "a_etapes",
+   "texte": "Cinq gestes : placer l’appareil, vérifier le zéro de l’aiguille, raccorder en parallèle, choisir l’échelle selon le calibre, lire en face du cadran.",
+   "voix": "Cinq gestes : placer l’appareil, vérifier le zéro de l’aiguille, raccorder en parallèle, choisir l’échelle selon le calibre, lire en face du cadran."
+  },
+  {
+   "cle": "s07",
+   "scene": "a_amp",
+   "texte": "L’ampèremètre mesure le courant. On le branche en série : tout le courant à mesurer doit le traverser.",
+   "voix": "L’ampèremètre mesure le courant. On le branche en série : tout le courant à mesurer doit le traverser."
+  },
+  {
+   "cle": "s08",
+   "scene": "a_secu",
+   "texte": "Sécurité : vérifier le raccordement avant la mise sous tension, vérifier le calibre, respecter la polarité en continu, et jamais de mesure en haute tension.",
+   "voix": "Sécurité : vérifier le raccordement avant la mise sous tension, vérifier le calibre, respecter la polarité en continu, et jamais de mesure en haute tension."
+  },
+  {
+   "cle": "s09",
+   "scene": "a_ohm",
+   "texte": "L’aummètre se branche hors tension. Pointes séparées, l’aiguille est sur l’infini ; pointes en contact, elle est sur zéro.",
+   "voix": "L’aummètre se branche hors tension. Pointes séparées, l’aiguille est sur l’infini ; pointes en contact, elle est sur zéro."
+  },
+  {
+   "cle": "s10",
+   "scene": "a_fus",
+   "texte": "Un fusible qui a l’air bon : à l’aummètre, hors tension, il doit indiquer pratiquement zéro. S’il indique l’infini, il est coupé.",
+   "voix": "Un fusible qui a l’air bon : à l’aummètre, hors tension, il doit indiquer pratiquement zéro. S’il indique l’infini, il est coupé."
+  },
+  {
+   "cle": "s11",
+   "scene": "a_recap",
+   "texte": "À retenir : voltmètre en parallèle, ampèremètre en série, aummètre hors tension. Toujours le bon calibre.",
+   "voix": "À retenir : voltmètre en parallèle, ampèremètre en série, aummètre hors tension. Toujours le bon calibre."
+  },
+  {
+   "cle": "s12",
+   "scene": "a_recap",
+   "texte": "À toi de jouer : classe et raccordement, points de sécurité, et quel appareil pour quel besoin.",
+   "voix": "À toi de jouer : classe et raccordement, points de sécurité, et quel appareil pour quel besoin."
+  }
+ ]
+}

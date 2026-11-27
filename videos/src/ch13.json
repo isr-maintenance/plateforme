@@ -1,0 +1,99 @@
+{
+ "id": "ch13-chute",
+ "titre": "La chute de tension en ligne",
+ "chapitre": "CHAPITRE 13 · LA CHUTE DE TENSION EN LIGNE",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "l_intro",
+   "texte": "Dans cette capsule, tu vas voir pourquoi la tension baisse le long d’une ligne, et comment limiter cette chute de tension.",
+   "voix": "Dans cette capsule, tu vas voir pourquoi la tension baisse le long d’une ligne, et comment limiter cette chute de tension."
+  },
+  {
+   "cle": "s02",
+   "scene": "l_exp",
+   "texte": "Un générateur, une ligne de deux fils, un récepteur. Près du générateur : 6 V. Près du récepteur : 4,8 V.",
+   "voix": "Un générateur, une ligne de deux fils, un récepteur. Près du générateur : six volts. Près du récepteur : quatre virgule huit volts.",
+   "flux": true
+  },
+  {
+   "cle": "s03",
+   "scene": "l_exp",
+   "texte": "La tension a baissé de 1,2 V dans la ligne : c’est la chute de tension, UL = UG − UR. Soit 20 % de la tension du générateur.",
+   "voix": "La tension a baissé de un virgule deux volt dans la ligne : c’est la chute de tension, u l égale u g moins u r. Soit vingt pour cent de la tension du générateur.",
+   "flux": true
+  },
+  {
+   "cle": "s04",
+   "scene": "l_res",
+   "texte": "Les deux fils de la ligne sont en série : RL = RL1 + RL2. On les calcule avec la loi de Pouillet, sur la longueur aller-retour.",
+   "voix": "Les deux fils de la ligne sont en série : r l égale r l un plus r l deux. On les calcule avec la loi de Pouillet, sur la longueur aller-retour."
+  },
+  {
+   "cle": "s05",
+   "scene": "l_res",
+   "texte": "RL = ρ . L / S, avec L la longueur des fils aller-retour, pas la distance entre le générateur et le récepteur.",
+   "voix": "R l égale rho fois l divisé par s, avec l la longueur des fils aller-retour, pas la distance entre le générateur et le récepteur."
+  },
+  {
+   "cle": "s06",
+   "scene": "l_tri",
+   "texte": "Le courant de la ligne traverse sa résistance : UL = RL . IL. Avec le triangle, on trouve aussi RL et IL.",
+   "voix": "Le courant de la ligne traverse sa résistance : u l égale r l fois i l. Avec le triangle, on trouve aussi r l et i l."
+  },
+  {
+   "cle": "s07",
+   "scene": "l_tri",
+   "texte": "Générateur, ligne et récepteur sont en série : IL = IG = IR. Et UG = UL + UR.",
+   "voix": "Générateur, ligne et récepteur sont en série : i l égale i g égale i r. Et u g égale u l plus u r."
+  },
+  {
+   "cle": "s08",
+   "scene": "l_dens",
+   "texte": "Avec Pouillet : UL = ρ . L . I / S. En posant J = I / S, la densité de courant en A par mm² : UL = ρ . L . J.",
+   "voix": "Avec Pouillet : u l égale rho fois l fois i divisé par s. En posant j égale i divisé par s, la densité de courant en ampères par millimètre carré : u l égale rho fois l fois j."
+  },
+  {
+   "cle": "s09",
+   "scene": "l_moy",
+   "texte": "Pour limiter la chute de tension : une faible résistivité, une distance plus courte, et une densité de courant raisonnable, donc une section adaptée.",
+   "voix": "Pour limiter la chute de tension : une faible résistivité, une distance plus courte, et une densité de courant raisonnable, donc une section adaptée."
+  },
+  {
+   "cle": "s10",
+   "scene": "l_ex",
+   "texte": "Une ligne en cuivre de 25 m, soit 50 m aller-retour, en 2,5 mm², parcourue par 16 A sous 230 V. Quelle chute de tension ?",
+   "voix": "Une ligne en cuivre de vingt-cinq mètres, soit cinquante mètres aller-retour, en deux virgule cinq millimètres carrés, parcourue par seize ampères sous deux cent trente volts. Quelle chute de tension ?"
+  },
+  {
+   "cle": "s11",
+   "scene": "l_ex",
+   "texte": "Données : L = 50 m, S = 2,5 mm², ρ = 0,0175 Ω·mm²/m et I = 16 A. On cherche UL.",
+   "voix": "Données : l égale cinquante mètres, s égale deux virgule cinq millimètres carrés, rho égale zéro virgule zéro cent septante-cinq, et i égale seize ampères. On cherche u l."
+  },
+  {
+   "cle": "s12",
+   "scene": "l_ex",
+   "texte": "RL = 0,0175 × 50 / 2,5 = 0,35 Ω. Puis UL = 0,35 × 16 = 5,6 V.",
+   "voix": "R l égale zéro virgule zéro cent septante-cinq fois cinquante divisé par deux virgule cinq, soit zéro virgule trente-cinq aum. Puis u l égale zéro virgule trente-cinq fois seize, soit cinq virgule six volts."
+  },
+  {
+   "cle": "s13",
+   "scene": "l_ex2",
+   "texte": "Au récepteur : UR = UG − UL = 230 − 5,6 = 224,4 V. La chute fait 2,4 % de la tension de la source.",
+   "voix": "Au récepteur : u r égale u g moins u l, soit deux cent trente moins cinq virgule six, égale deux cent vingt-quatre virgule quatre volts. La chute fait deux virgule quatre pour cent de la tension de la source."
+  },
+  {
+   "cle": "s14",
+   "scene": "l_recap",
+   "texte": "À retenir : UL = RL . IL, UL = ρ . L . J et UG = UL + UR. Ligne trop longue ou trop fine, chute trop grande.",
+   "voix": "À retenir : u l égale r l fois i l, u l égale rho fois l fois j, et u g égale u l plus u r. Ligne trop longue ou trop fine, chute trop grande."
+  },
+  {
+   "cle": "s15",
+   "scene": "l_recap",
+   "texte": "À toi de jouer : l’expérience, ce qui réduit la chute de tension, et trois exercices.",
+   "voix": "À toi de jouer : l’expérience, ce qui réduit la chute de tension, et trois exercices."
+  }
+ ]
+}

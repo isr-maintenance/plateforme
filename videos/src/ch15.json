@@ -1,0 +1,85 @@
+{
+ "id": "ch15-mixtes",
+ "titre": "Les résistances mixtes",
+ "chapitre": "CHAPITRE 15 · LES RÉSISTANCES MIXTES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "x_intro",
+   "texte": "Dans cette capsule, tu vas apprendre à réduire un circuit qui mélange des résistances en série et en parallèle.",
+   "voix": "Dans cette capsule, tu vas apprendre à réduire un circuit qui mélange des résistances en série et en parallèle."
+  },
+  {
+   "cle": "s02",
+   "scene": "x_def",
+   "texte": "La résistance équivalente remplace à elle seule plusieurs résistances, avec les mêmes effets sur le courant et sur la chaleur.",
+   "voix": "La résistance équivalente remplace à elle seule plusieurs résistances, avec les mêmes effets sur le courant et sur la chaleur."
+  },
+  {
+   "cle": "s03",
+   "scene": "x_regles",
+   "texte": "En série, les résistances s’additionnent. En parallèle, ce sont les inverses qui s’additionnent.",
+   "voix": "En série, les résistances s’additionnent. En parallèle, ce sont les inverses qui s’additionnent."
+  },
+  {
+   "cle": "s04",
+   "scene": "x_methode",
+   "texte": "Pour un circuit mixte : on réduit pas à pas, et on redessine le circuit à chaque étape, jusqu’à n’avoir plus qu’une résistance.",
+   "voix": "Pour un circuit mixte : on réduit pas à pas, et on redessine le circuit à chaque étape, jusqu’à n’avoir plus qu’une résistance."
+  },
+  {
+   "cle": "s05",
+   "scene": "x_red",
+   "texte": "Exemple : R1 = 5 Ω en série avec R2 = 20 Ω et R3 = 30 Ω en parallèle, sous 34 V.",
+   "voix": "Exemple : r un égale cinq aums, en série avec r deux égale vingt aums et r trois égale trente aums en parallèle, sous trente-quatre volts."
+  },
+  {
+   "cle": "s06",
+   "scene": "x_red",
+   "texte": "Étape 1 : R2 et R3 en parallèle : 20 × 30 / 50 = 12 Ω.",
+   "voix": "Étape un : r deux et r trois en parallèle : vingt fois trente, divisé par cinquante, égale douze aums."
+  },
+  {
+   "cle": "s07",
+   "scene": "x_red",
+   "texte": "Étape 2 : R1 est en série avec ce groupe : Réqu = 5 + 12 = 17 Ω.",
+   "voix": "Étape deux : r un est en série avec ce groupe : r équivalente égale cinq plus douze, soit dix-sept aums."
+  },
+  {
+   "cle": "s08",
+   "scene": "x_red",
+   "texte": "Le courant total : I = 34 / 17 = 2 A.",
+   "voix": "Le courant total : i égale trente-quatre divisé par dix-sept, soit deux ampères."
+  },
+  {
+   "cle": "s09",
+   "scene": "x_red",
+   "texte": "On redescend : U1 = 5 × 2 = 10 V, et le groupe parallèle reçoit 34 − 10 = 24 V.",
+   "voix": "On redescend : u un égale cinq fois deux, soit dix volts, et le groupe parallèle reçoit trente-quatre moins dix, soit vingt-quatre volts."
+  },
+  {
+   "cle": "s10",
+   "scene": "x_red",
+   "texte": "Dans R2 : 24 / 20 = 1,2 A. Dans R3 : 24 / 30 = 0,8 A. Ensemble : 2 A, comme le courant total.",
+   "voix": "Dans r deux : vingt-quatre divisé par vingt, soit un virgule deux ampère. Dans r trois : vingt-quatre divisé par trente, soit zéro virgule huit ampère. Ensemble : deux ampères, comme le courant total."
+  },
+  {
+   "cle": "s11",
+   "scene": "x_piege",
+   "texte": "Attention : sans le schéma, on ne sait pas ce qui est en série ou en parallèle. Dessine toujours chaque étape.",
+   "voix": "Attention : sans le schéma, on ne sait pas ce qui est en série ou en parallèle. Dessine toujours chaque étape."
+  },
+  {
+   "cle": "s12",
+   "scene": "x_recap",
+   "texte": "À retenir : réduire pas à pas jusqu’à Réqu, calculer le courant total, puis redescendre branche par branche.",
+   "voix": "À retenir : réduire pas à pas jusqu’à r équivalente, calculer le courant total, puis redescendre branche par branche."
+  },
+  {
+   "cle": "s13",
+   "scene": "x_recap",
+   "texte": "À toi de jouer : la réduction pas à pas, puis trois exercices avec les schémas de ton cours.",
+   "voix": "À toi de jouer : la réduction pas à pas, puis trois exercices avec les schémas de ton cours."
+  }
+ ]
+}

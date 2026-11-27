@@ -1,0 +1,98 @@
+{
+ "id": "ch12-serie",
+ "titre": "Les résistances séries",
+ "chapitre": "CHAPITRE 12 · LES RÉSISTANCES SÉRIES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "s_intro",
+   "texte": "Dans cette capsule, tu vas voir ce qui se passe quand on place des résistances les unes à la suite des autres : le circuit série.",
+   "voix": "Dans cette capsule, tu vas voir ce qui se passe quand on place des résistances les unes à la suite des autres : le circuit série."
+  },
+  {
+   "cle": "s02",
+   "scene": "s_chemin",
+   "texte": "Dans un circuit série, il n’y a qu’un seul chemin : le même courant I traverse toutes les résistances.",
+   "voix": "Dans un circuit série, il n’y a qu’un seul chemin : le même courant i traverse toutes les résistances.",
+   "flux": true
+  },
+  {
+   "cle": "s03",
+   "scene": "s_circ",
+   "texte": "Prenons trois résistances de 100, 200 et 300 Ω en série, sous 12 V.",
+   "voix": "Prenons trois résistances de cent, deux cents et trois cents aums en série, sous douze volts."
+  },
+  {
+   "cle": "s04",
+   "scene": "s_circ",
+   "texte": "Les résistances s’additionnent : RT = 100 + 200 + 300 = 600 Ω.",
+   "voix": "Les résistances s’additionnent : r t égale cent plus deux cents plus trois cents, soit six cents aums."
+  },
+  {
+   "cle": "s05",
+   "scene": "s_circ",
+   "texte": "Le courant : I = UT / RT = 12 / 600 = 0,02 A, soit 20 mA.",
+   "voix": "Le courant : i égale u t divisé par r t, soit douze divisé par six cents, égale zéro virgule zéro deux ampère, c’est-à-dire vingt milliampères."
+  },
+  {
+   "cle": "s06",
+   "scene": "s_circ",
+   "texte": "Chaque résistance a sa propre tension : U1 = R1 . I = 2 V, U2 = 4 V, U3 = 6 V.",
+   "voix": "Chaque résistance a sa propre tension : u un égale r un fois i, soit deux volts ; u deux, quatre volts ; u trois, six volts."
+  },
+  {
+   "cle": "s07",
+   "scene": "s_circ",
+   "texte": "Les tensions s’additionnent : 2 + 4 + 6 = 12 V, la tension du générateur.",
+   "voix": "Les tensions s’additionnent : deux plus quatre plus six égalent douze volts, la tension du générateur."
+  },
+  {
+   "cle": "s08",
+   "scene": "s_prop",
+   "texte": "Plus la résistance est grande, plus sa tension est grande. Et si un élément est coupé, plus rien ne circule.",
+   "voix": "Plus la résistance est grande, plus sa tension est grande. Et si un élément est coupé, plus rien ne circule."
+  },
+  {
+   "cle": "s09",
+   "scene": "s_tab",
+   "texte": "Pour chaque grandeur cherchée, une formule : I = UT / RT, UT = RT . I, U1 = R1 . I, RT = R1 + R2 + …, R1 = U1 / I.",
+   "voix": "Pour chaque grandeur cherchée, une formule : i égale u t divisé par r t ; u t égale r t fois i ; u un égale r un fois i ; r t égale r un plus r deux plus, et ainsi de suite ; r un égale u un divisé par i."
+  },
+  {
+   "cle": "s10",
+   "scene": "s_ex",
+   "texte": "Deux résistances en série sous 9 V : R1 = 3,3 kΩ et R2 = 1,2 kΩ. Quel courant ?",
+   "voix": "Deux résistances en série sous neuf volts : r un égale trois virgule trois kilo-aums, et r deux égale un virgule deux kilo-aum. Quel courant ?"
+  },
+  {
+   "cle": "s11",
+   "scene": "s_ex",
+   "texte": "On cherche I en milliampères. La formule : I = U / (R1 + R2).",
+   "voix": "On cherche i en milliampères. La formule : i égale u divisé par, r un plus r deux."
+  },
+  {
+   "cle": "s12",
+   "scene": "s_ex",
+   "texte": "RT = 4,5 kΩ ; I = 9 / 4,5 = 2 mA. Avec des kΩ, on obtient directement des mA.",
+   "voix": "R t égale quatre virgule cinq kilo-aums ; i égale neuf divisé par quatre virgule cinq, soit deux milliampères. Avec des kilo-aums, on obtient directement des milliampères."
+  },
+  {
+   "cle": "s13",
+   "scene": "s_ex2",
+   "texte": "R1 = 1 kΩ et R2 = 2,2 kΩ en série, avec 5 V aux bornes de R1 : le courant dans R2 est le même, I = 5 / 1 000 = 5 mA.",
+   "voix": "R un égale un kilo-aum et r deux égale deux virgule deux kilo-aums, en série, avec cinq volts aux bornes de r un : le courant dans r deux est le même, i égale cinq divisé par mille, soit cinq milliampères."
+  },
+  {
+   "cle": "s14",
+   "scene": "s_recap",
+   "texte": "À retenir : en série, I est le même partout, les tensions et les résistances s’additionnent.",
+   "voix": "À retenir : en série, i est le même partout, les tensions s’additionnent et les résistances s’additionnent."
+  },
+  {
+   "cle": "s15",
+   "scene": "s_recap",
+   "texte": "À toi de jouer : vrai ou faux, et trois exercices. Attention aux préfixes : kΩ, mA, µA.",
+   "voix": "À toi de jouer : vrai ou faux, et trois exercices. Attention aux préfixes : kilo-aums, milliampères, microampères."
+  }
+ ]
+}

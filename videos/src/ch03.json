@@ -1,0 +1,93 @@
+{
+ "id": "ch03-matiere",
+ "titre": "La matière",
+ "chapitre": "CHAPITRE 3 · LA MATIÈRE",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "mat_intro",
+   "texte": "Dans cette capsule, tu vas descendre dans la matière : molécules, atomes, électrons libres, et l’origine du courant électrique.",
+   "voix": "Dans cette capsule, tu vas descendre dans la matière : molécules, atomes, électrons libres, et l’origine du courant électrique."
+  },
+  {
+   "cle": "s02",
+   "scene": "mat_goutte",
+   "texte": "Partage une goutte d’eau en deux, puis recommence des milliers de fois : tu arrives à la molécule, qui garde encore toutes les propriétés de l’eau.",
+   "voix": "Partage une goutte d’eau en deux, puis recommence des milliers de fois : tu arrives à la molécule, qui garde encore toutes les propriétés de l’eau."
+  },
+  {
+   "cle": "s03",
+   "scene": "mat_mol",
+   "texte": "La molécule d’eau, H₂O, est formée de deux atomes d’hydrogène et d’un atome d’oxygène. Toute la matière est faite de molécules, combinaisons d’atomes.",
+   "voix": "La molécule d’eau, h deux o, est formée de deux atomes d’hydrogène et d’un atome d’oxygène. Toute la matière est faite de molécules, combinaisons d’atomes."
+  },
+  {
+   "cle": "s04",
+   "scene": "mat_etats",
+   "texte": "Trois états : gazeux, des molécules libres et très éloignées ; liquide, plus proches et sans ordre ; solide, très rapprochées et presque fixes.",
+   "voix": "Trois états : gazeux, des molécules libres et très éloignées ; liquide, plus proches et sans ordre ; solide, très rapprochées et presque fixes.",
+   "flux": true
+  },
+  {
+   "cle": "s05",
+   "scene": "mat_atome",
+   "texte": "L’atome ressemble à un soleil entouré de planètes : le noyau, positif, avec des protons et des neutrons, et les électrons, négatifs, qui tournent autour.",
+   "voix": "L’atome ressemble à un soleil entouré de planètes : le noyau, positif, avec des protons et des neutrons, et les électrons, négatifs, qui tournent autour."
+  },
+  {
+   "cle": "s06",
+   "scene": "mat_lois",
+   "texte": "Deux charges de même signe se repoussent. Deux charges de signes contraires s’attirent. Dans un atome neutre, il y a autant d’électrons que de protons.",
+   "voix": "Deux charges de même signe se repoussent. Deux charges de signes contraires s’attirent. Dans un atome neutre, il y a autant d’électrons que de protons."
+  },
+  {
+   "cle": "s07",
+   "scene": "mat_couches",
+   "texte": "Les électrons tournent sur sept couches, qui peuvent contenir au maximum 2, 8, 18, 32, 18, 8 et 2 électrons.",
+   "voix": "Les électrons tournent sur sept couches, qui peuvent contenir au maximum deux, huit, dix-huit, trente-deux, dix-huit, huit et deux électrons."
+  },
+  {
+   "cle": "s08",
+   "scene": "mat_libres",
+   "texte": "Les électrons des couches extérieures, moins attirés par le noyau, sont les électrons libres. Ceux des couches intérieures sont les électrons internes.",
+   "voix": "Les électrons des couches extérieures, moins attirés par le noyau, sont les électrons libres. Ceux des couches intérieures sont les électrons internes."
+  },
+  {
+   "cle": "s09",
+   "scene": "mat_ion",
+   "texte": "Un atome neutre qui perd un électron devient un ion positif. S’il en gagne un, il devient un ion négatif.",
+   "voix": "Un atome neutre qui perd un électron devient un ion positif. S’il en gagne un, il devient un ion négatif."
+  },
+  {
+   "cle": "s10",
+   "scene": "mat_cond",
+   "texte": "Dans un conducteur, des électrons libres circulent entre les ions positifs. Au hasard : rien. Tous dans le même sens : c’est le courant électrique.",
+   "voix": "Dans un conducteur, des électrons libres circulent entre les ions positifs. Au hasard : rien. Tous dans le même sens : c’est le courant électrique.",
+   "flux": true
+  },
+  {
+   "cle": "s11",
+   "scene": "mat_isol",
+   "texte": "Dans un isolant, le noyau retient si fort les électrons qu’aucun ne passe d’un atome à l’autre. Mais une gaine entaillée, mouillée ou trop chaude protège moins bien.",
+   "voix": "Dans un isolant, le noyau retient si fort les électrons qu’aucun ne passe d’un atome à l’autre. Mais une gaine entaillée, mouillée ou trop chaude protège moins bien."
+  },
+  {
+   "cle": "s12",
+   "scene": "mat_moyens",
+   "texte": "Six moyens de libérer des électrons : le choc, la chaleur, le frottement, la chimie, le magnétisme et la lumière.",
+   "voix": "Six moyens de libérer des électrons : le choc, la chaleur, le frottement, la chimie, le magnétisme et la lumière."
+  },
+  {
+   "cle": "s13",
+   "scene": "mat_recap",
+   "texte": "À retenir : le déplacement des électrons libres constitue le courant électrique dans un conducteur.",
+   "voix": "À retenir : le déplacement des électrons libres constitue le courant électrique dans un conducteur."
+  },
+  {
+   "cle": "s14",
+   "scene": "mat_recap",
+   "texte": "À toi de jouer : le zoom sur la matière, les trois états, les couches, l’atome et les électrons libres.",
+   "voix": "À toi de jouer : le zoom sur la matière, les trois états, les couches, l’atome et les électrons libres."
+  }
+ ]
+}

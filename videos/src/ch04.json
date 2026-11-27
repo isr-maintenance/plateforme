@@ -1,0 +1,87 @@
+{
+ "id": "ch04-notions",
+ "titre": "Notions générales",
+ "chapitre": "CHAPITRE 4 · NOTIONS GÉNÉRALES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "g_intro",
+   "texte": "Dans cette capsule, tu vas voir le générateur, la tension, le sens du courant, l’intensité et la résistance.",
+   "voix": "Dans cette capsule, tu vas voir le générateur, la tension, le sens du courant, l’intensité et la résistance."
+  },
+  {
+   "cle": "s02",
+   "scene": "g_gen",
+   "texte": "Un générateur produit en permanence un excès d’électrons à la borne moins, et un manque d’électrons à la borne plus. Pile, accumulateur, dynamo, alternateur.",
+   "voix": "Un générateur produit en permanence un excès d’électrons à la borne moins, et un manque d’électrons à la borne plus. Pile, accumulateur, dynamo, alternateur."
+  },
+  {
+   "cle": "s03",
+   "scene": "g_ddp",
+   "texte": "La tension, ou différence de potentiel, est la différence de charges entre les deux bornes. Son unité est le volt ; on la mesure avec un voltmètre.",
+   "voix": "La tension, ou différence de potentiel, est la différence de charges entre les deux bornes. Son unité est le volt ; on la mesure avec un voltmètre."
+  },
+  {
+   "cle": "s04",
+   "scene": "g_ten",
+   "texte": "Une pile plate fait 4,5 V, une batterie de voiture 12 V, et une prise de courant de la maison 230 V.",
+   "voix": "Une pile plate fait quatre virgule cinq volts, une batterie de voiture douze volts, et une prise de courant de la maison deux cent trente volts."
+  },
+  {
+   "cle": "s05",
+   "scene": "g_sens",
+   "texte": "Quand le circuit est fermé, la borne plus capte les électrons de la borne moins : ils se déplacent dans le conducteur de la borne moins vers la borne plus.",
+   "voix": "Quand le circuit est fermé, la borne plus capte les électrons de la borne moins : ils se déplacent dans le conducteur de la borne moins vers la borne plus.",
+   "flux": true
+  },
+  {
+   "cle": "s06",
+   "scene": "g_sens",
+   "texte": "Le sens conventionnel, toujours employé dans l’industrie, est l’inverse : à l’extérieur du générateur, de la borne plus vers la borne moins.",
+   "voix": "Le sens conventionnel, toujours employé dans l’industrie, est l’inverse : à l’extérieur du générateur, de la borne plus vers la borne moins.",
+   "flux": true
+  },
+  {
+   "cle": "s07",
+   "scene": "g_recep",
+   "texte": "Sans récepteur, les électrons rejoindraient aussitôt la borne plus : c’est le court-circuit. Le récepteur limite leur passage.",
+   "voix": "Sans récepteur, les électrons rejoindraient aussitôt la borne plus : c’est le court-circuit. Le récepteur limite leur passage."
+  },
+  {
+   "cle": "s08",
+   "scene": "g_I",
+   "texte": "L’intensité, c’est le nombre d’électrons qui passent par seconde. Son symbole est I, son unité l’ampère, et on la mesure avec un ampèremètre branché en série.",
+   "voix": "L’intensité, c’est le nombre d’électrons qui passent par seconde. Son symbole est i, son unité l’ampère, et on la mesure avec un ampèremètre branché en série."
+  },
+  {
+   "cle": "s09",
+   "scene": "g_R",
+   "texte": "La résistance, c’est la difficulté qu’un conducteur offre au courant. Son symbole est R, son unité l’aum, et on la mesure avec un aummètre, hors tension.",
+   "voix": "La résistance, c’est la difficulté qu’un conducteur offre au courant. Son symbole est r, son unité l’aum, et on la mesure avec un aummètre, hors tension."
+  },
+  {
+   "cle": "s10",
+   "scene": "g_lampes",
+   "texte": "Le filament d’une lampe de 25 W a une plus grande résistance que celui d’une lampe de 100 W : elle laisse passer moins de courant et dégage moins de lumière.",
+   "voix": "Le filament d’une lampe de vingt-cinq watts a une plus grande résistance que celui d’une lampe de cent watts : elle laisse passer moins de courant et dégage moins de lumière."
+  },
+  {
+   "cle": "s11",
+   "scene": "g_synth",
+   "texte": "Tension : volt, voltmètre en parallèle. Intensité : ampère, ampèremètre en série. Résistance : aum, aummètre hors tension.",
+   "voix": "Tension : volt, voltmètre en parallèle. Intensité : ampère, ampèremètre en série. Résistance : aum, aummètre hors tension."
+  },
+  {
+   "cle": "s12",
+   "scene": "g_recap",
+   "texte": "À retenir : le courant électrique est un déplacement d’électrons libres, dans un circuit fermé, sous l’effet d’une différence de potentiel.",
+   "voix": "À retenir : le courant électrique est un déplacement d’électrons libres, dans un circuit fermé, sous l’effet d’une différence de potentiel."
+  },
+  {
+   "cle": "s13",
+   "scene": "g_recap",
+   "texte": "À toi de jouer : les tensions courantes, ce qui se passe dans le circuit, grandeur, unité, appareil, et les définitions.",
+   "voix": "À toi de jouer : les tensions courantes, ce qui se passe dans le circuit, grandeur, unité, appareil, et les définitions."
+  }
+ ]
+}

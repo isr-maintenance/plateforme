@@ -1,0 +1,97 @@
+{
+ "id": "ch14-parallele",
+ "titre": "Les résistances parallèles",
+ "chapitre": "CHAPITRE 14 · LES RÉSISTANCES PARALLÈLES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "par_intro",
+   "texte": "Dans cette capsule, tu vas voir ce qui se passe quand on branche des résistances côte à côte : le circuit parallèle.",
+   "voix": "Dans cette capsule, tu vas voir ce qui se passe quand on branche des résistances côte à côte : le circuit parallèle."
+  },
+  {
+   "cle": "s02",
+   "scene": "par_circ",
+   "texte": "Dans un circuit parallèle, chaque branche est reliée aux mêmes deux points : la tension est la même, 12 V.",
+   "voix": "Dans un circuit parallèle, chaque branche est reliée aux mêmes deux points : la tension est la même, douze volts."
+  },
+  {
+   "cle": "s03",
+   "scene": "par_circ",
+   "texte": "Chaque branche a son courant : I1 = 12 / 60 = 0,2 A et I2 = 12 / 30 = 0,4 A.",
+   "voix": "Chaque branche a son courant : i un égale douze divisé par soixante, soit zéro virgule deux ampère ; et i deux égale douze divisé par trente, soit zéro virgule quatre ampère."
+  },
+  {
+   "cle": "s04",
+   "scene": "par_circ",
+   "texte": "Les courants s’additionnent : IT = 0,2 + 0,4 = 0,6 A.",
+   "voix": "Les courants s’additionnent : i t égale zéro virgule deux plus zéro virgule quatre, soit zéro virgule six ampère."
+  },
+  {
+   "cle": "s05",
+   "scene": "par_circ",
+   "texte": "La résistance équivalente : Réqu = U / IT = 12 / 0,6 = 20 Ω.",
+   "voix": "La résistance équivalente : r équivalente égale u divisé par i t, soit douze divisé par zéro virgule six, égale vingt aums."
+  },
+  {
+   "cle": "s06",
+   "scene": "par_form",
+   "texte": "Les inverses s’additionnent : 1 / Réqu = 1/R1 + 1/R2. Pour deux résistances, c’est le produit sur la somme.",
+   "voix": "Les inverses s’additionnent : un sur r équivalente égale un sur r un plus un sur r deux. Pour deux résistances, c’est le produit sur la somme."
+  },
+  {
+   "cle": "s07",
+   "scene": "par_plus",
+   "texte": "Réqu est toujours plus petite que la plus petite des résistances : chaque branche ajoutée ouvre un chemin de plus au courant.",
+   "voix": "R équivalente est toujours plus petite que la plus petite des résistances : chaque branche ajoutée ouvre un chemin de plus au courant."
+  },
+  {
+   "cle": "s08",
+   "scene": "par_maison",
+   "texte": "Si une lampe grille, les autres continuent : les prises et les luminaires d’une maison sont en parallèle.",
+   "voix": "Si une lampe grille, les autres continuent : les prises et les luminaires d’une maison sont en parallèle."
+  },
+  {
+   "cle": "s09",
+   "scene": "par_am",
+   "texte": "Jamais d’ampèremètre en parallèle ! Sa résistance est très faible, environ 0,1 Ω : sous 12 V, plus de 100 A passent, il est détruit.",
+   "voix": "Jamais d’ampèremètre en parallèle ! Sa résistance est très faible, environ zéro virgule un aum : sous douze volts, plus de cent ampères passent, et il est détruit."
+  },
+  {
+   "cle": "s10",
+   "scene": "par_ex",
+   "texte": "Deux résistances en parallèle : 90 Ω et 45 Ω. Quelle résistance équivalente ?",
+   "voix": "Deux résistances en parallèle : nonante aums et quarante-cinq aums. Quelle résistance équivalente ?"
+  },
+  {
+   "cle": "s11",
+   "scene": "par_ex",
+   "texte": "On utilise le produit sur la somme : Réqu = R1 . R2 / (R1 + R2).",
+   "voix": "On utilise le produit sur la somme : r équivalente égale r un fois r deux, divisé par, r un plus r deux."
+  },
+  {
+   "cle": "s12",
+   "scene": "par_ex",
+   "texte": "Produit : 90 × 45 = 4 050. Somme : 90 + 45 = 135. Réqu = 4 050 / 135 = 30 Ω, plus petite que 45 Ω : c’est cohérent.",
+   "voix": "Produit : nonante fois quarante-cinq égalent quatre mille cinquante. Somme : nonante plus quarante-cinq égalent cent trente-cinq. R équivalente égale quatre mille cinquante divisé par cent trente-cinq, soit trente aums, plus petite que quarante-cinq aums : c’est cohérent."
+  },
+  {
+   "cle": "s13",
+   "scene": "par_ex2",
+   "texte": "Trois résistances égales de 12 Ω en parallèle : Réqu = 12 / 3 = 4 Ω. On divise par le nombre de résistances.",
+   "voix": "Trois résistances égales de douze aums en parallèle : r équivalente égale douze divisé par trois, soit quatre aums. On divise par le nombre de résistances."
+  },
+  {
+   "cle": "s14",
+   "scene": "par_recap",
+   "texte": "À retenir : en parallèle, U est la même partout, les courants s’additionnent et Réqu est plus petite que la plus petite résistance.",
+   "voix": "À retenir : en parallèle, u est la même partout, les courants s’additionnent et r équivalente est plus petite que la plus petite résistance."
+  },
+  {
+   "cle": "s15",
+   "scene": "par_recap",
+   "texte": "À toi de jouer : vrai ou faux, l’ampèremètre mal branché et trois exercices.",
+   "voix": "À toi de jouer : vrai ou faux, l’ampèremètre mal branché et trois exercices."
+  }
+ ]
+}
