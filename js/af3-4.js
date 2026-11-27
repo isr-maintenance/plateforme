@@ -16,6 +16,7 @@ defAF(17, {
   caps:[
     {id:'A17a', sec:'17.1', t:'Générateurs électrochimiques : piles et accumulateurs', quiz:['A17aq1','A17aq2'], ex:{keys:['A17fam'], lbl:'Les familles'},
      body:()=>`${progRef(['Énoncer le principe élémentaire d’une pile','Relever les caractéristiques d’une pile (f.é.m., résistance interne, capacité)'],'p. 27')}
+      ${window.capVideo('videos/ch17-piles/capsule.mp4','Les piles (1 min 40)',1)}
       <p class="lead">L’automobile, les navires, les avions, les jouets… ne peuvent pas se brancher sur le réseau : ils utilisent des piles, des batteries d’accumulateurs, des dynamos ou des alternateurs.</p>
       <p>Tout générateur est caractérisé par deux paramètres :</p>
       ${defBox('La force électromotrice (f.é.m.)','Elle caractérise la possibilité qu’a le générateur de fournir de l’énergie aux électrons pour qu’ils se déplacent en bon ordre dans le circuit. Elle se mesure toujours <b>à vide</b>, quand le générateur ne débite aucun courant.')}
@@ -53,6 +54,7 @@ defAF(18, {
   caps:[
     {id:'A18a', sec:'18.1 — 18.2', t:'Le fonctionnement de l’accumulateur', quiz:['A18aq1','A18aq2'], ex:{keys:['A18ch','A18org'], lbl:'La charge et les organes'},
      body:()=>`${progRef(['Expliquer la différence entre pile et accumulateur (réversibilité du phénomène chimique) (CM2D)'],'p. 27')}
+      ${window.capVideo('videos/ch18-accumulateurs/capsule.mp4','Les accumulateurs (1 min 34)',1)}
       <p class="lead">Pendant la charge, un courant continu transforme chimiquement deux matières : l’accumulateur emmagasine de l’énergie. À l’utilisation, la transformation inverse restitue cette énergie sous forme de courant.</p>
       <p>On l’utilise pour le démarrage et l’alimentation des automobiles, mais aussi pour la traction de véhicules et d’engins spéciaux. Sa capacité, en ampères-heures, peut atteindre 200 Ah.</p>
       <p>Dans un bac d’eau et d’acide sulfurique, on plonge deux électrodes en plomb et on les soumet à un courant continu :</p>
@@ -89,6 +91,7 @@ defAF(19, {
   caps:[
     {id:'A19a', sec:'19.1', t:'Un générateur réel', quiz:['A19aq1'], ex:null,
      body:()=>`${progRef(['Appliquer la loi d’Ohm à un générateur (f.é.m. à vide / d.d.p. en charge) (CM2D)','Groupements de générateurs (CM2D)'],'p. 27')}
+      ${window.capVideo('videos/ch19-couplage/capsule.mp4','Le couplage des générateurs (1 min 30)',1)}
       <p class="lead">Une pile ou un accumulateur possède une <b>résistance interne r</b>. En charge, le courant traverse à la fois la résistance extérieure R et la résistance interne r.</p>
       ${fbox('I = E / (R + r)','le courant débité par un générateur de f.é.m. E et de résistance interne r')}
       ${terrain('C’est pour ça qu’une batterie fatiguée affiche encore 12 V au voltmètre (à vide), mais s’effondre dès qu’on démarre : sa résistance interne a augmenté.')}`},
@@ -124,6 +127,7 @@ defAF(20, {
   caps:[
     {id:'A20a', sec:'20.1 — 20.2', t:'Les multiples et sous-multiples', quiz:['A20aq1'], ex:{keys:['A20conv'], lbl:'Les conversions'},
      body:()=>`${progRef(['Compétence transversale — outil de calcul, en lien avec le cours de mathématique (Méthodologie, p. 24)'],'p. 24')}
+      ${window.capVideo('videos/ch20-multiples/capsule.mp4','Multiples et sous-multiples (1 min 28)',1)}
       <p class="lead">Pour simplifier l’écriture des nombres très grands ou très petits, on utilise des préfixes : on parle d’un différentiel de trente milliampères, d’un disque dur de deux téraoctets… Ces abréviations facilitent les calculs et limitent les erreurs.</p>
       ${tbl(['Préfixe','Symbole','Puissance de 10','Valeur'],[['Exa','E','10¹⁸','1 000 000 000 000 000 000'],['Péta','P','10¹⁵','1 000 000 000 000 000'],['Téra','T','10¹²','1 000 000 000 000'],['Giga','G','10⁹','1 000 000 000'],['Méga','M','10⁶','1 000 000'],['Kilo','k','10³','1 000'],['Unité','—','10⁰','1'],['Milli','m','10⁻³','0,001'],['Micro','µ','10⁻⁶','0,000 001'],['Nano','n','10⁻⁹','0,000 000 001'],['Pico','p','10⁻¹²','0,000 000 000 001'],['Femto','f','10⁻¹⁵','—'],['Atto','a','10⁻¹⁸','—']])}
       <p class="small muted">Dans les réponses, tu peux écrire une puissance de dix avec ^ : <code>3 . 10^-2</code> ou <code>0,03</code>, c’est accepté.</p>

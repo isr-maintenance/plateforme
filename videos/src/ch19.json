@@ -1,0 +1,73 @@
+{
+ "id": "ch19-couplage",
+ "titre": "Couplage des générateurs",
+ "chapitre": "CHAPITRE 19 · COUPLAGE DES GÉNÉRATEURS",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "cg_intro",
+   "texte": "Dans cette capsule, tu vas coupler des piles en série et en parallèle, et voir ce que ça change.",
+   "voix": "Dans cette capsule, tu vas coupler des piles en série et en parallèle, et voir ce que ça change."
+  },
+  {
+   "cle": "s02",
+   "scene": "cg_reel",
+   "texte": "Un générateur réel a une résistance interne r. En charge, le courant traverse R et r : I = E / (R + r).",
+   "voix": "Un générateur réel a une résistance interne r. En charge, le courant traverse grand R et petit r : I égale E divisé par R plus r."
+  },
+  {
+   "cle": "s03",
+   "scene": "cg_terrain",
+   "texte": "Une batterie fatiguée affiche encore 12 V à vide, mais s’effondre au démarrage : sa résistance interne a augmenté.",
+   "voix": "Une batterie fatiguée affiche encore douze volts à vide, mais s’effondre au démarrage : sa résistance interne a augmenté."
+  },
+  {
+   "cle": "s04",
+   "scene": "cg_serie",
+   "texte": "En série, on relie le moins du premier élément au plus du suivant. À vide, les f.é.m. s’additionnent : trois piles de 1,5 V donnent 4,5 V.",
+   "voix": "En série, on relie le moins du premier élément au plus du suivant. À vide, les forces électromotrices s’additionnent : trois piles de un virgule cinq volt donnent quatre virgule cinq volts."
+  },
+  {
+   "cle": "s05",
+   "scene": "cg_serie2",
+   "texte": "En charge, les résistances internes s’additionnent aussi : I = n E / (R + n r).",
+   "voix": "En charge, les résistances internes s’additionnent aussi : I égale n E divisé par R plus n r."
+  },
+  {
+   "cle": "s06",
+   "scene": "cg_para",
+   "texte": "En parallèle, on relie les plus ensemble et les moins ensemble. À vide, la tension reste celle d’une seule pile : 1,5 V.",
+   "voix": "En parallèle, on relie les plus ensemble et les moins ensemble. À vide, la tension reste celle d’une seule pile : un virgule cinq volt."
+  },
+  {
+   "cle": "s07",
+   "scene": "cg_para",
+   "texte": "En charge, la résistance interne équivalente est divisée par n : I = E / (R + r / n).",
+   "voix": "En charge, la résistance interne équivalente est divisée par n : I égale E divisé par R plus r sur n."
+  },
+  {
+   "cle": "s08",
+   "scene": "cg_diff",
+   "texte": "On ne couple en parallèle que des éléments de même f.é.m. : sinon la plus forte débite dans la plus faible, qui s’use sans rien alimenter.",
+   "voix": "On ne couple en parallèle que des éléments de même force électromotrice : sinon la plus forte débite dans la plus faible, qui s’use sans rien alimenter."
+  },
+  {
+   "cle": "s09",
+   "scene": "cg_comp",
+   "texte": "Série : plus de tension. Parallèle : un générateur qui s’essouffle moins.",
+   "voix": "Série : plus de tension. Parallèle : un générateur qui s’essouffle moins."
+  },
+  {
+   "cle": "s10",
+   "scene": "cg_recap",
+   "texte": "À retenir : série, les f.é.m. s’additionnent ; parallèle, la tension ne change pas et r est divisée.",
+   "voix": "À retenir : série, les forces électromotrices s’additionnent ; parallèle, la tension ne change pas et r est divisée."
+  },
+  {
+   "cle": "s11",
+   "scene": "cg_recap",
+   "texte": "À toi de jouer : les tensions à vide, puis série ou parallèle.",
+   "voix": "À toi de jouer : les tensions à vide, puis série ou parallèle."
+  }
+ ]
+}

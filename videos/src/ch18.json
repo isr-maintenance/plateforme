@@ -1,0 +1,73 @@
+{
+ "id": "ch18-accumulateurs",
+ "titre": "Les accumulateurs",
+ "chapitre": "CHAPITRE 18 · LES ACCUMULATEURS",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "ac_intro",
+   "texte": "Dans cette capsule, tu vas voir comment un accumulateur se charge et se décharge, ses organes, ses tensions et son état de charge.",
+   "voix": "Dans cette capsule, tu vas voir comment un accumulateur se charge et se décharge, ses organes, ses tensions et son état de charge."
+  },
+  {
+   "cle": "s02",
+   "scene": "ac_princ",
+   "texte": "À la charge, un courant continu transforme deux matières : l’accumulateur emmagasine de l’énergie. À l’utilisation, la transformation inverse la restitue.",
+   "voix": "À la charge, un courant continu transforme deux matières : l’accumulateur emmagasine de l’énergie. À l’utilisation, la transformation inverse la restitue."
+  },
+  {
+   "cle": "s03",
+   "scene": "ac_charge",
+   "texte": "On raccorde le plus du chargeur au plus de l’accumulateur, le moins au moins, en courant continu.",
+   "voix": "On raccorde le plus du chargeur au plus de l’accumulateur, le moins au moins, en courant continu."
+  },
+  {
+   "cle": "s04",
+   "scene": "ac_organes",
+   "texte": "Un accumulateur au plomb a quatre organes : le bac, l’électrolyte, les électrodes et les séparateurs.",
+   "voix": "Un accumulateur au plomb a quatre organes : le bac, l’électrolyte, les électrodes et les séparateurs."
+  },
+  {
+   "cle": "s05",
+   "scene": "ac_gel",
+   "texte": "Avec un électrolyte liquide, il faut rajouter de l’eau distillée. Avec un électrolyte gélifié, plus d’entretien.",
+   "voix": "Avec un électrolyte liquide, il faut rajouter de l’eau distillée. Avec un électrolyte gélifié, plus d’entretien."
+  },
+  {
+   "cle": "s06",
+   "scene": "ac_tens",
+   "texte": "Chaque élément donne 2,4 V en pleine charge et 1,8 V au seuil minimum. Une batterie de 6 éléments : 14,4 V puis 10,8 V.",
+   "voix": "Chaque élément donne deux virgule quatre volts en pleine charge et un virgule huit volt au seuil minimum. Une batterie de six éléments : quatorze virgule quatre volts, puis dix virgule huit volts."
+  },
+  {
+   "cle": "s07",
+   "scene": "ac_danger",
+   "texte": "Ne jamais décharger en dessous de 1,8 V par élément : les plaques se détériorent.",
+   "voix": "Ne jamais décharger en dessous de un virgule huit volt par élément : les plaques se détériorent."
+  },
+  {
+   "cle": "s08",
+   "scene": "ac_cap",
+   "texte": "Un accumulateur se caractérise par sa tension moyenne : 6, 12, 24 ou 48 V, et par sa capacité nominale en ampères-heures.",
+   "voix": "Un accumulateur se caractérise par sa tension moyenne : six, douze, vingt-quatre ou quarante-huit volts, et par sa capacité nominale en ampères-heures."
+  },
+  {
+   "cle": "s09",
+   "scene": "ac_ind",
+   "texte": "Fin de charge : l’électrolyte bouillonne, la densité est de 28 degrés Baumé. Fin de décharge : 1,8 V par élément, 20 degrés Baumé.",
+   "voix": "Fin de charge : l’électrolyte bouillonne, la densité est de vingt-huit degrés Baumé. Fin de décharge : un virgule huit volt par élément, vingt degrés Baumé."
+  },
+  {
+   "cle": "s10",
+   "scene": "ac_recap",
+   "texte": "À retenir : réaction réversible, plus sur plus, moins sur moins, jamais sous 1,8 V par élément.",
+   "voix": "À retenir : réaction réversible, plus sur plus, moins sur moins, jamais sous un virgule huit volt par élément."
+  },
+  {
+   "cle": "s11",
+   "scene": "ac_recap",
+   "texte": "À toi de jouer : charge et décharge dans l’ordre, organes, calculs de tension, indices.",
+   "voix": "À toi de jouer : charge et décharge dans l’ordre, organes, calculs de tension, indices."
+  }
+ ]
+}

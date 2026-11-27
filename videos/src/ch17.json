@@ -1,0 +1,73 @@
+{
+ "id": "ch17-piles",
+ "titre": "Les piles",
+ "chapitre": "CHAPITRE 17 · LES PILES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "pl_intro",
+   "texte": "Dans cette capsule, tu vas voir comment fonctionne une pile : f.é.m., électrodes, polarisation, pile sèche et pile bouton.",
+   "voix": "Dans cette capsule, tu vas voir comment fonctionne une pile : force électromotrice, électrodes, polarisation, pile sèche et pile bouton."
+  },
+  {
+   "cle": "s02",
+   "scene": "pl_gen",
+   "texte": "Un générateur a deux caractéristiques : la force électromotrice, mesurée à vide, et la résistance interne, qui représente ses pertes.",
+   "voix": "Un générateur a deux caractéristiques : la force électromotrice, mesurée à vide, et la résistance interne, qui représente ses pertes."
+  },
+  {
+   "cle": "s03",
+   "scene": "pl_elec",
+   "texte": "Une pile, c’est deux électrodes dans un électrolyte : ici du cuivre pour le pôle plus, du zinc pour le pôle moins. On obtient environ 1,08 V.",
+   "voix": "Une pile, c’est deux électrodes dans un électrolyte : ici du cuivre pour le pôle plus, du zinc pour le pôle moins. On obtient environ un virgule zéro huit volt."
+  },
+  {
+   "cle": "s04",
+   "scene": "pl_fam",
+   "texte": "La pile est un générateur primaire : sa réaction chimique est irréversible. L’accumulateur est secondaire : il se recharge.",
+   "voix": "La pile est un générateur primaire : sa réaction chimique est irréversible. L’accumulateur est secondaire : il se recharge."
+  },
+  {
+   "cle": "s05",
+   "scene": "pl_pol",
+   "texte": "Quand la pile débite, des bulles d’hydrogène isolent le cuivre de l’électrolyte : la tension chute, la pile est polarisée.",
+   "voix": "Quand la pile débite, des bulles d’hydrogène isolent le cuivre de l’électrolyte : la tension chute, la pile est polarisée."
+  },
+  {
+   "cle": "s06",
+   "scene": "pl_pol",
+   "texte": "Un dépolarisant, ajouté à l’électrolyte, neutralise l’hydrogène.",
+   "voix": "Un dépolarisant, ajouté à l’électrolyte, neutralise l’hydrogène."
+  },
+  {
+   "cle": "s07",
+   "scene": "pl_seche",
+   "texte": "Pile sèche saline : le récipient en zinc est le pôle moins, le crayon de charbon est le pôle plus, entouré du dépolarisant, dans un électrolyte en gel.",
+   "voix": "Pile sèche saline : le récipient en zinc est le pôle moins, le crayon de charbon est le pôle plus, entouré du dépolarisant, dans un électrolyte en gel."
+  },
+  {
+   "cle": "s08",
+   "scene": "pl_bouton",
+   "texte": "Une pile bouton est minuscule : la CR 2032 mesure 20 mm de diamètre et 3,2 mm d’épaisseur. L’oxygène de l’oxyde neutralise l’hydrogène : pas de polarisation.",
+   "voix": "Une pile bouton est minuscule : la c r deux mille trente-deux mesure vingt millimètres de diamètre et trois virgule deux millimètres d’épaisseur. L’oxygène de l’oxyde neutralise l’hydrogène : pas de polarisation."
+  },
+  {
+   "cle": "s09",
+   "scene": "pl_carac",
+   "texte": "Une pile se caractérise par sa tension en volts et sa capacité en ampères-heures. Tensions courantes : 1,5 – 3 – 4,5 – 6 – 9 V.",
+   "voix": "Une pile se caractérise par sa tension en volts et sa capacité en ampères-heures. Tensions courantes : un virgule cinq, trois, quatre virgule cinq, six, neuf volts."
+  },
+  {
+   "cle": "s10",
+   "scene": "pl_recap",
+   "texte": "À retenir : f.é.m. à vide, résistance interne, pile irréversible, dépolarisant contre la polarisation.",
+   "voix": "À retenir : force électromotrice à vide, résistance interne, pile irréversible, dépolarisant contre la polarisation."
+  },
+  {
+   "cle": "s11",
+   "scene": "pl_recap",
+   "texte": "À toi de jouer : pile ou accumulateur, ordre des événements, constitution d’une pile sèche.",
+   "voix": "À toi de jouer : pile ou accumulateur, ordre des événements, constitution d’une pile sèche."
+  }
+ ]
+}

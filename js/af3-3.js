@@ -188,6 +188,7 @@ defAF(16, {
   caps:[
     {id:'A16a', sec:'16.1', t:'Le voltmètre et sa résistance additionnelle', quiz:['A16aq1','A16aq2'], ex:{keys:['A16vo'], lbl:'Les exemples du cours'},
      body:()=>`${progRef(['Placer et utiliser correctement un ampèremètre, un voltmètre et un ohmmètre'],'pp. 25-26')}
+      ${window.capVideo('videos/ch16-appareils/capsule.mp4','Les appareils de mesures (1 min 32)',1)}
       <p class="lead">Un voltmètre, c’est un appareil de mesure à <b>cadre mobile</b> auquel on ajoute une résistance en série.</p>
       <p>Le cadre mobile mesure le courant qui le traverse : la position de l’aiguille est proportionnelle à ce courant. Le plus utilisé dévie à fond d’échelle pour <b>50 µA</b>. Il a une résistance R<sub>m</sub>, un courant de déviation maximum I<sub>m</sub> et une tension de déviation maximum V<sub>m</sub> = R<sub>m</sub> . I<sub>m</sub>.</p>
       <p>Seul, il ne mesure que de très petites tensions. Une résistance en série, appelée <b>multiplicateur</b> (R<sub>a</sub>), en fait un voltmètre utile : elle prend la tension en trop, V<sub>a</sub> = V<sub>t</sub> − V<sub>m</sub>, parcourue par le même courant I<sub>m</sub>.</p>

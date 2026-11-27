@@ -1,0 +1,67 @@
+{
+ "id": "ch20-multiples",
+ "titre": "Multiples et sous-multiples",
+ "chapitre": "CHAPITRE 20 · MULTIPLES ET SOUS-MULTIPLES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "pf_intro",
+   "texte": "Dans cette capsule, tu vas utiliser les préfixes et les puissances de dix pour écrire tes résultats simplement.",
+   "voix": "Dans cette capsule, tu vas utiliser les préfixes et les puissances de dix pour écrire tes résultats simplement."
+  },
+  {
+   "cle": "s02",
+   "scene": "pf_pref",
+   "texte": "Un différentiel de 30 mA, un disque de 2 To : les préfixes évitent les nombres trop longs. Méga, kilo, milli, micro, nano.",
+   "voix": "Un différentiel de trente milliampères, un disque de deux téraoctets : les préfixes évitent les nombres trop longs. Méga, kilo, milli, micro, nano."
+  },
+  {
+   "cle": "s03",
+   "scene": "pf_pref",
+   "texte": "Kilo, 10³. Méga, 10⁶. Milli, 10⁻³. Micro, 10⁻⁶. Nano, 10⁻⁹.",
+   "voix": "Kilo, dix puissance trois. Méga, dix puissance six. Milli, dix puissance moins trois. Micro, dix puissance moins six. Nano, dix puissance moins neuf."
+  },
+  {
+   "cle": "s04",
+   "scene": "pf_conv",
+   "texte": "30 mA, c’est 0,03 A. 2,2 kΩ, c’est 2 200 Ω. 150 µA, c’est 0,000 15 A.",
+   "voix": "Trente milliampères, c’est zéro virgule zéro trois ampère. Deux virgule deux kilo-aums, c’est deux mille deux cents aums. Cent cinquante microampères, c’est zéro virgule zéro zéro zéro un cinq ampère."
+  },
+  {
+   "cle": "s05",
+   "scene": "pf_prod",
+   "texte": "Produit de même base : on additionne les exposants. 3·10⁶ × 5·10³ = 15·10⁹.",
+   "voix": "Produit de même base : on additionne les exposants. Trois fois dix puissance six, fois cinq fois dix puissance trois, égale quinze fois dix puissance neuf."
+  },
+  {
+   "cle": "s06",
+   "scene": "pf_quot",
+   "texte": "Quotient de même base : on soustrait les exposants. 10⁶ / 10⁸ = 10⁻².",
+   "voix": "Quotient de même base : on soustrait les exposants. Dix puissance six divisé par dix puissance huit égale dix puissance moins deux."
+  },
+  {
+   "cle": "s07",
+   "scene": "pf_puiss",
+   "texte": "Puissance d’une puissance : on multiplie les exposants. Racine : on divise l’exposant.",
+   "voix": "Puissance d’une puissance : on multiplie les exposants. Racine : on divise l’exposant."
+  },
+  {
+   "cle": "s08",
+   "scene": "pf_ex",
+   "texte": "Tihange : 870 MW + 1 030 MW + 1 200 MW = 3 100 MW, soit 3,1·10⁹ W.",
+   "voix": "Tihange : huit cent septante mégawatts, plus mille trente, plus mille deux cents, égale trois mille cent mégawatts, soit trois virgule un fois dix puissance neuf watts."
+  },
+  {
+   "cle": "s09",
+   "scene": "pf_recap",
+   "texte": "À retenir : un préfixe est une puissance de dix. Produit : on additionne les exposants. Quotient : on les soustrait.",
+   "voix": "À retenir : un préfixe est une puissance de dix. Produit : on additionne les exposants. Quotient : on les soustrait."
+  },
+  {
+   "cle": "s10",
+   "scene": "pf_recap",
+   "texte": "À toi de jouer : les conversions, les puissances, puis trois exercices.",
+   "voix": "À toi de jouer : les conversions, les puissances, puis trois exercices."
+  }
+ ]
+}

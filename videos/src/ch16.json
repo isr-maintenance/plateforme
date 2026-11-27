@@ -1,0 +1,79 @@
+{
+ "id": "ch16-appareils",
+ "titre": "Les appareils de mesures",
+ "chapitre": "CHAPITRE 16 · LES APPAREILS DE MESURES",
+ "segments": [
+  {
+   "cle": "s01",
+   "scene": "vm_intro",
+   "texte": "Dans cette capsule, tu vas transformer un appareil à cadre mobile en voltmètre, puis en ampèremètre.",
+   "voix": "Dans cette capsule, tu vas transformer un appareil à cadre mobile en voltmètre, puis en ampèremètre."
+  },
+  {
+   "cle": "s02",
+   "scene": "vm_cadre",
+   "texte": "Le cadre mobile dévie à fond d’échelle pour 50 µA. Sa résistance est de 2 kΩ : sa tension maximum est donc de 0,1 V.",
+   "voix": "Le cadre mobile dévie à fond d’échelle pour cinquante microampères. Sa résistance est de deux kilo-aums : sa tension maximum est donc de zéro virgule un volt."
+  },
+  {
+   "cle": "s03",
+   "scene": "vm_mult",
+   "texte": "Pour mesurer une tension plus grande, on place une résistance en série : le multiplicateur. Elle prend la tension en trop.",
+   "voix": "Pour mesurer une tension plus grande, on place une résistance en série : le multiplicateur. Elle prend la tension en trop."
+  },
+  {
+   "cle": "s04",
+   "scene": "vm_mult",
+   "texte": "Ra = (Vt − Vm) / Im : 18 kΩ pour 1 V, 198 kΩ pour 10 V, presque 2 MΩ pour 100 V.",
+   "voix": "R a égale V t moins V m, divisé par I m : dix-huit kilo-aums pour un volt, cent nonante-huit kilo-aums pour dix volts, presque deux méga-aums pour cent volts."
+  },
+  {
+   "cle": "s05",
+   "scene": "vm_sens",
+   "texte": "Un cadre de 50 µA donne toujours un voltmètre de 20 kΩ par volt : c’est sa sensibilité.",
+   "voix": "Un cadre de cinquante microampères donne toujours un voltmètre de vingt kilo-aums par volt : c’est sa sensibilité."
+  },
+  {
+   "cle": "s06",
+   "scene": "vm_shunt",
+   "texte": "Pour mesurer un courant plus grand, on place une résistance en parallèle : le shunt. Il détourne presque tout le courant.",
+   "voix": "Pour mesurer un courant plus grand, on place une résistance en parallèle : le shunt. Il détourne presque tout le courant."
+  },
+  {
+   "cle": "s07",
+   "scene": "vm_shunt",
+   "texte": "Même tension aux bornes du cadre et du shunt : Rs = (Rm × Im) / (IT − Im).",
+   "voix": "Même tension aux bornes du cadre et du shunt : R s égale R m fois I m, divisé par I t moins I m."
+  },
+  {
+   "cle": "s08",
+   "scene": "vm_gam",
+   "texte": "Calibre 1 mA : 105 Ω. Calibre 10 mA : 10 Ω. Calibre 100 mA : 1 Ω. Calibre 1 A : 0,1 Ω.",
+   "voix": "Calibre un milliampère : cent cinq aums. Dix milliampères : dix aums. Cent milliampères : un aum. Un ampère : zéro virgule un aum."
+  },
+  {
+   "cle": "s09",
+   "scene": "vm_gam",
+   "texte": "Plus le calibre est grand, plus le shunt est petit.",
+   "voix": "Plus le calibre est grand, plus le shunt est petit."
+  },
+  {
+   "cle": "s10",
+   "scene": "vm_comp",
+   "texte": "Voltmètre : une résistance en série. Ampèremètre : un shunt en parallèle.",
+   "voix": "Voltmètre : une résistance en série. Ampèremètre : un shunt en parallèle."
+  },
+  {
+   "cle": "s11",
+   "scene": "vm_recap",
+   "texte": "À retenir : multiplicateur en série pour le voltmètre, shunt en parallèle pour l’ampèremètre.",
+   "voix": "À retenir : multiplicateur en série pour le voltmètre, shunt en parallèle pour l’ampèremètre."
+  },
+  {
+   "cle": "s12",
+   "scene": "vm_recap",
+   "texte": "À toi de jouer : les exemples du cours, puis trois exercices.",
+   "voix": "À toi de jouer : les exemples du cours, puis trois exercices."
+  }
+ ]
+}
