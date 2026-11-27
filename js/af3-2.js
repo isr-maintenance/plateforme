@@ -9,6 +9,7 @@
 const ALPHA_CU=3.93e-3, ALPHA_C=-0.4e-3;
 /* capsule vidéo d'un chapitre (fichiers dans videos/, sources dans videos/src/) */
 const capVideo = (src, titre, v) => `<div class="figure" style="padding:10px"><video controls preload="metadata" playsinline style="width:100%;border-radius:10px;background:#0f131a;display:block" src="${src}?v=${v}"></video><div class="small muted" style="margin-top:6px">🎬 Capsule vidéo : ${titre} · voix de synthèse : Kokoro, voix ff_siwis (corpus SIWIS, Université d’Édimbourg)</div></div>`;
+window.capVideo = capVideo;
 const lcd = (v,u,mode) => `<div class="meter" style="max-width:260px;margin:0 auto"><div class="lcd">${v}<small> ${u}</small></div><div class="mode">${mode}</div></div>`;
 const selRow = (lbl, key, opts, cur) => `<div class="row wrap" style="gap:6px;align-items:center"><span class="small" style="min-width:90px"><b>${lbl}</b></span><div class="seg">${opts.map(([v,l])=>`<button class="${String(cur)===String(v)?'on':''}" data-${key}="${v}">${l}</button>`).join('')}</div></div>`;
 

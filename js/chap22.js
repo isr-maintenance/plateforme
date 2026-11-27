@@ -210,6 +210,7 @@ defChapter({
       <div class="note bad" style="margin-top:14px"><b>La règle absolue</b>Dans une formule, on n'introduit que des unités de base : volts, ampères, ohms, secondes. On convertit d'abord, on calcule ensuite. Écrire 230 ÷ 1,5 parce que la résistance vaut 1,5 kΩ donne 153 au lieu de 0,153 : l'erreur est d'un facteur mille.</div>
       ${exbox('b4c','Drill — les conversions','Écris le résultat dans l’unité demandée. Virgule ou point, comme tu veux.')}
       <h3>La quantité d'électricité</h3>
+      ${window.capVideo('videos/ch06-quantite/capsule.mp4','La quantité d’électricité (2 min 21)',3)}
       <p>Le courant dit ce qui passe à chaque seconde. Pour savoir combien est passé en tout, il faut aussi la durée.</p>
       ${formula('Q = I × t','Q en coulombs (C) si t est en secondes, en ampères-heures (Ah) si t est en heures. 1 Ah = 3 600 C.')}
       <p class="small">C'est l'unité des batteries. Une batterie de 90 Ah alimente un circuit de secours de 1,5 A pendant 60 heures, ou un circuit de 3 A pendant 30 heures. C'est aussi ce qui fixe l'autonomie d'un onduleur ou d'une lampe de chantier.</p>
@@ -226,7 +227,8 @@ defChapter({
          {q:`Batterie ${v.g[0]} Ah, circuit de ${v.g[1]} A : autonomie théorique`,unit:'h',ans:v.g[0]/v.g[1]}]}))(vx('b4q',{a:[[2,30],[3,45],[4,60]],b:[[0.5,10],[0.25,5],[1.5,20]],c:[[3,8],[2,6],[5,4]],d:[[60,4],[48,3],[90,6]],e:[[45,10],[36,8],[72,12]],f:[[1.5,2],[2.5,3],[0.5,4]],g:[[74,5],[60,4],[95,8]]}));
      }},
     {id:'b5', sec:'2.2.4', t:'La loi d’Ohm', pdf:28, quiz:['b5q1','b5q2'], ex:{keys:['b5ohm'], lbl:'Drill de la loi d’Ohm'},
-     body:()=>`<p class="lead">Les trois grandeurs sont liées par une relation unique — la formule la plus utilisée du métier.</p>
+     body:()=>`${window.capVideo('videos/ch08-ohm/capsule.mp4','La loi d’Ohm (2 min 03)',2)}
+      <p class="lead">Les trois grandeurs sont liées par une relation unique — la formule la plus utilisée du métier.</p>
       ${formula('U = R × I','La tension (en V) est égale à la résistance (en Ω) multipliée par le courant (en A)')}
       ${exbox('ohmlab','Le triangle de la loi d’Ohm','Choisis ce que tu cherches et fais varier les deux autres grandeurs.')}
       ${tbl(['','Énoncé','Résolution'],[['1','Une résistance chauffante de 100 Ω est branchée sur 230 V. Quel courant ?','I = U ÷ R = 230 ÷ 100 = 2,3 A'],['2','Un élément chauffant absorbe 10 A sous 230 V. Sa résistance ?','R = U ÷ I = 230 ÷ 10 = 23 Ω'],['3','Un long conducteur de 0,05 Ω transporte 20 A. Tension perdue ?','U = R × I = 0,05 × 20 = 1 V perdu en chaleur dans le câble']])}
@@ -320,6 +322,7 @@ defChapter({
       ${tbl(['Section','Courant admissible indicatif','Usage typique'],[['0,25 mm²','Environ 2 A','Électronique, bus, signal'],['0,5 mm²','Environ 3 A','Signalisation, entrées/sorties d’automate'],['0,75 mm²','Environ 6 A','Circuits de commande'],['1 mm²','Environ 10 A','Commande, signalisation'],['1,5 mm²','Environ 16 A','Éclairage, petits circuits'],['2,5 mm²','Environ 20 A','Prises, petits départs moteurs'],['4 mm²','Environ 25 A','Départs de puissance'],['6 mm² et plus','Au-delà de 32 A','Alimentations, jeux de barres']])}
       <div class="note warn" style="margin-top:14px"><b>Valeurs indicatives</b>Le courant réellement admissible dépend du mode de pose, de la température et du groupement des câbles : on ne choisit pas une section de mémoire, on la vérifie dans les tables. Un câble sous-dimensionné ne coupe pas comme un fusible : il chauffe pendant des mois, l'isolant vieillit, puis un jour il y a un feu.</div>
       <h3>La loi de Pouillet</h3>
+      ${window.capVideo('videos/ch07-pouillet/capsule.mp4','La loi de Pouillet (2 min 28)',2)}
       ${formula('R = ρ × L ÷ S','R en ohms · ρ la résistivité en Ω·mm²/m · L la longueur en mètres · S la section en mm²')}
       <p>Plus le câble est long, plus il résiste ; plus il est gros, moins il résiste ; à dimensions égales, tout dépend du métal : cuivre 0,018, aluminium 0,029, fer 0,10 Ω·mm²/m à 20 °C. Mais la résistivité <b>augmente avec la température</b> — loi de Matthiessen, Rt = R0 × (1 + α × t), avec α = 0,004 pour le cuivre. Pour les calculs d'installation, on retient donc <b>ρ = 0,0225</b> pour le cuivre et <b>0,036</b> pour l'aluminium.</p>
       ${terrain('Les trois enroulements d’un moteur : si l’un mesure nettement moins que les deux autres, c’est Pouillet qui parle — une spire en court-circuit raccourcit la longueur. Et une rallonge de 50 m en 1,5 mm² fait mal démarrer une meuleuse qui tourne parfaitement branchée au mur.')}
