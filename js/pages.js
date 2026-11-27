@@ -222,7 +222,8 @@ function capHTML(id){
   </div>
   <div class="cap-foot">
     ${prev?`<button class="btn" data-cap="${prev.id}">← ${prev.t}</button>`:'<span></span>'}
-    <span class="small" id="capstatus">${capStatus(cap)}</span>
+    <span class="stack" style="align-items:center;gap:6px;text-align:center"><span class="small" id="capstatus">${capStatus(cap)}</span>
+      <button class="btn sm" data-refaire="${cap.id}" title="Effacer tes réponses de cette capsule pour la refaire">↺ Refaire cette capsule</button></span>
     ${next?`<button class="btn primary" data-cap="${next.id}">${next.t} →</button>`:ch.legacy?`<button class="btn primary" data-cap="test">Passer au test →</button>`:`<button class="btn primary" data-cap="syn:${ch.num}">${ch.synT||'Synthèse et évaluation'} →</button>`}
   </div>`;
 }
@@ -240,6 +241,11 @@ function afterPlayer(){
   m.querySelectorAll('[data-qopt]').forEach(b=>b.onclick=()=>answerQuiz(b.dataset.qopt,+b.dataset.i));
   m.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto));
   m.querySelectorAll('[data-signal]').forEach(b=>b.onclick=()=>signalForm(b.dataset.signal));
+  m.querySelectorAll('[data-refaire]').forEach(b=>b.onclick=()=>{
+    const c=capById(b.dataset.refaire); if(!c) return;
+    if(!capHasWork(c)){ toast('Rien à refaire pour l’instant : tu n’as pas encore répondu dans cette capsule.'); return; }
+    if(!confirm(`Refaire la capsule « ${c.t} » ?\n\nTes réponses et la validation de cette capsule seront effacées pour que tu puisses recommencer. Ton prof verra que tu l’as refaite.`)) return;
+    capReset(c); toast('Capsule remise à zéro : tu peux la refaire.'); render(); window.scrollTo(0,0); });
   const cap=S.view.cap;
   if(cap==='test') bindTest(m); else if(cap==='fv') bindFV(m); else if(cap.startsWith('syn:')) m.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>openCap(b.dataset.goto)); else mountCap(cap);
   startClock();

@@ -51,6 +51,39 @@ function exRate(k){ const p=P(); if(p.ex[k]) return; if(!p.tr||typeof p.tr!=='ob
 function exSet(k){ const p=P(); if(!p.ex[k]){ p.ex[k]=true; save(); } updateTocChecks(); }
 function DR(){ const p=P(); if(!p.dr||typeof p.dr!=='object') p.dr={}; return p.dr; }
 
+/* ---------- « Refaire cette capsule » ----------
+   L'élève efface ses réponses et la validation d'une capsule pour la refaire. On garde la trace : les essais ratés (p.tr)
+   et le nombre d'essais des questions restent, donc la note formative ne monte pas par magie ; le compteur p.rs[capId]
+   = {n: nombre de fois, t: date} est visible du prof (Suivi) et sert à la fusion entre appareils (mergeInto). */
+function capKeys(cap){
+  const ex=cap.ex; if(ex && typeof ex==='object') return { ex:ex.keys||[], steps:false, ohm:false };
+  const m={ parts:['parts'], coil:['coil'], pins:['pins1','pins2'], calc:['calc'] };
+  return { ex:m[ex]||[], steps:ex==='steps', ohm:ex==='ohm' };
+}
+function capHasWork(cap){
+  const p=P(), k=capKeys(cap), dr=p.dr||{};
+  return cap.quiz.some(id=>p.quiz[id] && p.quiz[id].sel!=null)
+    || k.ex.some(x=>p.ex[x] || (dr[x] && typeof dr[x]==='object' && Object.keys(dr[x]).some(f=>f!=='r' && String(dr[x][f]||'').trim())))
+    || (k.steps && p.steps.length>0) || (k.ohm && Object.keys(p.ohm).length>0);
+}
+/* efface le travail de la capsule dans la progression p (sans compter la réinitialisation) */
+function capWipe(cap, p){
+  const k=capKeys(cap), dr=p.dr||{};
+  cap.quiz.forEach(id=>{ const a=p.quiz[id]; if(a) p.quiz[id]={ sel:null, ok:false, first:false, tries:a.tries||0 }; });
+  k.ex.forEach(x=>{ delete p.ex[x]; delete dr[x]; delete WS[x]; });
+  if(k.steps) p.steps=[];
+  if(k.ohm) p.ohm={};
+}
+function capReset(cap){
+  const p=P();
+  if(!p.tr||typeof p.tr!=='object') p.tr={};
+  capKeys(cap).ex.forEach(x=>{ if(p.ex[x]) p.tr[x]=(p.tr[x]||0)+1; });   // un exercice refait compte comme un nouvel essai : la note ne remonte pas à 10 sur la même capsule
+  capWipe(cap, p);
+  if(!p.rs||typeof p.rs!=='object') p.rs={};
+  const r=p.rs[cap.id]||{ n:0 }; p.rs[cap.id]={ n:r.n+1, t:Date.now() };
+  save();
+}
+
 /* chapitres ouverts : le prof les ouvre pour sa classe et son cours (Suivi). Par défaut : les trois premiers.
    En 3QEM, les cours techniques sont donnés aux groupes de CT : c'est le groupe de CT de l'élève qui compte. */
 const OUV_DEF={ '4-elec':['2.1','2.2','2.3'], '3em-elec':['0.1','0.2','0.3'], '4-meca':['10.1','10.2','10.3'] };

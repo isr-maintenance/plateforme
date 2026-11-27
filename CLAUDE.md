@@ -53,6 +53,17 @@ Les chapitres 2.1 à 2.11 sont des exemples complets. Copie la structure de `js/
    - ajouter le fichier à la liste `FILES` de `sw.js` et incrémenter `CACHE` (`plateforme-vN` → `plateforme-vN+1`).
 7. **Ouverture** : un chapitre est fermé aux élèves tant que leur prof ne l'ouvre pas (Suivi › « Chapitres ouverts »). Rien à faire dans le code.
 
+## Refaire une capsule (bouton ↺)
+
+- Chaque capsule a un bouton « Refaire cette capsule » (pied de capsule, `data-refaire`, `js/pages.js`). `capReset(cap)` (`js/chapitres.js`) efface les réponses et la validation (`quiz`, `ex`, `dr` des clés de `cap.ex.keys`) ; rien à ajouter dans un nouveau chapitre.
+- **La trace reste** : les essais ratés (`prog.tr`) et le nombre d'essais des questions sont gardés, un exercice refait compte comme un essai de plus : la note formative ne remonte pas à 10. Le compteur `prog.rs[capId] = {n, t}` s'affiche dans Suivi (« ↺ refaite ×N »).
+- **Plusieurs appareils** : `mergeInto` (`js/core.js`) compare les dates `rs[...].t` : la réinitialisation la plus récente gagne, un appareil resté ouvert ne ressuscite pas ce qui a été effacé. Les simulateurs et labos libres (`DR().circ`, etc.) ne sont pas effacés.
+
+## Les capsules vidéo
+
+- Vidéos dans `videos/<chapitre>/capsule.mp4`, lecteur `capVideo(src, titre, v)` en haut de la capsule (`js/af3-2.js`) ; `v` change quand la vidéo change (cache). Les `.mp4` ne passent pas par le cache de `sw.js`.
+- Fabrication : `videos/src/` (scénario JSON `chNN.json` avec `texte` affiché et `voix` à lire, `scene.html` pour les dessins, `render.py` pour le montage). Voix de synthèse Kokoro (ff_siwis) : produite dans la conversation « Banc » d'Olivier, un WAV par phrase nommé d'après sa `cle`. Écrire les mots comme ils se prononcent dans `voix` (« coulon », « ku », « té »). Mention de la voix sous le lecteur.
+
 ## Les cours interactifs
 
 Trois cours ont des chapitres dans la plateforme : **Électricité 4e** (`4-elec`), **Électricité 3QEM** (`3em-elec`, « Ampère & Fils ») et **Mécanique 4e** (`4-meca`).

@@ -73,14 +73,21 @@ const actif = () => document.visibilityState==='visible' && Date.now()-lastAct <
 function mergeInto(a, b){   // a : progression locale (modifiée sur place), b : progression du serveur
   if(!b || typeof b!=='object') return false;
   b = normProg(JSON.parse(JSON.stringify(b))); let ch=false;
-  ['quiz','ex','ohm','atel'].forEach(k=>{ Object.keys(b[k]).forEach(x=>{ if(b[k][x] && !a[k][x]){ a[k][x]=b[k][x]; ch=true; } }); });
+  /* capsules refaites (« Refaire cette capsule ») : la réinitialisation la plus récente gagne, sinon un appareil resté
+     ouvert ressusciterait ce que l'élève vient d'effacer */
+  const bloque=new Set(), ra=(a.rs&&typeof a.rs==='object')?a.rs:(a.rs={}), rb=(b.rs&&typeof b.rs==='object')?b.rs:{};
+  Object.keys(Object.assign({}, ra, rb)).forEach(id=>{ const cap=typeof capById==='function'?capById(id):null; if(!cap) return;
+    const ta=(ra[id]||{}).t||0, tb=(rb[id]||{}).t||0;
+    if(tb>ta){ capWipe(cap, a); cap.quiz.forEach(q=>{ if(b.quiz[q]) a.quiz[q]=b.quiz[q]; }); ra[id]=rb[id]; ch=true; }
+    else if(ta>tb){ cap.quiz.forEach(q=>bloque.add(q)); capKeys(cap).ex.forEach(x=>bloque.add(x)); } });
+  ['quiz','ex','ohm','atel'].forEach(k=>{ Object.keys(b[k]).forEach(x=>{ if(b[k][x] && !a[k][x] && !bloque.has(x)){ a[k][x]=b[k][x]; ch=true; } }); });
   if(!a.tr||typeof a.tr!=='object') a.tr={};
   Object.keys(b.tr||{}).forEach(x=>{ if((b.tr[x]||0) > (a.tr[x]||0)){ a.tr[x]=b.tr[x]; ch=true; } });
   ['steps','visited'].forEach(k=>{ b[k].forEach(x=>{ if(!a[k].includes(x)){ a[k].push(x); ch=true; } }); });
   if((b.sec||0) > (a.sec||0)){ a.sec=b.sec; ch=true; }
   if(b.dr && typeof b.dr==='object'){ if(!a.dr||typeof a.dr!=='object') a.dr={};
     const plein = d => d && typeof d==='object' && Object.keys(d).some(k=>k!=='r' && String(d[k]||'').trim());
-    Object.keys(b.dr).forEach(x=>{ if(a.dr[x]==null){ a.dr[x]=b.dr[x]; ch=true; } else if(!plein(a.dr[x]) && plein(b.dr[x])){ Object.assign(a.dr[x], b.dr[x]); ch=true; } }); }
+    Object.keys(b.dr).forEach(x=>{ if(bloque.has(x)) return; if(a.dr[x]==null){ a.dr[x]=b.dr[x]; ch=true; } else if(!plein(a.dr[x]) && plein(b.dr[x])){ Object.assign(a.dr[x], b.dr[x]); ch=true; } }); }
   if(b.test && b.test.submitted && !(a.test && a.test.submitted)){ a.test=b.test; ch=true; }
   Object.keys(b).forEach(k=>{ if(a[k]===undefined){ a[k]=b[k]; ch=true; } });
   return ch;

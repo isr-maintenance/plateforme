@@ -165,7 +165,7 @@ function voirParcours(mail, co){
         const qOk=d.q.filter(x=>x.essais===0).length, eOk=d.ex.filter(x=>x.ok&&x.essais===0).length;
         const dets=[d.q.length?`questions : ${qOk}/${d.q.length} du 1<sup>er</sup> coup`:'', d.ex.length?`exercices : ${d.ex.filter(x=>x.ok).length}/${d.ex.length} réussis${d.ex.some(x=>x.ok)?`, ${eOk} du 1<sup>er</sup> coup`:''}`:''].filter(Boolean).join(' · ');
         const detEx=d.ex.map((x,i)=>({x,i})).filter(({x})=>x.ok||x.essais).map(({x,i})=>`exercice ${i+1} : ${x.ok?ess(x.essais):`pas encore (${x.essais} essai${x.essais>1?'s':''})`}`).join(' · ');
-        return `<tr><td><span class="tiny muted">${esc(c.sec||'')}</span> ${esc(c.t)}${detEx?`<div class="tiny muted">${detEx}</div>`:''}</td>
+        return `<tr><td><span class="tiny muted">${esc(c.sec||'')}</span> ${esc(c.t)}${detEx?`<div class="tiny muted">${detEx}</div>`:''}${(P().rs||{})[c.id]?`<div class="tiny"><span class="chip warn">↺ refaite ×${P().rs[c.id].n}</span></div>`:''}</td>
           <td>${done?'<span class="cell ok" style="min-width:0">✓ validée</span>':part?'<span class="cell run" style="min-width:0">en cours</span>':'<span class="cell none" style="min-width:0">·</span>'}</td>
           <td class="small">${(done||part)&&dets||'—'}</td><td>${nt!=null?`<b style="color:${nt>=8?'var(--ok)':nt>=5?'var(--amber, #b7791f)':'var(--bad)'}">${fr(nt,1)}</b><span class="tiny muted"> / 10</span>`:'—'}</td></tr>`; }).join('');
       const cn=chapNote(k);
