@@ -154,6 +154,7 @@ defAF(9, {
   caps:[
     {id:'A9a', sec:'9.1 — 9.3', t:'La résistance change avec la température', quiz:['A9aq1','A9aq2'], ex:{keys:['A9exp'], lbl:'Le tableau de l’expérience'},
      body:()=>`${progRef(['Analyser l’influence de la température sur la résistance d’un conducteur (CM2D)','Distinguer les matériaux à coefficient de température positif et négatif (CM2D)','Résoudre des problèmes relatifs à la loi de Mathiessen (CM2D)'],'p. 26')}
+      ${capVideo('videos/ch09-mathiessen/capsule.mp4','La loi de Mathiessen (2 min 34)',1)}
       <p class="lead">Quand la température augmente, l’agitation thermique des molécules augmente, ce qui freine le déplacement des électrons dans la matière.</p>
       <p>Pour la plupart des métaux, la résistance augmente quand la température monte, et diminue quand elle baisse. Certains matériaux ont un <b>coefficient de température négatif</b> : leur résistance diminue quand la température augmente. Ce sont le carbone, les électrolytes et les semi-conducteurs.</p>
       <h3>Expérience 1 : une bobine de cuivre de 1 Ω</h3>
@@ -188,6 +189,7 @@ defAF(10, {
   caps:[
     {id:'A10a', sec:'10.1 — 10.3', t:'La puissance électrique', quiz:['A10aq1','A10aq2'], ex:{keys:['A10mes'], lbl:'Les mesures'},
      body:()=>`${progRef(['Citer et définir la puissance électrique et son unité (CM2D)','Différencier puissance absorbée et puissance utile (CM2D)','Résoudre des problèmes relatifs à la puissance électrique (CM2D)'],'pp. 27-28')}
+      ${capVideo('videos/ch10-puissance/capsule.mp4','La puissance électrique (1 min 58)',1)}
       <p class="lead">Comme la puissance d’une machine, la puissance électrique exprime l’aptitude d’une résistance à transformer l’énergie dans un temps déterminé. Son unité est le <b>watt (W)</b>.</p>
       <p>On la mesure avec deux appareils : l’<b>ampèremètre en série</b> avec le récepteur et le <b>voltmètre en parallèle</b>. La puissance est le produit de la tension lue au voltmètre par l’intensité indiquée par l’ampèremètre.</p>
       <div class="tri-row">${fbox('P = U . I','moyen mnémotechnique : <b>P U I</b>ssance')}${triangle('P','U','I')}</div>
@@ -215,6 +217,7 @@ defAF(11, {
   caps:[
     {id:'A11a', sec:'11.1', t:'La loi de Joule', quiz:['A11aq1','A11aq2'], ex:null,
      body:()=>`${progRef(['Citer et définir l’énergie électrique (CM2D)','Résoudre des problèmes relatifs à la loi de Joule (CM2D)','Expliquer comment limiter les effets néfastes de l’effet Joule (CM2D)'],'p. 28')}
+      ${capVideo('videos/ch11-joule/capsule.mp4','L’effet Joule (2 min 21)',1)}
       <p class="lead">Un conducteur parcouru par un courant dégage de la chaleur et échauffe l’air autour de lui : c’est l’<b>effet Joule</b>. Le radiateur qui chauffe la pièce, c’est aussi l’effet Joule.</p>
       <p>L’énergie fournie à un récepteur quelconque vaut :</p>
       ${fbox('W = U . I . t','W : joules — U : volts — I : ampères — t : secondes')}
