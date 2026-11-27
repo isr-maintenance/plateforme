@@ -30,7 +30,7 @@ const MECA4 = [
   ['La consignation des installations','Électrique, hydraulique, mécanique, pneumatique'],
   ['Le plan d’intervention','Objectif, contenu, élaboration'],
   ['Les éléments mécaniques d’une installation','Caractéristiques techniques'],
-  ['L’outillage du mécanicien de maintenance',''],
+  ['L’outillage du mécanicien de maintenance','Les outils de mesure : pied à coulisse, micromètre, comparateur'],
   // Partie 3 — Mise en situation (UAA1)
   ['L’analyse de risque (A.R.D.M.)','S’arrêter, penser, agir'],
   ['Consigner et déconsigner une installation','Procédures types'],
