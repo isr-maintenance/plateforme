@@ -123,7 +123,7 @@ defChapter({
       ${terrain('Ce facteur de cinq à huit est derrière la moitié des choix d’un départ moteur : courbe C ou D et jamais B, fusible aM et non gG, classe du relais thermique, éclairage qui cligne, câble qui ne tient pas au démarrage. Quand une protection déclenche à la mise en marche mais jamais en fonctionnement, c’est cette pointe qu’il faut regarder — pas la machine.')}
       <p class="small">Le démarrage direct convient aux moteurs de faible et moyenne puissance, sur des machines qui démarrent à vide ou sous faible charge. Au-delà : étoile-triangle, démarreur progressif, variateur — vus les années suivantes. Le réglage du thermique et la courbe du disjoncteur sont traités au chapitre 2.5.</p>
       ${exbox('d5box','Drill — le démarrage direct','Courant de démarrage : de 5 à 8 fois le courant nominal. Puissance triphasée : P = √3 × U × I × cos φ.')}
-      <div class="note" style="margin-top:14px"><b>★ Dessin</b>Tracer le schéma de puissance d'un démarrage direct : chapitre 5 du Cours de dessin électrique, avant le TP É04.</div>`,
+      <div class="note" style="margin-top:14px"><b>★ Dessin</b>L’arrivée, le 24 V et le schéma de puissance d’un démarrage direct : <button class="revoir" data-goto="d9">Dessin 6 →</button>, à la fin de ce chapitre, avant le TP É04.</div>`,
      mount:root=>(v=>mountDrillW(root.querySelector('#d5box'),'d5dr',{rows:[
        ...v.L.flatMap(In=>[{q:`In = ${fr(In,1)} A : pointe minimale (5 × In)`,unit:'A',ans:5*In},{q:'… pointe maximale (8 × In)',unit:'A',ans:8*In}]),
        {q:`Moteur 400 V · ${v.a[0]} A · cos φ ${fr(v.a[1])} : puissance absorbée`,unit:'W',ans:R3*400*v.a[0]*v.a[1]},

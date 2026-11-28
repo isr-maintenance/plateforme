@@ -548,7 +548,7 @@ function capBody(id){
     <div class="card pad"><div class="kicker">Exercice — calcul</div>
       <p><b>Une bobine de relais 24 V continu mesure 480 Ω à l'ohmmètre.</b> Calcule le courant qu'elle absorbe et la puissance qu'elle consomme. La valeur mesurée est-elle normale ?</p>
       <div id="calcbox"></div></div>
-    <div class="note" style="margin-top:14px"><b>★ Dessin</b>Le tracé du schéma de commande à auto-maintien se fait au chapitre 4 du Cours de dessin électrique — 4e année, avec le présent chapitre et avant le TP É03.</div>`;
+    <div class="note" style="margin-top:14px"><b>★ Dessin</b>Les contacts NO et NC, la logique à contacts et le tracé d’une branche à auto-maintien : <button class="revoir" data-goto="d6">Dessin 3 à 5 →</button>, au chapitre 2.4.</div>`;
   }
 }
 function introSVG(on){
