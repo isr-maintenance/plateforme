@@ -47,7 +47,7 @@ defChapter({
       <p>Chaque schéma porte dans son cartouche une lettre : A pour la première version, puis B, C, D… à chaque modification. Un petit tableau garde la trace de chaque indice : date, objet, auteur.</p>
       <div class="note warn"><b>Avant d'intervenir</b>On vérifie que le schéma en main porte le dernier indice : un schéma à l'indice dépassé décrit une machine qui n'existe plus. <b>Après</b>, on ne gomme jamais : on barre l'ancienne valeur pour qu'elle reste lisible, on écrit la nouvelle à côté, on date et on signe.</div>
       ${exbox('f4box','Bonne ou mauvaise pratique ?')}
-      <div class="note" style="margin-top:14px"><b>★ Dessin</b>Tracer le plan d'implantation d'une armoire : chapitre 7 du Cours de dessin électrique, avant les TP É06 et É08.</div>`,
+      <div class="note" style="margin-top:14px"><b>★ Dessin</b>Le plan de bornier et le plan d’implantation : <button class="revoir" data-goto="f6">Dessin 12 →</button>, à la fin de ce chapitre, avant les TP É06 et É08.</div>`,
      mount:root=>mountSortW(root.querySelector('#f4box'),'f4sort',{cats:[['b','Bonne'],['m','Mauvaise']],items:[['Gommer l’ancien réglage et écrire le nouveau','m','On barre pour que l’ancienne valeur reste lisible.'],['Barrer l’ancienne référence, écrire la nouvelle à côté, dater et signer','b'],['Vérifier l’indice du schéma avant d’intervenir','b'],['Garder la modification « dans sa tête » pour la prochaine fois','m'],['Remettre le schéma annoté au responsable','b'],['Travailler avec un schéma à l’indice B quand le dossier est à l’indice D','m']],ok:'Juste.'})},
   ],
   prereq:[

@@ -173,7 +173,7 @@ defChapter({
       <ol class="ctrlq"><li>Lire la plaque et relever le courant nominal <b>du couplage réellement réalisé</b>. C'est cette valeur qui commande tout le reste.</li><li>Choisir le <b>relais thermique</b> dont la plage contient ce courant — et pas seulement le frôle.</li><li>Choisir le <b>disjoncteur</b> : calibre au moins égal au courant nominal, courbe dont le seuil magnétique est franchement au-dessus de la pointe de démarrage.</li><li>Vérifier le <b>pouvoir de coupure</b>, supérieur au court-circuit possible à cet endroit.</li></ol>
       <p class="small muted">Les références ci-dessous sont inventées pour l'exercice, avec des valeurs types. Sur une commande réelle, on travaille sur le catalogue du fournisseur retenu.</p>
       ${exbox('cata','Équipe le départ moteur du TP')}
-      <div class="note" style="margin-top:14px"><b>★ Dessin</b>Tracer le schéma de commande complet : chapitre 6 du Cours de dessin électrique, avant le TP É05.</div>`,
+      <div class="note" style="margin-top:14px"><b>★ Dessin</b>La sécurité positive, le second sens et son verrouillage, la feuille complète : <button class="revoir" data-goto="e9">Dessin 9 →</button>, à la fin de ce chapitre, avant le TP É05.</div>`,
      mount:mountCata},
   ],
   prereq:[

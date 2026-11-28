@@ -356,7 +356,7 @@ defChapter({
       <h3>Les déchets de l'atelier</h3>
       <p class="small">Cuivre au bac cuivre (il se recycle intégralement) ; gaines et embouts ratés aux plastiques ; emballages au carton ; composants remplacés au bac DEEE ; tubes fluorescents en filière séparée (mercure : ne jamais les casser ni les jeter) ; piles en collecte spécifique ; chiffons souillés et huiles en déchets dangereux, jamais à l'évier. L'épreuve évalue que <b>les déchets sont triés</b> et que <b>le poste est rangé et nettoyé</b>.</p>
       ${exbox('b10d','Dans quel bac ?')}
-      <div class="note" style="margin-top:14px"><b>★ Dessin</b>Passer du schéma au câblage et numéroter les fils : chapitre 3 du Cours de dessin électrique, avant le TP É02.</div>`,
+      <div class="note" style="margin-top:14px"><b>★ Dessin</b>Récepteurs en parallèle, coupures en série : <button class="revoir" data-goto="b11">Dessin 2 →</button>, à la fin de ce chapitre, avant le TP É02.</div>`,
      mount:root=>{
        mountSortW(root.querySelector('#b10c'),'b10ctl',{cats:[['ok','Bon'],['ko','Défaut']],items:[
          ['Continuité d’un conducteur : 0,3 Ω','ok'],['Continuité d’un conducteur : OL','ko','OL : le conducteur est coupé.'],['Entre L et N : OL','ok'],['Entre L et PE : 0,2 Ω','ko','Une valeur faible entre deux conducteurs différents : contact anormal.'],

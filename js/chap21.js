@@ -376,7 +376,7 @@ defChapter({
       <h3 style="margin-top:18px">Le matériel et l'outillage</h3>
       ${tbl(['Outil','Usage'],[['Tournevis isolés','Jeu complet ; lame fine d’électricien pour les bornes à vis'],['Tournevis dynamométrique','Couple prescrit sur les bornes de puissance : trop faible, la borne chauffe ; trop fort, elle se déforme'],['Pinces','Universelle, coupante, à becs longs, à becs demi-ronds'],['Pince à dénuder','Réglable ou automatique — ne jamais entailler le cuivre'],['Pince à sertir','Pour les embouts : le cliquet garantit un sertissage mené à son terme'],['Couteau d’électricien','Dégainage des câbles'],['Clés Allen isolées','Bornes de puissance et fixations en armoire']])}
       <div class="note warn" style="margin-top:14px"><b>Rangement et contrôle</b>Chaque outil à sa place : un outil oublié dans une armoire devient un court-circuit à la remise sous tension. Contrôle visuel de l'outillage et des cordons avant chaque usage, étiquette de contrôle à jour sur les appareils de mesure. Ranger le poste en fin d'intervention : c'est un indicateur évalué à l'épreuve.</div>
-      <div class="note" style="margin-top:10px"><b>★ Dessin</b>Les symboles normalisés, le repère des appareils, la numérotation des bornes et la structure d'un schéma : chapitre 2 du Cours de dessin électrique, avant le TP É01.</div>`,
+      <div class="note" style="margin-top:10px"><b>★ Dessin</b>Commande et puissance, le repère d’appareil au format -2S3E et les références croisées : <button class="revoir" data-goto="a9">Dessin 1 →</button>, à la fin de ce chapitre, avant le TP É01.</div>`,
      mount:mountPince},
   ],
   prereq:[
